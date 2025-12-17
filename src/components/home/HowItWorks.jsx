@@ -6,26 +6,26 @@ export default function HowItWorks() {
   const steps = [
     {
       icon: Sparkles,
-      title: "Crie sua Estampa",
-      description: "Use nossa IA para gerar designs únicos ou envie sua própria arte",
+      title: "Crie sua Arte",
+      description: "Transforme suas ideias em estampas únicas. Sua história merece ser contada",
       color: "from-purple-500 to-indigo-600"
     },
     {
       icon: Upload,
-      title: "Publique",
-      description: "Escolha os produtos e publique sua estampa na plataforma",
+      title: "Compartilhe",
+      description: "Publique suas criações e conecte-se com pessoas que amam arte como você",
       color: "from-pink-500 to-rose-600"
     },
     {
       icon: DollarSign,
-      title: "Ganhe Comissões",
-      description: "Receba até 30% de comissão em cada venda do seu design",
+      title: "Viva da sua Arte",
+      description: "Ganhe 30% por cada venda. Artistas merecem ser valorizados",
       color: "from-green-500 to-emerald-600"
     },
     {
       icon: Truck,
-      title: "Nós Entregamos",
-      description: "Cuidamos da produção e entrega. Você só cria!",
+      title: "Relaxe",
+      description: "Cuidamos de tudo: produção, qualidade e entrega. Você foca no que ama",
       color: "from-blue-500 to-cyan-600"
     }
   ];

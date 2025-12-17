@@ -5,6 +5,8 @@ import HeroSection from '@/components/home/HeroSection';
 import FeaturedDesigns from '@/components/home/FeaturedDesigns';
 import HowItWorks from '@/components/home/HowItWorks';
 import CompetitionBanner from '@/components/home/CompetitionBanner';
+import Testimonials from '@/components/home/Testimonials';
+import ArtistSpotlight from '@/components/home/ArtistSpotlight';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -57,9 +59,13 @@ export default function Home() {
         subtitle="Descubra os designs mais amados pela comunidade"
       />
       
+      <ArtistSpotlight />
+      
       <HowItWorks />
       
       {activeCompetition && <CompetitionBanner competition={activeCompetition} />}
+      
+      <Testimonials />
 
       {/* Features Section */}
       <section className="py-24 bg-white">

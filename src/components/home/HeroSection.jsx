@@ -59,8 +59,8 @@ export default function HeroSection() {
             </h1>
             
             <p className="text-xl text-gray-600 mb-8 max-w-lg leading-relaxed">
-              Crie estampas únicas, venda seus designs e ganhe comissões. 
-              Use nossa IA para dar vida às suas ideias ou envie suas próprias criações.
+              Transforme sua arte em renda. Cada estampa conta uma história, 
+              cada design conecta pessoas. Junte-se a milhares de artistas que já mudaram suas vidas.
             </p>
 
             <div className="flex flex-wrap gap-4">
@@ -118,13 +118,13 @@ export default function HeroSection() {
               >
                 <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
                   <img
-                    src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500"
+                    src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=500"
                     alt="Design destaque"
                     className="w-full aspect-square object-cover"
                   />
                   <div className="p-4">
-                    <p className="font-semibold">Aurora Boreal</p>
-                    <p className="text-sm text-gray-500">por @artista</p>
+                    <p className="font-semibold">Força Feminina</p>
+                    <p className="text-sm text-gray-500">por @mariasilva</p>
                   </div>
                 </div>
               </motion.div>
@@ -137,7 +137,7 @@ export default function HeroSection() {
               >
                 <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
                   <img
-                    src="https://images.unsplash.com/photo-1634017839464-5c339bbe3f35?w=300"
+                    src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300"
                     alt="Design"
                     className="w-full aspect-square object-cover"
                   />
@@ -152,7 +152,7 @@ export default function HeroSection() {
               >
                 <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
                   <img
-                    src="https://images.unsplash.com/photo-1549490349-8643362247b5?w=300"
+                    src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300"
                     alt="Design"
                     className="w-full aspect-square object-cover"
                   />

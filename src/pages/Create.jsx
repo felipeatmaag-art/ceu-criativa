@@ -60,12 +60,14 @@ export default function Create() {
   ];
 
   const promptSuggestions = [
-    "Arte abstrata com cores vibrantes e formas fluidas",
-    "Paisagem minimalista com montanhas ao pôr do sol",
-    "Ilustração de floresta encantada com elementos mágicos",
-    "Design geométrico futurista em tons de neon",
-    "Arte urbana estilo grafite com mensagem positiva",
-    "Natureza selvagem com animais em estilo aquarela"
+    "Retrato artístico de mulher forte e empoderada",
+    "Pessoa sorrindo com cores vibrantes e alegres",
+    "Família abraçada em ilustração calorosa",
+    "Retrato de criança com olhar sonhador",
+    "Diversidade humana celebrada em cores",
+    "Mãos entrelaçadas representando união",
+    "Rosto feminino com flores e natureza",
+    "Pessoa meditando em paz e harmonia"
   ];
 
   const handleGenerateAI = async () => {
