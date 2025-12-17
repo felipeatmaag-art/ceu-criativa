@@ -1,10 +1,13 @@
 import React from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
-import HeroSection from '@/components/home/HeroSection';
+import HeroCarousel from '@/components/home/HeroCarousel';
+import ProductShowcase from '@/components/home/ProductShowcase';
 import FeaturedDesigns from '@/components/home/FeaturedDesigns';
+import CommissionHighlight from '@/components/home/CommissionHighlight';
 import HowItWorks from '@/components/home/HowItWorks';
 import CompetitionBanner from '@/components/home/CompetitionBanner';
+import ReferralProgram from '@/components/home/ReferralProgram';
 import Testimonials from '@/components/home/Testimonials';
 import ArtistSpotlight from '@/components/home/ArtistSpotlight';
 import { motion } from 'framer-motion';
@@ -51,7 +54,9 @@ export default function Home() {
 
   return (
     <div>
-      <HeroSection />
+      <HeroCarousel />
+      
+      <ProductShowcase />
       
       <FeaturedDesigns 
         designs={designs} 
@@ -59,11 +64,15 @@ export default function Home() {
         subtitle="Descubra os designs mais amados pela comunidade"
       />
       
+      <CommissionHighlight />
+      
       <ArtistSpotlight />
       
       <HowItWorks />
       
       {activeCompetition && <CompetitionBanner competition={activeCompetition} />}
+      
+      <ReferralProgram />
       
       <Testimonials />
 
