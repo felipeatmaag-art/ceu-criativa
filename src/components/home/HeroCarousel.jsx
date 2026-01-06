@@ -69,7 +69,7 @@ export default function HeroCarousel() {
   return (
     <section className="relative min-h-[90vh] flex items-center overflow-hidden">
       {/* Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-black" />
+      <div className="absolute inset-0 bg-[#0a0a0f]" />
       
       <AnimatePresence mode="wait">
         <motion.div
@@ -119,7 +119,7 @@ export default function HeroCarousel() {
                 <Link to={createPageUrl(slides[currentSlide].ctaLink)}>
                   <Button 
                     size="lg" 
-                    className="bg-white text-gray-900 hover:bg-gray-100 rounded-2xl px-8 h-14 text-lg font-semibold shadow-xl"
+                    className="ceu-gradient text-white rounded-2xl px-8 h-14 text-lg font-semibold hover-glow"
                   >
                     {slides[currentSlide].cta}
                     <ArrowRight className="w-5 h-5 ml-2" />
@@ -140,11 +140,11 @@ export default function HeroCarousel() {
               className="relative hidden lg:block"
             >
               <div className="relative aspect-square max-w-lg mx-auto">
-                <div className="absolute inset-0 bg-white/20 backdrop-blur-xl rounded-[3rem] shadow-2xl" />
+                <div className="absolute inset-0 glass-card rounded-[3rem]" />
                 <img
                   src={slides[currentSlide].image}
                   alt={slides[currentSlide].title}
-                  className="relative w-full h-full object-cover rounded-[3rem] shadow-2xl"
+                  className="relative w-full h-full object-cover rounded-[3rem] hover-glow"
                 />
               </div>
             </motion.div>

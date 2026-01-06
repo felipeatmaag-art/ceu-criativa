@@ -52,7 +52,7 @@ export default function ProductShowcase() {
   ];
 
   return (
-    <section className="py-24 bg-gradient-to-b from-white to-gray-50 overflow-hidden">
+    <section className="py-24 overflow-hidden relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -60,13 +60,13 @@ export default function ProductShowcase() {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <span className="inline-block px-4 py-2 rounded-full bg-purple-100 text-purple-700 text-sm font-medium mb-4">
+          <span className="inline-block px-4 py-2 rounded-full glass-card text-emerald-400 text-sm font-medium mb-4 hover-glow">
             Vista a Arte
           </span>
-          <h2 className="text-3xl lg:text-5xl font-bold text-gray-900 mb-4">
+          <h2 className="text-3xl lg:text-5xl font-bold text-white mb-4">
             Suas Estampas em Pessoas Reais
           </h2>
-          <p className="text-xl text-gray-500 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-400 max-w-2xl mx-auto">
             Cada camiseta conta uma história. Veja como suas artes ganham vida
           </p>
         </motion.div>
@@ -88,7 +88,7 @@ export default function ProductShowcase() {
                   index === 1 ? 'z-10' : 'z-0 hidden lg:block'
                 }`}
               >
-                <div className={`relative rounded-3xl overflow-hidden shadow-2xl ${
+                <div className={`relative rounded-3xl overflow-hidden glass-card hover-glow ${
                   index === 1 ? 'w-80 h-[500px]' : 'w-64 h-[400px]'
                 }`}>
                   <img
@@ -96,9 +96,9 @@ export default function ProductShowcase() {
                     alt={mockup.person}
                     className="w-full h-full object-cover"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
                   <div className="absolute bottom-6 left-6 right-6 text-white">
-                    <p className="font-bold text-lg mb-1">{mockup.design}</p>
+                    <p className="font-bold text-lg mb-1 text-emerald-400">{mockup.design}</p>
                     <p className="text-sm text-white/80">por {mockup.person}</p>
                   </div>
                 </div>
@@ -109,15 +109,15 @@ export default function ProductShowcase() {
           {/* Navigation Buttons */}
           <button
             onClick={() => setCurrentIndex((prev) => (prev - 1 + mockups.length) % mockups.length)}
-            className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white shadow-xl flex items-center justify-center hover:bg-gray-50 transition-all z-20"
+            className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full glass-card hover-glow flex items-center justify-center transition-all z-20"
           >
-            <ChevronLeft className="w-6 h-6 text-gray-600" />
+            <ChevronLeft className="w-6 h-6 text-emerald-400" />
           </button>
           <button
             onClick={() => setCurrentIndex((prev) => (prev + 1) % mockups.length)}
-            className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white shadow-xl flex items-center justify-center hover:bg-gray-50 transition-all z-20"
+            className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full glass-card hover-glow flex items-center justify-center transition-all z-20"
           >
-            <ChevronRight className="w-6 h-6 text-gray-600" />
+            <ChevronRight className="w-6 h-6 text-emerald-400" />
           </button>
 
           {/* Dots */}
@@ -128,8 +128,8 @@ export default function ProductShowcase() {
                 onClick={() => setCurrentIndex(index)}
                 className={`h-2 rounded-full transition-all ${
                   index === currentIndex 
-                    ? 'w-8 bg-purple-600' 
-                    : 'w-2 bg-gray-300 hover:bg-gray-400'
+                    ? 'w-8 bg-emerald-500 shadow-lg shadow-emerald-500/50' 
+                    : 'w-2 bg-gray-600 hover:bg-emerald-400'
                 }`}
               />
             ))}

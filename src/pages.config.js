@@ -1,30 +1,30 @@
-import Home from './pages/Home';
-import Explore from './pages/Explore';
-import Create from './pages/Create';
-import Competitions from './pages/Competitions';
 import Artists from './pages/Artists';
-import DesignDetail from './pages/DesignDetail';
-import Profile from './pages/Profile';
-import MyDesigns from './pages/MyDesigns';
 import Cart from './pages/Cart';
+import Competitions from './pages/Competitions';
+import Create from './pages/Create';
+import DesignDetail from './pages/DesignDetail';
+import Explore from './pages/Explore';
 import Favorites from './pages/Favorites';
+import Home from './pages/Home';
+import MyDesigns from './pages/MyDesigns';
 import MyOrders from './pages/MyOrders';
+import Profile from './pages/Profile';
 import Settings from './pages/Settings';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
-    "Home": Home,
-    "Explore": Explore,
-    "Create": Create,
-    "Competitions": Competitions,
     "Artists": Artists,
-    "DesignDetail": DesignDetail,
-    "Profile": Profile,
-    "MyDesigns": MyDesigns,
     "Cart": Cart,
+    "Competitions": Competitions,
+    "Create": Create,
+    "DesignDetail": DesignDetail,
+    "Explore": Explore,
     "Favorites": Favorites,
+    "Home": Home,
+    "MyDesigns": MyDesigns,
     "MyOrders": MyOrders,
+    "Profile": Profile,
     "Settings": Settings,
 }
 

@@ -57,64 +57,181 @@ export default function Layout({ children, currentPageName }) {
   ];
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA]">
+    <div className="min-h-screen bg-[#0a0a0f] text-gray-100">
       <style>{`
         :root {
-          --ceu-primary: #1A1A2E;
-          --ceu-secondary: #16213E;
-          --ceu-accent: #E94560;
-          --ceu-gold: #D4AF37;
-          --ceu-light: #FAFAFA;
-          --ceu-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          --ceu-dark-bg: #0a0a0f;
+          --ceu-dark-card: rgba(20, 20, 30, 0.7);
+          --ceu-emerald: #10b981;
+          --ceu-emerald-dark: #059669;
+          --ceu-emerald-light: #34d399;
+          --ceu-gradient: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
         }
-        
+
+        body {
+          background: #0a0a0f;
+        }
+
+        .glass-effect {
+          background: rgba(20, 20, 30, 0.7);
+          backdrop-filter: blur(20px) saturate(180%);
+          -webkit-backdrop-filter: blur(20px) saturate(180%);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .glass-card {
+          background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%);
+          backdrop-filter: blur(20px) saturate(180%);
+          -webkit-backdrop-filter: blur(20px) saturate(180%);
+          border: 1px solid rgba(16, 185, 129, 0.2);
+          box-shadow: 0 8px 32px 0 rgba(16, 185, 129, 0.15);
+        }
+
         .ceu-gradient {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
         }
-        
+
         .ceu-text-gradient {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
         }
-        
-        .glass-effect {
-          background: rgba(255, 255, 255, 0.85);
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
+
+        .animated-gradient-bg {
+          position: fixed;
+          inset: 0;
+          z-index: -1;
+          background: #0a0a0f;
+          overflow: hidden;
         }
-        
+
+        .gradient-mesh {
+          position: absolute;
+          inset: -50%;
+          background: 
+            radial-gradient(circle at 20% 50%, rgba(16, 185, 129, 0.15) 0%, transparent 50%),
+            radial-gradient(circle at 80% 80%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+            radial-gradient(circle at 40% 20%, rgba(139, 92, 246, 0.15) 0%, transparent 50%);
+          animation: meshMove 20s ease-in-out infinite;
+        }
+
+        @keyframes meshMove {
+          0%, 100% { transform: translate(0, 0) rotate(0deg); }
+          33% { transform: translate(5%, 5%) rotate(120deg); }
+          66% { transform: translate(-5%, 5%) rotate(240deg); }
+        }
+
+        .hover-glow {
+          position: relative;
+          transition: all 0.3s ease;
+        }
+
+        .hover-glow:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 0 20px rgba(16, 185, 129, 0.4), 0 0 40px rgba(16, 185, 129, 0.2);
+        }
+
+        .hover-glow::before {
+          content: '';
+          position: absolute;
+          inset: -2px;
+          border-radius: inherit;
+          background: linear-gradient(135deg, #10b981, #3b82f6);
+          opacity: 0;
+          z-index: -1;
+          transition: opacity 0.3s ease;
+        }
+
+        .hover-glow:hover::before {
+          opacity: 0.3;
+        }
+
         @keyframes float {
           0%, 100% { transform: translateY(0); }
           50% { transform: translateY(-10px); }
         }
-        
+
         .animate-float {
           animation: float 6s ease-in-out infinite;
         }
+
+        .bento-grid {
+          display: grid;
+          gap: 1rem;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+
+        @media (min-width: 1024px) {
+          .bento-grid {
+            grid-template-columns: repeat(12, 1fr);
+          }
+          .bento-span-6 { grid-column: span 6; }
+          .bento-span-4 { grid-column: span 4; }
+          .bento-span-8 { grid-column: span 8; }
+          .bento-span-12 { grid-column: span 12; }
+          .bento-row-2 { grid-row: span 2; }
+        }
+
+        input, textarea, select {
+          transition: all 0.3s ease;
+        }
+
+        input:focus, textarea:focus, select:focus {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+        }
+
+        button {
+          position: relative;
+          overflow: hidden;
+          transition: all 0.3s ease;
+        }
+
+        button::before {
+          content: '';
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          width: 0;
+          height: 0;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.2);
+          transform: translate(-50%, -50%);
+          transition: width 0.6s, height 0.6s;
+        }
+
+        button:hover::before {
+          width: 300px;
+          height: 300px;
+        }
       `}</style>
+
+      {/* Animated Background */}
+      <div className="animated-gradient-bg">
+        <div className="gradient-mesh" />
+      </div>
 
       {/* Navigation */}
       <motion.header
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-          scrolled ? 'glass-effect shadow-lg' : 'bg-transparent'
+          scrolled ? 'glass-effect shadow-lg shadow-emerald-500/10' : 'bg-transparent'
         }`}
       >
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
             {/* Logo */}
-            <Link to={createPageUrl('Home')} className="flex items-center gap-2">
+            <Link to={createPageUrl('Home')} className="flex items-center gap-2 group">
               <div className="relative">
-                <div className="w-10 h-10 rounded-2xl ceu-gradient flex items-center justify-center">
+                <div className="w-10 h-10 rounded-2xl ceu-gradient flex items-center justify-center group-hover:shadow-lg group-hover:shadow-emerald-500/50 transition-all duration-300">
                   <span className="text-white font-bold text-xl">C</span>
                 </div>
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full animate-pulse" />
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full animate-pulse shadow-lg shadow-emerald-400/50" />
               </div>
               <span className="text-2xl font-bold tracking-tight">
-                <span className="ceu-text-gradient">Céu</span>
+                <span className="text-white group-hover:text-emerald-400 transition-colors duration-300">Céu</span>
               </span>
             </Link>
 
@@ -145,19 +262,19 @@ export default function Layout({ children, currentPageName }) {
               <Button 
                 variant="ghost" 
                 size="icon"
-                className="rounded-xl hover:bg-gray-100"
+                className="rounded-xl hover:bg-white/10 hover-glow transition-all"
               >
-                <Search className="w-5 h-5 text-gray-600" />
+                <Search className="w-5 h-5 text-gray-300 hover:text-emerald-400 transition-colors" />
               </Button>
-              
+
               <Link to={createPageUrl('Cart')}>
                 <Button 
                   variant="ghost" 
                   size="icon"
-                  className="rounded-xl hover:bg-gray-100 relative"
+                  className="rounded-xl hover:bg-white/10 hover-glow relative transition-all"
                 >
-                  <ShoppingBag className="w-5 h-5 text-gray-600" />
-                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-purple-600 text-white text-xs rounded-full flex items-center justify-center">
+                  <ShoppingBag className="w-5 h-5 text-gray-300 hover:text-emerald-400 transition-colors" />
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-br from-emerald-500 to-blue-500 text-white text-xs rounded-full flex items-center justify-center shadow-lg shadow-emerald-500/50">
                     0
                   </span>
                 </Button>
@@ -286,7 +403,7 @@ export default function Layout({ children, currentPageName }) {
       </main>
 
       {/* Footer */}
-      <footer className="bg-[#1A1A2E] text-white mt-20">
+      <footer className="glass-card border-t border-white/10 text-gray-300 mt-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
             <div className="col-span-1 md:col-span-2">

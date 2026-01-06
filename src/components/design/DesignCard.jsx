@@ -40,7 +40,7 @@ export default function DesignCard({ design, onLike, index = 0 }) {
       onMouseLeave={() => setIsHovered(false)}
     >
       <Link to={createPageUrl(`DesignDetail?id=${design.id}`)}>
-        <div className="relative bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
+        <div className="relative glass-card rounded-3xl overflow-hidden hover-glow transition-all duration-500 transform hover:-translate-y-2">
           {/* Image Container */}
           <div className="relative aspect-square overflow-hidden">
             <img
@@ -79,7 +79,7 @@ export default function DesignCard({ design, onLike, index = 0 }) {
             >
               <Button
                 size="sm"
-                className="flex-1 bg-white text-gray-900 hover:bg-gray-100 rounded-xl"
+                className="flex-1 ceu-gradient text-white rounded-xl hover-glow"
               >
                 <ShoppingBag className="w-4 h-4 mr-2" />
                 Comprar
@@ -87,7 +87,7 @@ export default function DesignCard({ design, onLike, index = 0 }) {
               <Button
                 size="icon"
                 variant="secondary"
-                className="bg-white/90 hover:bg-white rounded-xl"
+                className="glass-card text-emerald-400 hover-glow rounded-xl"
               >
                 <Eye className="w-4 h-4" />
               </Button>
@@ -96,7 +96,7 @@ export default function DesignCard({ design, onLike, index = 0 }) {
             {/* Like Button */}
             <button
               onClick={handleLike}
-              className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/90 hover:bg-white flex items-center justify-center transition-all duration-300 hover:scale-110"
+              className="absolute top-4 right-4 w-10 h-10 rounded-full glass-card hover-glow flex items-center justify-center transition-all duration-300 hover:scale-110"
             >
               <Heart
                 className={`w-5 h-5 transition-colors ${
@@ -110,11 +110,11 @@ export default function DesignCard({ design, onLike, index = 0 }) {
           <div className="p-5">
             <div className="flex items-start justify-between gap-2 mb-3">
               <div>
-                <h3 className="font-semibold text-gray-900 text-lg leading-tight line-clamp-1">
+                <h3 className="font-semibold text-white text-lg leading-tight line-clamp-1">
                   {design.title}
                 </h3>
-                <p className="text-sm text-gray-500 mt-1">
-                  por <span className="text-purple-600 font-medium">{design.artist_name || 'Artista'}</span>
+                <p className="text-sm text-gray-400 mt-1">
+                  por <span className="text-emerald-400 font-medium">{design.artist_name || 'Artista'}</span>
                 </p>
               </div>
               <Badge variant="outline" className="shrink-0 rounded-lg">
@@ -122,8 +122,8 @@ export default function DesignCard({ design, onLike, index = 0 }) {
               </Badge>
             </div>
 
-            <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-              <div className="flex items-center gap-4 text-sm text-gray-500">
+            <div className="flex items-center justify-between pt-3 border-t border-white/10">
+              <div className="flex items-center gap-4 text-sm text-gray-400">
                 <span className="flex items-center gap-1">
                   <Heart className="w-4 h-4" />
                   {design.likes_count || 0}

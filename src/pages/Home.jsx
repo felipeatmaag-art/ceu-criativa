@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import HeroCarousel from '@/components/home/HeroCarousel';
 import ProductShowcase from '@/components/home/ProductShowcase';
+import BentoShowcase from '@/components/home/BentoShowcase';
 import FeaturedDesigns from '@/components/home/FeaturedDesigns';
 import CommissionHighlight from '@/components/home/CommissionHighlight';
 import HowItWorks from '@/components/home/HowItWorks';
@@ -57,6 +58,8 @@ export default function Home() {
       <HeroCarousel />
       
       <ProductShowcase />
+      
+      <BentoShowcase />
       
       <FeaturedDesigns 
         designs={designs} 
