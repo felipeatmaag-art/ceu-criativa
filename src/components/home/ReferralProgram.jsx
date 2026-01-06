@@ -1,15 +1,31 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import { base44 } from '@/api/base44Client';
+import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Gift, Users, Share2, Trophy, Copy, Check } from 'lucide-react';
+import { Gift, Users, Share2, Trophy, Copy, Check, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 
 export default function ReferralProgram() {
   const [copied, setCopied] = useState(false);
   const referralCode = "CEU2024";
+
+  const { data: user } = useQuery({
+    queryKey: ['user'],
+    queryFn: () => base44.auth.me(),
+  });
+
+  const { data: loyaltyData } = useQuery({
+    queryKey: ['loyalty', user?.email],
+    queryFn: async () => {
+      const records = await base44.entities.LoyaltyPoint.filter({ user_email: user.email });
+      return records[0] || { points: 0, referrals_count: 0 };
+    },
+    enabled: !!user,
+  });
 
   const handleCopy = () => {
     navigator.clipboard.writeText(referralCode);
@@ -19,15 +35,22 @@ export default function ReferralProgram() {
 
   const rewards = [
     {
+      icon: Sparkles,
+      title: "+500 Pontos por Indicação",
+      description: "Ganhe pontos cada vez que alguém se cadastrar com seu código",
+      color: "from-emerald-500 to-green-600",
+      points: 500
+    },
+    {
       icon: Gift,
       title: "Brindes Exclusivos",
-      description: "Camisetas, bonés e acessórios da Céu",
+      description: "Troque seus pontos por produtos oficiais da Céu",
       color: "from-pink-500 to-rose-600"
     },
     {
       icon: Trophy,
-      title: "Desconto Vitalício",
-      description: "10% de desconto permanente em todas as compras",
+      title: "Recompensas Progressivas",
+      description: "Quanto mais você indica, mais pontos você ganha",
       color: "from-yellow-500 to-orange-600"
     },
     {
@@ -69,9 +92,23 @@ export default function ReferralProgram() {
             </h2>
             
             <p className="text-xl text-white/90 mb-8 leading-relaxed">
-              Compartilhe a Céu com seus amigos artistas e ganhe recompensas exclusivas. 
-              Quanto mais pessoas você indicar, mais benefícios você recebe!
+              Compartilhe a Céu com seus amigos artistas e ganhe <span className="text-emerald-400 font-bold">500 pontos</span> por cada indicação! 
+              Troque seus pontos por brindes exclusivos.
             </p>
+
+            {/* Points Stats */}
+            {user && loyaltyData && (
+              <div className="flex gap-4 mb-8">
+                <div className="glass-card rounded-2xl p-4 flex-1">
+                  <p className="text-emerald-400 text-3xl font-bold">{loyaltyData.points || 0}</p>
+                  <p className="text-white/70 text-sm">Pontos Disponíveis</p>
+                </div>
+                <div className="glass-card rounded-2xl p-4 flex-1">
+                  <p className="text-blue-400 text-3xl font-bold">{loyaltyData.referrals_count || 0}</p>
+                  <p className="text-white/70 text-sm">Indicações Feitas</p>
+                </div>
+              </div>
+            )}
 
             {/* Share Code */}
             <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-8">
@@ -92,13 +129,25 @@ export default function ReferralProgram() {
             </div>
 
             {/* Share Button */}
-            <Button 
-              size="lg"
-              className="bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 hover:from-yellow-500 hover:to-orange-600 rounded-2xl px-8 h-14 text-lg font-semibold"
-            >
-              <Share2 className="w-5 h-5 mr-2" />
-              Compartilhar Agora
-            </Button>
+            <div className="flex gap-4">
+              <Button 
+                size="lg"
+                className="bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 hover:from-yellow-500 hover:to-orange-600 rounded-2xl px-8 h-14 text-lg font-semibold hover-glow"
+              >
+                <Share2 className="w-5 h-5 mr-2" />
+                Compartilhar Agora
+              </Button>
+              <Link to={createPageUrl('Brindes')}>
+                <Button 
+                  size="lg"
+                  variant="outline"
+                  className="glass-card border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 rounded-2xl px-8 h-14 text-lg font-semibold hover-glow"
+                >
+                  <Gift className="w-5 h-5 mr-2" />
+                  Ver Brindes
+                </Button>
+              </Link>
+            </div>
           </motion.div>
 
           {/* Right Content - Rewards */}
@@ -118,16 +167,21 @@ export default function ReferralProgram() {
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.1 }}
                 >
-                  <Card className="bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20 transition-all">
+                  <Card className="bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20 transition-all hover-glow">
                     <CardContent className="p-6">
                       <div className="flex items-center gap-4">
-                        <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${reward.color} flex items-center justify-center shrink-0`}>
+                        <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${reward.color} flex items-center justify-center shrink-0 shadow-lg`}>
                           <Icon className="w-7 h-7 text-white" />
                         </div>
-                        <div className="text-white">
+                        <div className="text-white flex-1">
                           <h3 className="font-bold text-lg mb-1">{reward.title}</h3>
                           <p className="text-white/80 text-sm">{reward.description}</p>
                         </div>
+                        {reward.points && (
+                          <div className="text-emerald-400 font-bold text-xl">
+                            +{reward.points}
+                          </div>
+                        )}
                       </div>
                     </CardContent>
                   </Card>

@@ -53,6 +53,7 @@ export default function Layout({ children, currentPageName }) {
     { name: 'Explorar', page: 'Explore', icon: Home },
     { name: 'Criar', page: 'Create', icon: Sparkles },
     { name: 'Competições', page: 'Competitions', icon: Trophy },
+    { name: 'Brindes', page: 'Brindes', icon: Gift },
     { name: 'Artistas', page: 'Artists', icon: Palette },
   ];
 
