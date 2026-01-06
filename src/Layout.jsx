@@ -14,7 +14,8 @@ import {
   Settings,
   Palette,
   Trophy,
-  Home
+  Home,
+  Gift
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
