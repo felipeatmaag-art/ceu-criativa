@@ -21,7 +21,9 @@ import {
   Loader2,
   ArrowRight,
   Check,
-  RefreshCw
+  RefreshCw,
+  ShoppingBag,
+  CreditCard
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -45,6 +47,10 @@ export default function Create() {
     tags: '',
     price_base: 49.90
   });
+  
+  const [selectedProduct, setSelectedProduct] = useState('camiseta');
+  const [quantity, setQuantity] = useState(1);
+  const [size, setSize] = useState('M');
 
   const categories = [
     { value: 'abstrato', label: 'Abstrato' },
@@ -129,12 +135,30 @@ export default function Create() {
         commission_rate: 30
       });
       
-      navigate(createPageUrl('MyDesigns'));
+      setStep(3);
     } catch (error) {
       console.error('Erro ao salvar:', error);
     }
     
     setIsSaving(false);
+  };
+
+  const handleFinalizePurchase = async () => {
+    setIsSaving(true);
+    try {
+      // Simular processamento de pagamento
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      navigate(createPageUrl('MyDesigns'));
+    } catch (error) {
+      console.error('Erro ao processar compra:', error);
+    }
+    setIsSaving(false);
+  };
+
+  const productPrices = {
+    camiseta: 49.90,
+    quadro: 89.90,
+    caneca: 39.90
   };
 
   return (
@@ -160,7 +184,7 @@ export default function Create() {
 
         {/* Progress Steps */}
         <div className="flex items-center justify-center gap-4 mb-12">
-          {[1, 2].map((s) => (
+          {[1, 2, 3].map((s) => (
             <div key={s} className="flex items-center gap-2">
               <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold transition-all ${
                 step >= s 
@@ -172,9 +196,9 @@ export default function Create() {
               <span className={`hidden sm:block font-medium ${
                 step >= s ? 'text-gray-900' : 'text-gray-400'
               }`}>
-                {s === 1 ? 'Criar Design' : 'Detalhes'}
+                {s === 1 ? 'Criar Design' : s === 2 ? 'Detalhes' : 'Visualizar'}
               </span>
-              {s < 2 && <div className="w-16 h-0.5 bg-gray-200 hidden sm:block" />}
+              {s < 3 && <div className="w-16 h-0.5 bg-gray-200 hidden sm:block" />}
             </div>
           ))}
         </div>
@@ -372,6 +396,193 @@ export default function Create() {
             </motion.div>
           )}
 
+          {/* Step 3: Product Mockup & Purchase */}
+          {step === 3 && (
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="bg-white rounded-3xl shadow-xl p-8"
+            >
+              <div className="grid lg:grid-cols-2 gap-8">
+                {/* Mockup Preview */}
+                <div>
+                  <Label className="text-lg font-semibold mb-4 block">Visualize seu Produto</Label>
+                  
+                  {/* Product Selector */}
+                  <div className="flex gap-2 mb-6">
+                    {[
+                      { value: 'camiseta', label: 'Camiseta', icon: '👕' },
+                      { value: 'quadro', label: 'Quadro', icon: '🖼️' },
+                      { value: 'caneca', label: 'Caneca', icon: '☕' }
+                    ].map((prod) => (
+                      <button
+                        key={prod.value}
+                        onClick={() => setSelectedProduct(prod.value)}
+                        className={`flex-1 px-4 py-3 rounded-xl font-medium transition-all ${
+                          selectedProduct === prod.value
+                            ? 'bg-purple-600 text-white shadow-lg'
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        }`}
+                      >
+                        <span className="text-xl mr-2">{prod.icon}</span>
+                        {prod.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Mockup Display */}
+                  <div className="relative aspect-square rounded-2xl overflow-hidden bg-gradient-to-br from-purple-50 to-gray-100 p-8">
+                    {selectedProduct === 'camiseta' && (
+                      <div className="relative h-full flex items-center justify-center">
+                        <div className="w-64 h-80 bg-white rounded-3xl shadow-2xl flex items-center justify-center p-8">
+                          <img
+                            src={selectedImage}
+                            alt="Design na camiseta"
+                            className="w-48 h-48 object-contain"
+                          />
+                        </div>
+                      </div>
+                    )}
+                    {selectedProduct === 'quadro' && (
+                      <div className="relative h-full flex items-center justify-center">
+                        <div className="w-72 h-72 bg-white rounded-lg shadow-2xl border-8 border-gray-800 overflow-hidden">
+                          <img
+                            src={selectedImage}
+                            alt="Design no quadro"
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      </div>
+                    )}
+                    {selectedProduct === 'caneca' && (
+                      <div className="relative h-full flex items-center justify-center">
+                        <div className="w-48 h-56 bg-white rounded-2xl shadow-2xl flex items-center justify-center p-6 relative">
+                          <div className="absolute top-4 right-4 w-8 h-12 bg-gray-300 rounded"></div>
+                          <img
+                            src={selectedImage}
+                            alt="Design na caneca"
+                            className="w-32 h-32 object-contain"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <Button
+                    variant="ghost"
+                    onClick={() => setStep(2)}
+                    className="mt-4"
+                  >
+                    ← Voltar
+                  </Button>
+                </div>
+
+                {/* Purchase Form */}
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                      {designData.title}
+                    </h3>
+                    <p className="text-gray-500">{designData.description}</p>
+                  </div>
+
+                  {selectedProduct === 'camiseta' && (
+                    <div>
+                      <Label className="text-base font-medium mb-2 block">Tamanho</Label>
+                      <div className="flex gap-2">
+                        {['P', 'M', 'G', 'GG'].map((s) => (
+                          <button
+                            key={s}
+                            onClick={() => setSize(s)}
+                            className={`flex-1 py-3 rounded-xl font-medium transition-all ${
+                              size === s
+                                ? 'bg-purple-600 text-white'
+                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            }`}
+                          >
+                            {s}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div>
+                    <Label className="text-base font-medium mb-2 block">Quantidade</Label>
+                    <div className="flex items-center gap-4">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                        className="h-12 w-12 rounded-xl"
+                      >
+                        -
+                      </Button>
+                      <span className="text-2xl font-bold w-12 text-center">{quantity}</span>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => setQuantity(quantity + 1)}
+                        className="h-12 w-12 rounded-xl"
+                      >
+                        +
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="bg-purple-50 rounded-2xl p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="text-gray-600">Preço unitário</span>
+                      <span className="text-xl font-bold text-gray-900">
+                        R$ {productPrices[selectedProduct].toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="text-gray-600">Quantidade</span>
+                      <span className="text-xl font-bold text-gray-900">x{quantity}</span>
+                    </div>
+                    <div className="border-t pt-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-lg font-semibold text-gray-900">Total</span>
+                        <span className="text-3xl font-bold ceu-text-gradient">
+                          R$ {(productPrices[selectedProduct] * quantity).toFixed(2)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Button
+                    onClick={handleFinalizePurchase}
+                    disabled={isSaving}
+                    className="w-full h-14 rounded-xl ceu-gradient text-white text-lg"
+                  >
+                    {isSaving ? (
+                      <>
+                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                        Processando...
+                      </>
+                    ) : (
+                      <>
+                        <CreditCard className="w-5 h-5 mr-2" />
+                        Finalizar Compra
+                      </>
+                    )}
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    onClick={() => navigate(createPageUrl('MyDesigns'))}
+                    className="w-full h-12 rounded-xl"
+                  >
+                    <ShoppingBag className="w-4 h-4 mr-2" />
+                    Apenas Publicar (sem comprar)
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
           {/* Step 2: Details */}
           {step === 2 && (
             <motion.div
@@ -482,8 +693,8 @@ export default function Create() {
                         </>
                       ) : (
                         <>
-                          <Check className="w-5 h-5 mr-2" />
-                          Publicar Estampa
+                          Continuar
+                          <ArrowRight className="w-5 h-5 ml-2" />
                         </>
                       )}
                     </Button>

@@ -1,4 +1,5 @@
 import Artists from './pages/Artists';
+import Brindes from './pages/Brindes';
 import Cart from './pages/Cart';
 import Competitions from './pages/Competitions';
 import Create from './pages/Create';
@@ -10,12 +11,12 @@ import MyDesigns from './pages/MyDesigns';
 import MyOrders from './pages/MyOrders';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
-import Brindes from './pages/Brindes';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "Artists": Artists,
+    "Brindes": Brindes,
     "Cart": Cart,
     "Competitions": Competitions,
     "Create": Create,
@@ -27,7 +28,6 @@ export const PAGES = {
     "MyOrders": MyOrders,
     "Profile": Profile,
     "Settings": Settings,
-    "Brindes": Brindes,
 }
 
 export const pagesConfig = {
