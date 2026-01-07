@@ -28,6 +28,9 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProductOptionButton from '@/components/create/ProductOptionButton';
+import TshirtMockup from '@/components/create/TshirtMockup';
+import MugMockup from '@/components/create/MugMockup';
+import FrameMockup from '@/components/create/FrameMockup';
 
 export default function Create() {
   const navigate = useNavigate();
@@ -489,44 +492,42 @@ export default function Create() {
                     )}
 
                     {/* Mockup Display */}
-                    <div className="relative aspect-square rounded-2xl overflow-hidden bg-gradient-to-br from-purple-50 to-gray-100 p-8">
-                      {selectedProduct === 'camiseta' && (
-                        <div className="relative h-full flex items-center justify-center">
-                          <div 
-                            className="w-64 h-80 rounded-3xl shadow-2xl flex items-center justify-center p-8 transition-colors"
-                            style={{ backgroundColor: colors.find(c => c.name === productColor)?.hex }}
+                    <div className="relative aspect-square rounded-2xl overflow-hidden">
+                      <AnimatePresence mode="wait">
+                        {selectedProduct === 'camiseta' && (
+                          <motion.div
+                            key="tshirt"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="w-full h-full"
                           >
-                            <img
-                              src={selectedImage}
-                              alt="Design na camiseta"
-                              className="w-48 h-48 object-contain"
-                            />
-                          </div>
-                        </div>
-                      )}
-                      {selectedProduct === 'quadro' && (
-                        <div className="relative h-full flex items-center justify-center">
-                          <div className="w-72 h-72 bg-white rounded-lg shadow-2xl border-8 border-gray-800 overflow-hidden">
-                            <img
-                              src={selectedImage}
-                              alt="Design no quadro"
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                        </div>
-                      )}
-                      {selectedProduct === 'caneca' && (
-                        <div className="relative h-full flex items-center justify-center">
-                          <div className="w-48 h-56 bg-white rounded-2xl shadow-2xl flex items-center justify-center p-6 relative">
-                            <div className="absolute top-4 right-4 w-8 h-12 bg-gray-300 rounded"></div>
-                            <img
-                              src={selectedImage}
-                              alt="Design na caneca"
-                              className="w-32 h-32 object-contain"
-                            />
-                          </div>
-                        </div>
-                      )}
+                            <TshirtMockup designImage={selectedImage} color={productColor} />
+                          </motion.div>
+                        )}
+                        {selectedProduct === 'quadro' && (
+                          <motion.div
+                            key="frame"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="w-full h-full"
+                          >
+                            <FrameMockup designImage={selectedImage} />
+                          </motion.div>
+                        )}
+                        {selectedProduct === 'caneca' && (
+                          <motion.div
+                            key="mug"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="w-full h-full"
+                          >
+                            <MugMockup designImage={selectedImage} />
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
                   </div>
 
