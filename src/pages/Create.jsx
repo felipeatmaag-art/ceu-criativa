@@ -49,8 +49,8 @@ export default function Create() {
   });
   
   const [selectedProduct, setSelectedProduct] = useState('camiseta');
-  const [quantity, setQuantity] = useState(1);
-  const [size, setSize] = useState('M');
+  const [productColor, setProductColor] = useState('white');
+  const [cart, setCart] = useState([]);
 
   const categories = [
     { value: 'abstrato', label: 'Abstrato' },
@@ -143,16 +143,34 @@ export default function Create() {
     setIsSaving(false);
   };
 
-  const handleFinalizePurchase = async () => {
+  const handleAddToCart = (productType, size = null, quantity = 1) => {
+    const product = {
+      id: Date.now(),
+      design_image: selectedImage,
+      design_title: designData.title,
+      product_type: productType,
+      price: productPrices[productType],
+      color: productColor,
+      size: size,
+      quantity: quantity
+    };
+    setCart([...cart, product]);
+  };
+
+  const handlePublishOnly = async () => {
     setIsSaving(true);
     try {
-      // Simular processamento de pagamento
-      await new Promise(resolve => setTimeout(resolve, 2000));
       navigate(createPageUrl('MyDesigns'));
     } catch (error) {
-      console.error('Erro ao processar compra:', error);
+      console.error('Erro:', error);
     }
     setIsSaving(false);
+  };
+
+  const handleGoToCart = () => {
+    // Salvar carrinho no localStorage
+    localStorage.setItem('cart', JSON.stringify(cart));
+    navigate(createPageUrl('Cart'));
   };
 
   const productPrices = {
@@ -160,6 +178,19 @@ export default function Create() {
     quadro: 89.90,
     caneca: 39.90
   };
+
+  const productSizes = {
+    camiseta: ['P', 'M', 'G', 'GG'],
+    quadro: ['30x40cm', '50x70cm', '70x100cm'],
+    caneca: ['300ml', '500ml']
+  };
+
+  const colors = [
+    { name: 'white', label: 'Branco', hex: '#FFFFFF' },
+    { name: 'black', label: 'Preto', hex: '#000000' },
+    { name: 'navy', label: 'Azul Marinho', hex: '#1e3a8a' },
+    { name: 'gray', label: 'Cinza', hex: '#6b7280' }
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-50/50 to-white py-12">
@@ -396,190 +427,227 @@ export default function Create() {
             </motion.div>
           )}
 
-          {/* Step 3: Product Mockup & Purchase */}
+          {/* Step 3: Product Mockup & Add to Cart */}
           {step === 3 && (
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              className="bg-white rounded-3xl shadow-xl p-8"
             >
-              <div className="grid lg:grid-cols-2 gap-8">
-                {/* Mockup Preview */}
-                <div>
-                  <Label className="text-lg font-semibold mb-4 block">Visualize seu Produto</Label>
-                  
-                  {/* Product Selector */}
-                  <div className="flex gap-2 mb-6">
-                    {[
-                      { value: 'camiseta', label: 'Camiseta', icon: '👕' },
-                      { value: 'quadro', label: 'Quadro', icon: '🖼️' },
-                      { value: 'caneca', label: 'Caneca', icon: '☕' }
-                    ].map((prod) => (
-                      <button
-                        key={prod.value}
-                        onClick={() => setSelectedProduct(prod.value)}
-                        className={`flex-1 px-4 py-3 rounded-xl font-medium transition-all ${
-                          selectedProduct === prod.value
-                            ? 'bg-purple-600 text-white shadow-lg'
-                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                        }`}
-                      >
-                        <span className="text-xl mr-2">{prod.icon}</span>
-                        {prod.label}
-                      </button>
-                    ))}
-                  </div>
+              <div className="bg-white rounded-3xl shadow-xl p-8 mb-6">
+                <div className="grid lg:grid-cols-2 gap-8">
+                  {/* Left: Mockup Preview */}
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <Label className="text-lg font-semibold">Visualize seu Produto</Label>
+                      <Button variant="ghost" size="sm" onClick={() => setStep(2)}>
+                        ← Voltar
+                      </Button>
+                    </div>
+                    
+                    {/* Product Type Selector */}
+                    <div className="grid grid-cols-3 gap-2 mb-6">
+                      {[
+                        { value: 'camiseta', label: 'Camiseta', icon: '👕' },
+                        { value: 'quadro', label: 'Quadro', icon: '🖼️' },
+                        { value: 'caneca', label: 'Caneca', icon: '☕' }
+                      ].map((prod) => (
+                        <button
+                          key={prod.value}
+                          onClick={() => setSelectedProduct(prod.value)}
+                          className={`flex flex-col items-center gap-2 p-4 rounded-xl font-medium transition-all ${
+                            selectedProduct === prod.value
+                              ? 'ceu-gradient text-white shadow-lg scale-105'
+                              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                          }`}
+                        >
+                          <span className="text-3xl">{prod.icon}</span>
+                          <span className="text-sm">{prod.label}</span>
+                        </button>
+                      ))}
+                    </div>
 
-                  {/* Mockup Display */}
-                  <div className="relative aspect-square rounded-2xl overflow-hidden bg-gradient-to-br from-purple-50 to-gray-100 p-8">
+                    {/* Color Selector */}
                     {selectedProduct === 'camiseta' && (
-                      <div className="relative h-full flex items-center justify-center">
-                        <div className="w-64 h-80 bg-white rounded-3xl shadow-2xl flex items-center justify-center p-8">
-                          <img
-                            src={selectedImage}
-                            alt="Design na camiseta"
-                            className="w-48 h-48 object-contain"
-                          />
+                      <div className="mb-4">
+                        <Label className="text-sm font-medium mb-2 block">Cor</Label>
+                        <div className="flex gap-2">
+                          {colors.map((color) => (
+                            <button
+                              key={color.name}
+                              onClick={() => setProductColor(color.name)}
+                              className={`w-10 h-10 rounded-full border-2 transition-all ${
+                                productColor === color.name ? 'border-purple-600 scale-110' : 'border-gray-200'
+                              }`}
+                              style={{ backgroundColor: color.hex }}
+                              title={color.label}
+                            />
+                          ))}
                         </div>
                       </div>
                     )}
-                    {selectedProduct === 'quadro' && (
-                      <div className="relative h-full flex items-center justify-center">
-                        <div className="w-72 h-72 bg-white rounded-lg shadow-2xl border-8 border-gray-800 overflow-hidden">
-                          <img
-                            src={selectedImage}
-                            alt="Design no quadro"
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                      </div>
-                    )}
-                    {selectedProduct === 'caneca' && (
-                      <div className="relative h-full flex items-center justify-center">
-                        <div className="w-48 h-56 bg-white rounded-2xl shadow-2xl flex items-center justify-center p-6 relative">
-                          <div className="absolute top-4 right-4 w-8 h-12 bg-gray-300 rounded"></div>
-                          <img
-                            src={selectedImage}
-                            alt="Design na caneca"
-                            className="w-32 h-32 object-contain"
-                          />
-                        </div>
-                      </div>
-                    )}
-                  </div>
 
-                  <Button
-                    variant="ghost"
-                    onClick={() => setStep(2)}
-                    className="mt-4"
-                  >
-                    ← Voltar
-                  </Button>
-                </div>
-
-                {/* Purchase Form */}
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                      {designData.title}
-                    </h3>
-                    <p className="text-gray-500">{designData.description}</p>
-                  </div>
-
-                  {selectedProduct === 'camiseta' && (
-                    <div>
-                      <Label className="text-base font-medium mb-2 block">Tamanho</Label>
-                      <div className="flex gap-2">
-                        {['P', 'M', 'G', 'GG'].map((s) => (
-                          <button
-                            key={s}
-                            onClick={() => setSize(s)}
-                            className={`flex-1 py-3 rounded-xl font-medium transition-all ${
-                              size === s
-                                ? 'bg-purple-600 text-white'
-                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                            }`}
+                    {/* Mockup Display */}
+                    <div className="relative aspect-square rounded-2xl overflow-hidden bg-gradient-to-br from-purple-50 to-gray-100 p-8">
+                      {selectedProduct === 'camiseta' && (
+                        <div className="relative h-full flex items-center justify-center">
+                          <div 
+                            className="w-64 h-80 rounded-3xl shadow-2xl flex items-center justify-center p-8 transition-colors"
+                            style={{ backgroundColor: colors.find(c => c.name === productColor)?.hex }}
                           >
-                            {s}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  <div>
-                    <Label className="text-base font-medium mb-2 block">Quantidade</Label>
-                    <div className="flex items-center gap-4">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                        className="h-12 w-12 rounded-xl"
-                      >
-                        -
-                      </Button>
-                      <span className="text-2xl font-bold w-12 text-center">{quantity}</span>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => setQuantity(quantity + 1)}
-                        className="h-12 w-12 rounded-xl"
-                      >
-                        +
-                      </Button>
+                            <img
+                              src={selectedImage}
+                              alt="Design na camiseta"
+                              className="w-48 h-48 object-contain"
+                            />
+                          </div>
+                        </div>
+                      )}
+                      {selectedProduct === 'quadro' && (
+                        <div className="relative h-full flex items-center justify-center">
+                          <div className="w-72 h-72 bg-white rounded-lg shadow-2xl border-8 border-gray-800 overflow-hidden">
+                            <img
+                              src={selectedImage}
+                              alt="Design no quadro"
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        </div>
+                      )}
+                      {selectedProduct === 'caneca' && (
+                        <div className="relative h-full flex items-center justify-center">
+                          <div className="w-48 h-56 bg-white rounded-2xl shadow-2xl flex items-center justify-center p-6 relative">
+                            <div className="absolute top-4 right-4 w-8 h-12 bg-gray-300 rounded"></div>
+                            <img
+                              src={selectedImage}
+                              alt="Design na caneca"
+                              className="w-32 h-32 object-contain"
+                            />
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
 
-                  <div className="bg-purple-50 rounded-2xl p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <span className="text-gray-600">Preço unitário</span>
-                      <span className="text-xl font-bold text-gray-900">
-                        R$ {productPrices[selectedProduct].toFixed(2)}
-                      </span>
+                  {/* Right: Product Options */}
+                  <div className="space-y-6">
+                    <div>
+                      <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                        {designData.title}
+                      </h3>
+                      <p className="text-gray-500">{designData.description}</p>
                     </div>
-                    <div className="flex items-center justify-between mb-4">
-                      <span className="text-gray-600">Quantidade</span>
-                      <span className="text-xl font-bold text-gray-900">x{quantity}</span>
-                    </div>
-                    <div className="border-t pt-4">
+
+                    <div className="bg-purple-50 rounded-2xl p-4">
                       <div className="flex items-center justify-between">
-                        <span className="text-lg font-semibold text-gray-900">Total</span>
-                        <span className="text-3xl font-bold ceu-text-gradient">
-                          R$ {(productPrices[selectedProduct] * quantity).toFixed(2)}
+                        <span className="text-gray-600 font-medium">Preço</span>
+                        <span className="text-2xl font-bold ceu-text-gradient">
+                          R$ {productPrices[selectedProduct].toFixed(2)}
                         </span>
                       </div>
                     </div>
+
+                    {/* Size/Options Selector */}
+                    <div>
+                      <Label className="text-base font-medium mb-3 block">
+                        {selectedProduct === 'camiseta' ? 'Tamanho' : selectedProduct === 'quadro' ? 'Dimensão' : 'Capacidade'}
+                      </Label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {productSizes[selectedProduct].map((opt, idx) => (
+                          <ProductOptionButton
+                            key={opt}
+                            option={opt}
+                            productType={selectedProduct}
+                            onAdd={() => handleAddToCart(selectedProduct, opt, 1)}
+                          />
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="pt-4 border-t">
+                      <p className="text-sm text-gray-500 mb-3">
+                        Adicione quantos produtos quiser ao carrinho e finalize tudo de uma vez!
+                      </p>
+                    </div>
                   </div>
-
-                  <Button
-                    onClick={handleFinalizePurchase}
-                    disabled={isSaving}
-                    className="w-full h-14 rounded-xl ceu-gradient text-white text-lg"
-                  >
-                    {isSaving ? (
-                      <>
-                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                        Processando...
-                      </>
-                    ) : (
-                      <>
-                        <CreditCard className="w-5 h-5 mr-2" />
-                        Finalizar Compra
-                      </>
-                    )}
-                  </Button>
-
-                  <Button
-                    variant="outline"
-                    onClick={() => navigate(createPageUrl('MyDesigns'))}
-                    className="w-full h-12 rounded-xl"
-                  >
-                    <ShoppingBag className="w-4 h-4 mr-2" />
-                    Apenas Publicar (sem comprar)
-                  </Button>
                 </div>
               </div>
+
+              {/* Cart Summary */}
+              {cart.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-white rounded-3xl shadow-xl p-6 mb-6"
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-bold text-gray-900">
+                      Itens no Carrinho ({cart.length})
+                    </h3>
+                    <Button variant="ghost" size="sm" onClick={() => setCart([])}>
+                      Limpar
+                    </Button>
+                  </div>
+                  
+                  <div className="space-y-3 mb-4">
+                    {cart.map((item, idx) => (
+                      <div key={idx} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                        <img src={item.design_image} alt="" className="w-12 h-12 object-cover rounded" />
+                        <div className="flex-1">
+                          <p className="font-medium text-sm">{item.product_type} - {item.size}</p>
+                          <p className="text-xs text-gray-500">R$ {item.price.toFixed(2)}</p>
+                        </div>
+                        <button
+                          onClick={() => setCart(cart.filter((_, i) => i !== idx))}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex items-center justify-between p-4 bg-purple-50 rounded-xl mb-4">
+                    <span className="font-semibold text-gray-900">Total</span>
+                    <span className="text-2xl font-bold ceu-text-gradient">
+                      R$ {cart.reduce((sum, item) => sum + item.price, 0).toFixed(2)}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <Button
+                      variant="outline"
+                      onClick={handlePublishOnly}
+                      className="h-12 rounded-xl"
+                    >
+                      Apenas Publicar
+                    </Button>
+                    <Button
+                      onClick={handleGoToCart}
+                      className="h-12 rounded-xl ceu-gradient text-white"
+                    >
+                      <ShoppingBag className="w-4 h-4 mr-2" />
+                      Ir para Carrinho
+                    </Button>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Actions when cart is empty */}
+              {cart.length === 0 && (
+                <div className="bg-white rounded-3xl shadow-xl p-6 text-center">
+                  <p className="text-gray-500 mb-4">
+                    Escolha os tamanhos/modelos que deseja comprar ou publique a estampa sem comprar agora
+                  </p>
+                  <Button
+                    variant="outline"
+                    onClick={handlePublishOnly}
+                    className="rounded-xl"
+                  >
+                    Apenas Publicar Estampa
+                  </Button>
+                </div>
+              )}
             </motion.div>
           )}
 
