@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import ProductOptionButton from '@/components/create/ProductOptionButton';
 
 export default function Create() {
   const navigate = useNavigate();
