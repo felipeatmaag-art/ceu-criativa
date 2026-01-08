@@ -11,6 +11,8 @@ import MyDesigns from './pages/MyDesigns';
 import MyOrders from './pages/MyOrders';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
+import CompetitionDetail from './pages/CompetitionDetail';
+import ArtistProfile from './pages/ArtistProfile';
 import __Layout from './Layout.jsx';
 
 
@@ -28,6 +30,8 @@ export const PAGES = {
     "MyOrders": MyOrders,
     "Profile": Profile,
     "Settings": Settings,
+    "CompetitionDetail": CompetitionDetail,
+    "ArtistProfile": ArtistProfile,
 }
 
 export const pagesConfig = {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -27,6 +27,7 @@ import { motion } from 'framer-motion';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function DesignDetail() {
+  const navigate = useNavigate();
   const urlParams = new URLSearchParams(window.location.search);
   const designId = urlParams.get('id');
 
@@ -35,6 +36,7 @@ export default function DesignDetail() {
   const [selectedSize, setSelectedSize] = useState('M');
   const [quantity, setQuantity] = useState(1);
   const [isLiked, setIsLiked] = useState(false);
+  const [addedToCart, setAddedToCart] = useState(false);
 
   const { data: design, isLoading } = useQuery({
     queryKey: ['design', designId],
@@ -66,6 +68,27 @@ export default function DesignDetail() {
 
   const selectedProductData = products.find(p => p.type === selectedProduct);
   const totalPrice = (selectedProductData?.price || 0) * quantity;
+
+  const handleAddToCart = () => {
+    const cartItem = {
+      id: Date.now(),
+      design_image: design.image_url,
+      design_title: design.title,
+      product_type: selectedProduct,
+      price: selectedProductData.price,
+      color: selectedColor,
+      size: selectedSize,
+      quantity: quantity
+    };
+
+    const existingCart = localStorage.getItem('cart');
+    const cart = existingCart ? JSON.parse(existingCart) : [];
+    cart.push(cartItem);
+    localStorage.setItem('cart', JSON.stringify(cart));
+
+    setAddedToCart(true);
+    setTimeout(() => setAddedToCart(false), 2000);
+  };
 
   const categoryLabels = {
     abstrato: 'Abstrato',
@@ -317,10 +340,34 @@ export default function DesignDetail() {
                     R$ {totalPrice.toFixed(2)}
                   </span>
                 </div>
-                <Button className="w-full h-14 rounded-xl ceu-gradient text-white text-lg">
-                  <ShoppingBag className="w-5 h-5 mr-2" />
-                  Adicionar ao Carrinho
-                </Button>
+                <div className="space-y-3">
+                  <Button 
+                    onClick={handleAddToCart}
+                    className="w-full h-14 rounded-xl ceu-gradient text-white text-lg"
+                    disabled={addedToCart}
+                  >
+                    {addedToCart ? (
+                      <>
+                        <Check className="w-5 h-5 mr-2" />
+                        Adicionado!
+                      </>
+                    ) : (
+                      <>
+                        <ShoppingBag className="w-5 h-5 mr-2" />
+                        Adicionar ao Carrinho
+                      </>
+                    )}
+                  </Button>
+                  {addedToCart && (
+                    <Button 
+                      onClick={() => navigate(createPageUrl('Cart'))}
+                      variant="outline"
+                      className="w-full h-12 rounded-xl"
+                    >
+                      Ver Carrinho
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
 
