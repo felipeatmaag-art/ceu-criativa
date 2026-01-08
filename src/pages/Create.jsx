@@ -443,7 +443,7 @@ export default function Create() {
                   {/* Left: Mockup Preview */}
                   <div>
                     <div className="flex items-center justify-between mb-4">
-                      <Label className="text-lg font-semibold">Visualize seu Produto</Label>
+                        <Label className="text-lg font-semibold text-gray-900">Visualize seu Produto</Label>
                       <Button variant="ghost" size="sm" onClick={() => setStep(2)}>
                         ← Voltar
                       </Button>
@@ -474,7 +474,7 @@ export default function Create() {
                     {/* Color Selector */}
                     {selectedProduct === 'camiseta' && (
                       <div className="mb-4">
-                        <Label className="text-sm font-medium mb-2 block">Cor</Label>
+                        <Label className="text-sm font-medium mb-2 block text-gray-700">Cor</Label>
                         <div className="flex gap-2">
                           {colors.map((color) => (
                             <button
@@ -535,9 +535,9 @@ export default function Create() {
                   <div className="space-y-6">
                     <div>
                       <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                        {designData.title}
+                        {designData.title || 'Sua Estampa'}
                       </h3>
-                      <p className="text-gray-500">{designData.description}</p>
+                      <p className="text-gray-600">{designData.description || 'Escolha o produto e personalize sua compra'}</p>
                     </div>
 
                     <div className="bg-purple-50 rounded-2xl p-4">
@@ -551,7 +551,7 @@ export default function Create() {
 
                     {/* Size/Options Selector */}
                     <div>
-                      <Label className="text-base font-medium mb-3 block">
+                      <Label className="text-base font-medium mb-3 block text-gray-900">
                         {selectedProduct === 'camiseta' ? 'Tamanho' : selectedProduct === 'quadro' ? 'Dimensão' : 'Capacidade'}
                       </Label>
                       <div className="grid grid-cols-2 gap-2">

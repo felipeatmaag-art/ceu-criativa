@@ -4,227 +4,259 @@ import { motion } from 'framer-motion';
 export default function MugMockup({ designImage }) {
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.6 }}
-      className="relative w-full h-full flex items-center justify-center overflow-hidden"
-      style={{ perspective: '1500px' }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className="relative w-full h-full flex items-center justify-center overflow-hidden rounded-2xl"
     >
-      {/* Background com mesa de madeira */}
-      <div className="absolute inset-0 bg-gradient-to-b from-amber-50 via-orange-50 to-amber-100" />
+      {/* Background ambiente aconchegante */}
+      <div className="absolute inset-0 bg-gradient-to-br from-amber-50 via-orange-50/50 to-stone-100" />
+      
+      {/* Textura de madeira sutil */}
       <div 
-        className="absolute inset-0 opacity-[0.15]"
+        className="absolute inset-0 opacity-10"
         style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0 L100 0 L100 3 L0 3 Z M0 10 L100 10 L100 13 L0 13 Z M0 20 L100 20 L100 23 L0 23 Z M0 30 L100 30 L100 33 L0 33 Z' fill='%23D97706' opacity='0.3'/%3E%3C/svg%3E")`,
-          backgroundSize: '100px 100px'
+          backgroundImage: `repeating-linear-gradient(
+            90deg,
+            transparent,
+            transparent 20px,
+            rgba(139,90,43,0.1) 20px,
+            rgba(139,90,43,0.1) 21px
+          )`
         }}
       />
 
-      {/* Vapor da caneca (mais realista) */}
-      {[...Array(3)].map((_, i) => (
+      {/* Luz ambiente */}
+      <div 
+        className="absolute inset-0"
+        style={{
+          background: 'radial-gradient(ellipse at 40% 30%, rgba(255,255,255,0.6) 0%, transparent 50%)'
+        }}
+      />
+
+      {/* Vapor animado */}
+      {[...Array(4)].map((_, i) => (
         <motion.div
           key={i}
-          className="absolute top-8 left-1/2 -translate-x-1/2 w-16 h-28"
+          className="absolute z-20"
+          style={{
+            top: '60px',
+            left: `${45 + i * 5}%`,
+          }}
           initial={{ opacity: 0 }}
           animate={{
-            y: [-10, -70],
-            x: [0, (i - 1) * 15, (i - 1) * 25],
-            opacity: [0, 0.4, 0],
-            scale: [0.8, 1.5]
+            y: [-20, -80],
+            x: [(i - 1.5) * 8, (i - 1.5) * 20],
+            opacity: [0, 0.6, 0],
+            scale: [0.5, 1.2]
           }}
           transition={{ 
-            duration: 3,
-            delay: i * 0.8,
+            duration: 2.5,
+            delay: i * 0.5,
             repeat: Infinity,
             ease: "easeOut"
           }}
         >
           <div 
-            className="w-full h-full rounded-full blur-2xl"
+            className="w-8 h-12 rounded-full blur-xl"
             style={{
-              background: 'radial-gradient(ellipse, rgba(200,200,200,0.6), transparent)'
+              background: 'radial-gradient(ellipse, rgba(255,255,255,0.8), transparent)'
             }}
           />
         </motion.div>
       ))}
 
-      {/* Caneca */}
+      {/* Container da caneca */}
       <motion.div
         className="relative z-10"
-        initial={{ rotateY: -15, scale: 0.9 }}
         animate={{ 
-          rotateY: [0, -3, 0],
-          y: [0, -6, 0]
+          y: [0, -4, 0],
+          rotateY: [0, -2, 0]
         }}
         transition={{ 
-          rotateY: { duration: 6, repeat: Infinity, ease: "easeInOut" },
-          y: { duration: 3, repeat: Infinity, ease: "easeInOut" }
+          duration: 5,
+          repeat: Infinity,
+          ease: "easeInOut"
         }}
         style={{ 
-          transformStyle: 'preserve-3d',
-          filter: 'drop-shadow(0 25px 40px rgba(0,0,0,0.3))'
+          perspective: '1000px',
+          filter: 'drop-shadow(0 30px 40px rgba(0,0,0,0.25))'
         }}
       >
-        {/* Corpo da caneca */}
-        <div 
-          className="relative rounded-2xl overflow-visible"
-          style={{ 
-            width: '200px',
-            height: '240px',
-            transform: 'rotateY(-2deg)',
-            transformStyle: 'preserve-3d'
-          }}
+        {/* SVG Caneca Realista */}
+        <svg 
+          width="280" 
+          height="320" 
+          viewBox="0 0 280 320" 
+          fill="none" 
+          xmlns="http://www.w3.org/2000/svg"
         >
-          {/* Interior escuro (topo) */}
-          <div 
-            className="absolute top-0 left-0 right-0 h-12 rounded-t-2xl overflow-hidden"
-            style={{
-              background: 'radial-gradient(ellipse at center, #3a2a1a 0%, #1a1410 70%)',
-              boxShadow: 'inset 0 5px 20px rgba(0,0,0,0.8)'
-            }}
-          >
-            {/* Líquido (café) */}
-            <div 
-              className="absolute bottom-0 left-3 right-3 h-2 rounded-full"
-              style={{
-                background: 'linear-gradient(180deg, #4a3428 0%, #2a1a10 100%)',
-                boxShadow: '0 -2px 10px rgba(0,0,0,0.5)'
-              }}
-            />
-          </div>
-
-          {/* Superfície principal da caneca */}
-          <div 
-            className="absolute top-6 left-0 right-0 bottom-0 rounded-2xl"
-            style={{
-              background: 'linear-gradient(120deg, #ffffff 0%, #f8f8f8 50%, #ffffff 100%)',
-              boxShadow: `
-                inset -8px 0 20px rgba(0,0,0,0.08),
-                inset 8px 0 20px rgba(255,255,255,0.8),
-                0 20px 60px rgba(0,0,0,0.25)
-              `
-            }}
-          >
-            {/* Design na caneca (área curva) */}
-            <motion.div
-              className="absolute top-16 left-1/2 -translate-x-1/2 flex items-center justify-center"
-              style={{ 
-                width: '150px',
-                height: '150px'
-              }}
-              whileHover={{ scale: 1.1 }}
-              transition={{ duration: 0.3 }}
-            >
-              <div 
-                className="w-full h-full p-3"
-                style={{
-                  transform: 'perspective(600px) rotateY(-5deg)',
-                  filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.15))'
-                }}
-              >
-                <img
-                  src={designImage}
-                  alt="Design"
-                  className="w-full h-full object-contain"
-                  style={{
-                    imageRendering: 'high-quality'
-                  }}
-                />
-              </div>
-            </motion.div>
-
-            {/* Reflexo principal (luz da janela) */}
-            <div 
-              className="absolute inset-0 rounded-2xl pointer-events-none"
-              style={{
-                background: `
-                  linear-gradient(135deg, 
-                    rgba(255,255,255,0.9) 0%, 
-                    transparent 15%, 
-                    transparent 40%, 
-                    rgba(255,255,255,0.4) 50%, 
-                    transparent 60%,
-                    transparent 85%,
-                    rgba(255,255,255,0.2) 100%
-                  )
-                `,
-                mixBlendMode: 'overlay'
-              }}
-            />
-
-            {/* Reflexo secundário */}
-            <div 
-              className="absolute right-4 top-20 w-8 h-32 rounded-full blur-sm opacity-60 pointer-events-none"
-              style={{
-                background: 'linear-gradient(180deg, rgba(255,255,255,0.6), transparent)'
-              }}
-            />
-
-            {/* Borda superior brilhante */}
-            <div 
-              className="absolute top-0 left-0 right-0 h-2 rounded-t-2xl"
-              style={{
-                background: 'linear-gradient(180deg, rgba(255,255,255,0.8), transparent)'
-              }}
-            />
-          </div>
-
-          {/* Alça da caneca (3D realista) */}
-          <div
-            className="absolute top-12 -right-12 w-16 h-28"
-            style={{
-              transform: 'rotateY(15deg) translateZ(10px)',
-              transformStyle: 'preserve-3d'
-            }}
-          >
-            {/* Parte externa da alça */}
-            <div 
-              className="absolute inset-0 border-[10px] border-white rounded-r-[50px] rounded-l-[30px]"
-              style={{
-                borderLeftColor: 'transparent',
-                background: 'linear-gradient(90deg, transparent 40%, rgba(255,255,255,0.1) 100%)',
-                boxShadow: `
-                  inset -4px 0 12px rgba(0,0,0,0.15),
-                  inset 4px 4px 12px rgba(255,255,255,0.9),
-                  -5px 8px 20px rgba(0,0,0,0.2)
-                `,
-                filter: 'drop-shadow(-3px 5px 8px rgba(0,0,0,0.15))'
-              }}
-            />
+          <defs>
+            {/* Gradiente corpo */}
+            <linearGradient id="mugBody" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#ffffff" />
+              <stop offset="30%" stopColor="#fafafa" />
+              <stop offset="70%" stopColor="#f5f5f5" />
+              <stop offset="100%" stopColor="#eeeeee" />
+            </linearGradient>
             
-            {/* Highlight na alça */}
-            <div 
-              className="absolute right-1 top-4 w-2 h-16 rounded-full opacity-60"
+            {/* Gradiente interior */}
+            <linearGradient id="mugInterior" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#2a1a0a" />
+              <stop offset="100%" stopColor="#1a0f05" />
+            </linearGradient>
+
+            {/* Gradiente café */}
+            <radialGradient id="coffeeGradient" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="#3d2817" />
+              <stop offset="100%" stopColor="#251509" />
+            </radialGradient>
+
+            {/* Gradiente alça */}
+            <linearGradient id="handleGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#f0f0f0" />
+              <stop offset="50%" stopColor="#ffffff" />
+              <stop offset="100%" stopColor="#e8e8e8" />
+            </linearGradient>
+
+            {/* Reflexo */}
+            <linearGradient id="reflection" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="rgba(255,255,255,0.6)" />
+              <stop offset="50%" stopColor="rgba(255,255,255,0)" />
+              <stop offset="100%" stopColor="rgba(255,255,255,0.2)" />
+            </linearGradient>
+          </defs>
+
+          {/* Corpo da caneca */}
+          <path
+            d="M 50 50 
+               L 50 260 
+               C 50 280, 70 290, 140 290 
+               C 210 290, 230 280, 230 260 
+               L 230 50 
+               C 230 45, 220 40, 140 40 
+               C 60 40, 50 45, 50 50 
+               Z"
+            fill="url(#mugBody)"
+          />
+
+          {/* Interior da caneca */}
+          <ellipse cx="140" cy="55" rx="85" ry="18" fill="url(#mugInterior)" />
+          
+          {/* Café */}
+          <ellipse cx="140" cy="60" rx="75" ry="14" fill="url(#coffeeGradient)" />
+          
+          {/* Reflexo no café */}
+          <ellipse cx="120" cy="58" rx="20" ry="4" fill="rgba(255,255,255,0.15)" />
+
+          {/* Borda superior */}
+          <ellipse 
+            cx="140" 
+            cy="50" 
+            rx="90" 
+            ry="20" 
+            fill="none" 
+            stroke="#e0e0e0" 
+            strokeWidth="8"
+          />
+          <ellipse 
+            cx="140" 
+            cy="50" 
+            rx="90" 
+            ry="20" 
+            fill="none" 
+            stroke="url(#reflection)" 
+            strokeWidth="3"
+          />
+
+          {/* Alça */}
+          <path
+            d="M 230 90 
+               C 260 90, 280 120, 280 160 
+               C 280 200, 260 230, 230 230"
+            fill="none"
+            stroke="url(#handleGradient)"
+            strokeWidth="18"
+            strokeLinecap="round"
+          />
+          
+          {/* Sombra interna da alça */}
+          <path
+            d="M 230 95 
+               C 255 95, 272 120, 272 160 
+               C 272 200, 255 225, 230 225"
+            fill="none"
+            stroke="rgba(0,0,0,0.08)"
+            strokeWidth="10"
+            strokeLinecap="round"
+          />
+
+          {/* Reflexos na caneca */}
+          <path
+            d="M 70 70 L 70 250 C 70 260, 80 265, 90 265"
+            stroke="rgba(255,255,255,0.5)"
+            strokeWidth="8"
+            strokeLinecap="round"
+            fill="none"
+          />
+          
+          <path
+            d="M 85 80 L 85 200"
+            stroke="rgba(255,255,255,0.3)"
+            strokeWidth="3"
+            strokeLinecap="round"
+            fill="none"
+          />
+        </svg>
+
+        {/* Design/Estampa na caneca */}
+        <motion.div
+          className="absolute flex items-center justify-center"
+          style={{ 
+            top: '110px',
+            left: '50%',
+            transform: 'translateX(-55%)',
+            width: '130px',
+            height: '130px'
+          }}
+          whileHover={{ scale: 1.05 }}
+          transition={{ duration: 0.3 }}
+        >
+          <div 
+            style={{
+              width: '100%',
+              height: '100%',
+              transform: 'perspective(500px) rotateY(-8deg)',
+            }}
+          >
+            <img
+              src={designImage}
+              alt="Design"
+              className="w-full h-full object-contain"
               style={{
-                background: 'linear-gradient(180deg, rgba(255,255,255,0.9), transparent)'
+                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))',
+                borderRadius: '4px'
               }}
             />
           </div>
-
-          {/* Textura de cerâmica */}
-          <div 
-            className="absolute inset-0 rounded-2xl opacity-[0.03] pointer-events-none"
-            style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-              backgroundSize: '100px 100px'
-            }}
-          />
-        </div>
+        </motion.div>
       </motion.div>
 
-      {/* Sombra no chão (mesa) */}
+      {/* Sombra no chão */}
       <motion.div
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 w-56 h-16 rounded-full blur-2xl"
-        style={{ 
-          background: 'radial-gradient(ellipse, rgba(0,0,0,0.4) 0%, transparent 70%)',
-          transform: 'rotateX(80deg)'
-        }}
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 w-48 h-10 rounded-full blur-2xl"
+        style={{ background: 'radial-gradient(ellipse, rgba(0,0,0,0.25), transparent)' }}
         animate={{ 
           scale: [1, 1.05, 1],
-          opacity: [0.4, 0.5, 0.4]
+          opacity: [0.3, 0.4, 0.3]
         }}
-        transition={{ duration: 3, repeat: Infinity }}
+        transition={{ duration: 5, repeat: Infinity }}
       />
+
+      {/* Badge */}
+      <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-lg">
+        <span className="text-xs font-medium text-gray-600">Cerâmica Premium</span>
+      </div>
     </motion.div>
   );
 }

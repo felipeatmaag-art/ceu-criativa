@@ -4,206 +4,186 @@ import { motion } from 'framer-motion';
 export default function FrameMockup({ designImage }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
-      className="relative w-full h-full flex items-center justify-center overflow-hidden"
-      style={{ perspective: '1800px' }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className="relative w-full h-full flex items-center justify-center overflow-hidden rounded-2xl"
     >
-      {/* Parede realista com textura */}
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-200 via-gray-100 to-stone-200" />
+      {/* Parede elegante */}
+      <div className="absolute inset-0 bg-gradient-to-br from-stone-200 via-gray-100 to-neutral-200" />
       
-      {/* Textura de parede pintada */}
+      {/* Textura de parede sutil */}
       <div 
-        className="absolute inset-0 opacity-[0.12]"
+        className="absolute inset-0 opacity-[0.08]"
         style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='2' numOctaves='4'/%3E%3CfeColorMatrix values='0 0 0 0 0, 0 0 0 0 0, 0 0 0 0 0, 0 0 0 0.5 0'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)'/%3E%3C/svg%3E")`,
-          backgroundSize: '200px 200px'
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`
         }}
       />
 
-      {/* Luz ambiente na parede */}
+      {/* Luz de ambiente/janela */}
       <div 
         className="absolute inset-0"
         style={{
-          background: 'radial-gradient(ellipse at 30% 30%, rgba(255,255,255,0.4), transparent 50%)'
+          background: 'radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.5) 0%, transparent 50%)'
         }}
       />
 
-      {/* Quadro emoldurado */}
+      {/* Container do quadro */}
       <motion.div
         className="relative z-10"
-        initial={{ rotateY: -8, scale: 0.9 }}
         animate={{ 
-          rotateY: [0, -1.5, 0],
-          rotateZ: [0, 0.3, 0, -0.3, 0],
-          y: [0, -10, 0]
+          y: [0, -5, 0],
+          rotateZ: [0, 0.3, 0, -0.3, 0]
         }}
         transition={{ 
           duration: 8,
           repeat: Infinity,
           ease: "easeInOut"
         }}
-        whileHover={{ scale: 1.02, rotateY: 3 }}
+        whileHover={{ scale: 1.02, y: -8 }}
         style={{ 
-          transformStyle: 'preserve-3d',
-          filter: 'drop-shadow(0 30px 60px rgba(0,0,0,0.35))'
+          filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.3))'
         }}
       >
-        {/* Corda/Fio de suspensão */}
-        <div className="absolute -top-8 left-1/2 -translate-x-1/2 flex items-start justify-center">
-          {/* Gancho na parede */}
-          <div 
-            className="relative w-4 h-6 rounded-b-full bg-gradient-to-b from-gray-400 to-gray-500"
-            style={{
-              boxShadow: '0 2px 6px rgba(0,0,0,0.3), inset 0 1px 2px rgba(255,255,255,0.3)'
-            }}
-          >
-            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-2 h-3 rounded-b-full bg-gray-600" />
+        {/* Fio de sustentação */}
+        <div className="absolute -top-10 left-1/2 -translate-x-1/2">
+          {/* Gancho */}
+          <div className="relative">
+            <div 
+              className="w-3 h-4 mx-auto rounded-b-full"
+              style={{
+                background: 'linear-gradient(180deg, #9ca3af, #6b7280)',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.3)'
+              }}
+            />
+            {/* Cordão */}
+            <svg 
+              width="60" 
+              height="30" 
+              viewBox="0 0 60 30" 
+              className="absolute top-3 left-1/2 -translate-x-1/2"
+            >
+              <path
+                d="M 30 0 L 10 28 M 30 0 L 50 28"
+                stroke="#8b7355"
+                strokeWidth="1.5"
+                fill="none"
+              />
+            </svg>
           </div>
-          
-          {/* Fio */}
-          <div 
-            className="absolute top-6 left-1/2 -translate-x-1/2 w-[2px] h-10 bg-gradient-to-b from-gray-400 to-gray-500"
-            style={{
-              boxShadow: '1px 1px 2px rgba(0,0,0,0.2)'
-            }}
-          />
         </div>
 
-        {/* Moldura de madeira escura (camada externa) */}
+        {/* Moldura externa */}
         <div 
-          className="relative p-8 rounded-sm"
+          className="relative p-5 rounded-sm"
           style={{
-            background: `
-              linear-gradient(135deg, 
-                #2d2416 0%, 
-                #1a1410 20%, 
-                #2d2416 40%, 
-                #1a1410 60%, 
-                #2d2416 80%, 
-                #1a1410 100%
-              )
-            `,
+            background: 'linear-gradient(145deg, #2a1f1a 0%, #1a1410 50%, #2a1f1a 100%)',
             boxShadow: `
-              0 25px 80px rgba(0,0,0,0.5),
-              inset 0 2px 4px rgba(255,255,255,0.1),
-              inset 0 -2px 4px rgba(0,0,0,0.8)
+              0 20px 60px rgba(0,0,0,0.4),
+              inset 0 1px 1px rgba(255,255,255,0.1),
+              inset 0 -1px 1px rgba(0,0,0,0.5)
             `
           }}
         >
-          {/* Textura de madeira na moldura */}
+          {/* Textura de madeira */}
           <div 
-            className="absolute inset-0 opacity-20 pointer-events-none rounded-sm"
+            className="absolute inset-0 opacity-20 rounded-sm"
             style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 10 Q 25 8, 50 10 T 100 10 L 100 12 Q 75 14, 50 12 T 0 12 Z M0 20 Q 25 22, 50 20 T 100 20 L 100 22 Q 75 20, 50 22 T 0 22 Z M0 30 Q 25 28, 50 30 T 100 30 L 100 32 Q 75 34, 50 32 T 0 32 Z' fill='%23000' opacity='0.3'/%3E%3C/svg%3E")`,
-              backgroundSize: '100% 50px'
+              backgroundImage: `repeating-linear-gradient(
+                90deg,
+                transparent,
+                transparent 8px,
+                rgba(139,115,85,0.3) 8px,
+                rgba(139,115,85,0.3) 9px
+              )`
             }}
           />
 
-          {/* Detalhes entalhados nos cantos */}
-          <div className="absolute top-5 left-5 w-6 h-6">
-            <div className="absolute inset-0 border-t-2 border-l-2 border-amber-700/40 rounded-tl-sm" />
-            <div className="absolute top-1 left-1 w-3 h-3 border-t border-l border-amber-600/60 rounded-tl-sm" />
-          </div>
-          <div className="absolute top-5 right-5 w-6 h-6">
-            <div className="absolute inset-0 border-t-2 border-r-2 border-amber-700/40 rounded-tr-sm" />
-            <div className="absolute top-1 right-1 w-3 h-3 border-t border-r border-amber-600/60 rounded-tr-sm" />
-          </div>
-          <div className="absolute bottom-5 left-5 w-6 h-6">
-            <div className="absolute inset-0 border-b-2 border-l-2 border-amber-700/40 rounded-bl-sm" />
-            <div className="absolute bottom-1 left-1 w-3 h-3 border-b border-l border-amber-600/60 rounded-bl-sm" />
-          </div>
-          <div className="absolute bottom-5 right-5 w-6 h-6">
-            <div className="absolute inset-0 border-b-2 border-r-2 border-amber-700/40 rounded-br-sm" />
-            <div className="absolute bottom-1 right-1 w-3 h-3 border-b border-r border-amber-600/60 rounded-br-sm" />
-          </div>
+          {/* Detalhes dourados nos cantos */}
+          {['top-2 left-2', 'top-2 right-2', 'bottom-2 left-2', 'bottom-2 right-2'].map((pos, i) => (
+            <div 
+              key={i}
+              className={`absolute ${pos} w-4 h-4`}
+              style={{
+                borderColor: 'rgba(212,175,55,0.4)',
+                borderWidth: i < 2 ? '2px 0 0 2px' : '0 2px 2px 0',
+                borderStyle: 'solid',
+                borderRadius: i < 2 
+                  ? (i === 0 ? '4px 0 0 0' : '0 4px 0 0')
+                  : (i === 2 ? '0 0 0 4px' : '0 0 4px 0')
+              }}
+            />
+          ))}
 
-          {/* Moldura interna (paspatur/matboard bege) */}
+          {/* Passe-partout (passepartout) */}
           <div 
             className="relative p-6"
             style={{
-              background: 'linear-gradient(135deg, #f5f1e8 0%, #e8e4db 50%, #f5f1e8 100%)',
-              boxShadow: `
-                inset 0 2px 8px rgba(0,0,0,0.15),
-                inset 0 -2px 4px rgba(255,255,255,0.5)
-              `
+              background: 'linear-gradient(135deg, #f8f6f2 0%, #ebe7df 50%, #f8f6f2 100%)',
+              boxShadow: 'inset 0 2px 10px rgba(0,0,0,0.1)'
             }}
           >
             {/* Borda interna decorativa */}
             <div 
-              className="absolute inset-5 pointer-events-none border border-gray-300/50"
+              className="absolute inset-4 pointer-events-none"
               style={{
-                boxShadow: 'inset 0 0 0 1px rgba(200,180,150,0.3)'
+                border: '1px solid rgba(180,160,140,0.3)',
+                boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.5)'
               }}
             />
 
-            {/* Imagem/Design */}
+            {/* Área da imagem com vidro */}
             <motion.div
               className="relative bg-white overflow-hidden"
               style={{ 
-                width: '280px',
-                height: '280px',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                width: '240px',
+                height: '240px',
+                boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.08)'
               }}
-              whileHover={{ scale: 1.03 }}
-              transition={{ duration: 0.3 }}
             >
               <img
                 src={designImage}
                 alt="Design"
                 className="w-full h-full object-cover"
-                style={{
-                  imageRendering: 'high-quality'
-                }}
               />
 
-              {/* Vidro protetor com reflexos realistas */}
+              {/* Efeito de vidro */}
               <div 
                 className="absolute inset-0 pointer-events-none"
                 style={{
                   background: `
                     linear-gradient(135deg, 
-                      rgba(255,255,255,0.5) 0%, 
-                      transparent 15%, 
-                      transparent 45%, 
-                      rgba(255,255,255,0.25) 50%, 
-                      transparent 55%,
-                      transparent 85%, 
-                      rgba(255,255,255,0.15) 100%
+                      rgba(255,255,255,0.4) 0%, 
+                      transparent 20%, 
+                      transparent 50%, 
+                      rgba(255,255,255,0.15) 55%, 
+                      transparent 60%,
+                      transparent 90%, 
+                      rgba(255,255,255,0.1) 100%
                     )
-                  `,
-                  mixBlendMode: 'overlay'
+                  `
                 }}
               />
 
-              {/* Reflexo da janela */}
+              {/* Reflexo de luz */}
               <motion.div 
-                className="absolute top-8 right-8 w-20 h-32 opacity-20 pointer-events-none"
+                className="absolute top-4 right-4 w-16 h-24 opacity-25 pointer-events-none"
                 style={{
                   background: 'linear-gradient(180deg, rgba(255,255,255,0.8), transparent)',
-                  filter: 'blur(8px)',
-                  transform: 'rotate(-15deg)'
+                  filter: 'blur(6px)',
+                  transform: 'rotate(-12deg)'
                 }}
                 animate={{
-                  opacity: [0.15, 0.25, 0.15]
+                  opacity: [0.2, 0.3, 0.2]
                 }}
-                transition={{ duration: 5, repeat: Infinity }}
-              />
-
-              {/* Textura do vidro */}
-              <div 
-                className="absolute inset-0 opacity-[0.015] pointer-events-none"
-                style={{
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='glassNoise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.5' numOctaves='2'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23glassNoise)'/%3E%3C/svg%3E")`
-                }}
+                transition={{ duration: 4, repeat: Infinity }}
               />
             </motion.div>
           </div>
 
           {/* Brilho na moldura */}
           <div 
-            className="absolute top-0 left-0 right-0 h-1/3 pointer-events-none rounded-t-sm"
+            className="absolute top-0 left-0 right-0 h-1/4 pointer-events-none rounded-t-sm"
             style={{
               background: 'linear-gradient(180deg, rgba(255,255,255,0.08), transparent)'
             }}
@@ -211,22 +191,26 @@ export default function FrameMockup({ designImage }) {
         </div>
       </motion.div>
 
-      {/* Sombra projetada na parede */}
+      {/* Sombra na parede */}
       <motion.div
-        className="absolute z-0 rounded-sm"
+        className="absolute z-0"
         style={{
-          width: '330px',
-          height: '330px',
-          background: 'radial-gradient(ellipse, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.05) 40%, transparent 70%)',
-          transform: 'translateZ(-50px) translateY(25px) translateX(15px)',
-          filter: 'blur(25px)'
+          width: '320px',
+          height: '320px',
+          background: 'radial-gradient(ellipse, rgba(0,0,0,0.15) 0%, transparent 60%)',
+          transform: 'translateY(20px) translateX(10px)',
+          filter: 'blur(20px)'
         }}
         animate={{
-          opacity: [0.4, 0.6, 0.4],
-          scale: [1, 1.03, 1]
+          opacity: [0.3, 0.4, 0.3]
         }}
         transition={{ duration: 8, repeat: Infinity }}
       />
+
+      {/* Badge */}
+      <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-lg">
+        <span className="text-xs font-medium text-gray-600">Moldura em Madeira Nobre</span>
+      </div>
     </motion.div>
   );
 }
