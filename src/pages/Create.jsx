@@ -49,8 +49,27 @@ export default function Create() {
     description: '',
     category: '',
     tags: '',
-    price_base: 49.90
+    price_base: 49.90,
+    commission_rate: 25
   });
+
+  const [user, setUser] = useState(null);
+
+  React.useEffect(() => {
+    const loadUser = async () => {
+      try {
+        const currentUser = await base44.auth.me();
+        setUser(currentUser);
+        setDesignData(prev => ({
+          ...prev,
+          commission_rate: currentUser.artist_commission_rate || 25
+        }));
+      } catch (e) {
+        console.error('Erro ao carregar usuário:', e);
+      }
+    };
+    loadUser();
+  }, []);
   
   const [selectedProduct, setSelectedProduct] = useState('camiseta');
   const [productColor, setProductColor] = useState('white');
@@ -122,28 +141,28 @@ export default function Create() {
 
   const handleSaveDesign = async () => {
     if (!selectedImage || !designData.title || !designData.category) return;
-    
+
     setIsSaving(true);
-    
+
     try {
-      const user = await base44.auth.me();
-      
+      const currentUser = await base44.auth.me();
+
       await base44.entities.Design.create({
         ...designData,
         image_url: selectedImage,
-        artist_id: user.id,
-        artist_name: user.artist_name || user.full_name,
+        artist_id: currentUser.id,
+        artist_name: currentUser.artist_name || currentUser.full_name,
         tags: designData.tags.split(',').map(t => t.trim()).filter(t => t),
         is_ai_generated: mode === 'ai',
         status: 'pendente',
-        commission_rate: 30
+        commission_rate: designData.commission_rate
       });
-      
+
       setStep(3);
     } catch (error) {
       console.error('Erro ao salvar:', error);
     }
-    
+
     setIsSaving(false);
   };
 
@@ -744,11 +763,32 @@ export default function Create() {
                     <div className="bg-purple-50 rounded-2xl p-6 mb-6">
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-gray-600">Sua comissão por venda</span>
-                        <span className="text-2xl font-bold ceu-text-gradient">30%</span>
+                        <span className="text-2xl font-bold ceu-text-gradient">{designData.commission_rate}%</span>
                       </div>
                       <p className="text-sm text-gray-500">
-                        Você receberá R$ 14,97 por cada camiseta vendida
+                        Você receberá R$ {((designData.price_base || 49.90) * (designData.commission_rate / 100)).toFixed(2)} por cada venda
                       </p>
+                      <div className="mt-4 pt-4 border-t border-purple-200">
+                        <p className="text-xs text-gray-500 mb-2">Ganhos estimados por produto:</p>
+                        <div className="grid grid-cols-2 gap-2 text-xs">
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Camiseta (R$ 79,90):</span>
+                            <span className="font-medium text-green-600">R$ {(79.90 * (designData.commission_rate / 100)).toFixed(2)}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Caneca (R$ 49,90):</span>
+                            <span className="font-medium text-green-600">R$ {(49.90 * (designData.commission_rate / 100)).toFixed(2)}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Quadro (R$ 129,90):</span>
+                            <span className="font-medium text-green-600">R$ {(129.90 * (designData.commission_rate / 100)).toFixed(2)}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Boné (R$ 59,90):</span>
+                            <span className="font-medium text-green-600">R$ {(59.90 * (designData.commission_rate / 100)).toFixed(2)}</span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
 
                     <Button

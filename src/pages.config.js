@@ -1,6 +1,8 @@
+import ArtistProfile from './pages/ArtistProfile';
 import Artists from './pages/Artists';
 import Brindes from './pages/Brindes';
 import Cart from './pages/Cart';
+import CompetitionDetail from './pages/CompetitionDetail';
 import Competitions from './pages/Competitions';
 import Create from './pages/Create';
 import DesignDetail from './pages/DesignDetail';
@@ -11,15 +13,15 @@ import MyDesigns from './pages/MyDesigns';
 import MyOrders from './pages/MyOrders';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
-import CompetitionDetail from './pages/CompetitionDetail';
-import ArtistProfile from './pages/ArtistProfile';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
+    "ArtistProfile": ArtistProfile,
     "Artists": Artists,
     "Brindes": Brindes,
     "Cart": Cart,
+    "CompetitionDetail": CompetitionDetail,
     "Competitions": Competitions,
     "Create": Create,
     "DesignDetail": DesignDetail,
@@ -30,8 +32,6 @@ export const PAGES = {
     "MyOrders": MyOrders,
     "Profile": Profile,
     "Settings": Settings,
-    "CompetitionDetail": CompetitionDetail,
-    "ArtistProfile": ArtistProfile,
 }
 
 export const pagesConfig = {
