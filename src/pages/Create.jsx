@@ -31,6 +31,9 @@ import ProductOptionButton from '@/components/create/ProductOptionButton';
 import TshirtMockup from '@/components/create/TshirtMockup';
 import MugMockup from '@/components/create/MugMockup';
 import FrameMockup from '@/components/create/FrameMockup';
+import CapMockup from '@/components/create/CapMockup';
+import EcobagMockup from '@/components/create/EcobagMockup';
+import PillowMockup from '@/components/create/PillowMockup';
 
 export default function Create() {
   const navigate = useNavigate();
@@ -73,6 +76,7 @@ export default function Create() {
   
   const [selectedProduct, setSelectedProduct] = useState('camiseta');
   const [productColor, setProductColor] = useState('white');
+  const [viewAngle, setViewAngle] = useState('front');
   const [cart, setCart] = useState([]);
 
   const categories = [
@@ -197,15 +201,23 @@ export default function Create() {
   };
 
   const productPrices = {
-    camiseta: 49.90,
-    quadro: 89.90,
-    caneca: 39.90
+    camiseta: 79.90,
+    quadro: 129.90,
+    caneca: 49.90,
+    bone: 59.90,
+    ecobag: 39.90,
+    almofada: 69.90,
+    poster: 45.90
   };
 
   const productSizes = {
     camiseta: ['P', 'M', 'G', 'GG'],
     quadro: ['30x40cm', '50x70cm', '70x100cm'],
-    caneca: ['300ml', '500ml']
+    caneca: ['300ml', '500ml'],
+    bone: ['Único'],
+    ecobag: ['Único'],
+    almofada: ['40x40cm', '50x50cm'],
+    poster: ['A3', 'A2', 'A1']
   };
 
   const colors = [
@@ -469,11 +481,15 @@ export default function Create() {
                     </div>
                     
                     {/* Product Type Selector */}
-                    <div className="grid grid-cols-3 gap-2 mb-6">
+                    <div className="grid grid-cols-4 gap-2 mb-6">
                       {[
                         { value: 'camiseta', label: 'Camiseta', icon: '👕' },
                         { value: 'quadro', label: 'Quadro', icon: '🖼️' },
-                        { value: 'caneca', label: 'Caneca', icon: '☕' }
+                        { value: 'caneca', label: 'Caneca', icon: '☕' },
+                        { value: 'bone', label: 'Boné', icon: '🧢' },
+                        { value: 'ecobag', label: 'Ecobag', icon: '🛍️' },
+                        { value: 'almofada', label: 'Almofada', icon: '🛋️' },
+                        { value: 'poster', label: 'Poster', icon: '📄' }
                       ].map((prod) => (
                         <button
                           key={prod.value}
@@ -491,7 +507,7 @@ export default function Create() {
                     </div>
 
                     {/* Color Selector */}
-                    {selectedProduct === 'camiseta' && (
+                    {(selectedProduct === 'camiseta' || selectedProduct === 'bone') && (
                       <div className="mb-4">
                         <Label className="text-sm font-medium mb-2 block text-gray-700">Cor</Label>
                         <div className="flex gap-2">
@@ -510,40 +526,130 @@ export default function Create() {
                       </div>
                     )}
 
+                    {/* View Angle Selector */}
+                    <div className="mb-4">
+                      <Label className="text-sm font-medium mb-2 block text-gray-700">Ângulo de Visualização</Label>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setViewAngle('front')}
+                          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                            viewAngle === 'front' 
+                              ? 'bg-purple-600 text-white' 
+                              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                          }`}
+                        >
+                          Frontal
+                        </button>
+                        <button
+                          onClick={() => setViewAngle('angled')}
+                          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                            viewAngle === 'angled' 
+                              ? 'bg-purple-600 text-white' 
+                              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                          }`}
+                        >
+                          3/4
+                        </button>
+                        {(selectedProduct === 'camiseta' || selectedProduct === 'bone') && (
+                          <button
+                            onClick={() => setViewAngle('worn')}
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                              viewAngle === 'worn' 
+                                ? 'bg-purple-600 text-white' 
+                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            }`}
+                          >
+                            Em Uso
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
                     {/* Mockup Display */}
-                    <div className="relative aspect-square rounded-2xl overflow-hidden">
+                    <div className="relative aspect-square rounded-2xl overflow-hidden bg-gradient-to-br from-slate-100 to-stone-100">
                       <AnimatePresence mode="wait">
                         {selectedProduct === 'camiseta' && (
                           <motion.div
-                            key="tshirt"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
+                            key={`tshirt-${viewAngle}`}
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            transition={{ duration: 0.3 }}
                             className="w-full h-full"
                           >
-                            <TshirtMockup designImage={selectedImage} color={productColor} />
+                            <TshirtMockup designImage={selectedImage} color={productColor} angle={viewAngle} />
                           </motion.div>
                         )}
                         {selectedProduct === 'quadro' && (
                           <motion.div
-                            key="frame"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
+                            key={`frame-${viewAngle}`}
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            transition={{ duration: 0.3 }}
                             className="w-full h-full"
                           >
-                            <FrameMockup designImage={selectedImage} />
+                            <FrameMockup designImage={selectedImage} angle={viewAngle} />
                           </motion.div>
                         )}
                         {selectedProduct === 'caneca' && (
                           <motion.div
-                            key="mug"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
+                            key={`mug-${viewAngle}`}
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            transition={{ duration: 0.3 }}
                             className="w-full h-full"
                           >
-                            <MugMockup designImage={selectedImage} />
+                            <MugMockup designImage={selectedImage} angle={viewAngle} />
+                          </motion.div>
+                        )}
+                        {selectedProduct === 'bone' && (
+                          <motion.div
+                            key={`cap-${viewAngle}`}
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            transition={{ duration: 0.3 }}
+                            className="w-full h-full"
+                          >
+                            <CapMockup designImage={selectedImage} color={productColor} angle={viewAngle} />
+                          </motion.div>
+                        )}
+                        {selectedProduct === 'ecobag' && (
+                          <motion.div
+                            key={`ecobag-${viewAngle}`}
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            transition={{ duration: 0.3 }}
+                            className="w-full h-full"
+                          >
+                            <EcobagMockup designImage={selectedImage} angle={viewAngle} />
+                          </motion.div>
+                        )}
+                        {selectedProduct === 'almofada' && (
+                          <motion.div
+                            key={`pillow-${viewAngle}`}
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            transition={{ duration: 0.3 }}
+                            className="w-full h-full"
+                          >
+                            <PillowMockup designImage={selectedImage} angle={viewAngle} />
+                          </motion.div>
+                        )}
+                        {selectedProduct === 'poster' && (
+                          <motion.div
+                            key={`poster-${viewAngle}`}
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            transition={{ duration: 0.3 }}
+                            className="w-full h-full"
+                          >
+                            <FrameMockup designImage={selectedImage} angle={viewAngle} isPoster />
                           </motion.div>
                         )}
                       </AnimatePresence>

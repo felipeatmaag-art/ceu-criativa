@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
-export default function FrameMockup({ designImage }) {
+export default function FrameMockup({ designImage, angle = 'front', isPoster = false }) {
   return (
     <motion.div
       initial={{ opacity: 0 }}

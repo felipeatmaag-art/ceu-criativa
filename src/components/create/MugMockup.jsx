@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
-export default function MugMockup({ designImage }) {
+export default function MugMockup({ designImage, angle = 'front' }) {
   return (
     <motion.div
       initial={{ opacity: 0 }}

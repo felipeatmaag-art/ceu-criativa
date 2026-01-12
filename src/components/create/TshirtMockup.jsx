@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
-export default function TshirtMockup({ designImage, color = 'white' }) {
+export default function TshirtMockup({ designImage, color = 'white', angle = 'front' }) {
   const colorMap = {
     white: { bg: '#FFFFFF', sleeve: '#f5f5f5', shadow: 'rgba(0,0,0,0.08)', collar: '#e8e8e8' },
     black: { bg: '#1a1a1a', sleeve: '#0d0d0d', shadow: 'rgba(0,0,0,0.3)', collar: '#2a2a2a' },
