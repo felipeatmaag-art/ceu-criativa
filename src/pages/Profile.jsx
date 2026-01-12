@@ -28,7 +28,8 @@ export default function Profile() {
     bio: '',
     social_instagram: '',
     social_twitter: '',
-    social_portfolio: ''
+    social_portfolio: '',
+    artist_commission_rate: 25
   });
   const [isUploading, setIsUploading] = useState(false);
 
@@ -44,7 +45,8 @@ export default function Profile() {
         bio: user.bio || '',
         social_instagram: user.social_instagram || '',
         social_twitter: user.social_twitter || '',
-        social_portfolio: user.social_portfolio || ''
+        social_portfolio: user.social_portfolio || '',
+        artist_commission_rate: user.artist_commission_rate || 25
       });
     }
   }, [user]);
@@ -262,6 +264,48 @@ export default function Profile() {
                         onChange={(e) => setFormData({...formData, social_portfolio: e.target.value})}
                         className="pl-12 h-12 rounded-xl"
                       />
+                    </div>
+                  </div>
+
+                  {/* Commission Rate */}
+                  <div className="bg-purple-50 rounded-2xl p-6 border border-purple-200">
+                    <Label className="text-base font-medium mb-2 block">
+                      Taxa de Comissão (%)
+                    </Label>
+                    <p className="text-sm text-gray-600 mb-4">
+                      Percentual que você receberá de cada venda dos seus designs
+                    </p>
+                    <div className="flex items-center gap-4">
+                      <Input
+                        type="number"
+                        min="10"
+                        max="50"
+                        value={formData.artist_commission_rate}
+                        onChange={(e) => setFormData({...formData, artist_commission_rate: Number(e.target.value)})}
+                        className="rounded-xl w-24 text-center text-lg font-bold"
+                      />
+                      <span className="text-2xl font-bold ceu-text-gradient">{formData.artist_commission_rate}%</span>
+                    </div>
+                    <div className="mt-4 pt-4 border-t border-purple-200">
+                      <p className="text-xs text-gray-500 mb-2">Seus ganhos estimados por venda:</p>
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Camiseta (R$ 79,90):</span>
+                          <span className="font-medium text-green-600">R$ {(79.90 * (formData.artist_commission_rate / 100)).toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Caneca (R$ 49,90):</span>
+                          <span className="font-medium text-green-600">R$ {(49.90 * (formData.artist_commission_rate / 100)).toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Quadro (R$ 129,90):</span>
+                          <span className="font-medium text-green-600">R$ {(129.90 * (formData.artist_commission_rate / 100)).toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Boné (R$ 59,90):</span>
+                          <span className="font-medium text-green-600">R$ {(59.90 * (formData.artist_commission_rate / 100)).toFixed(2)}</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
