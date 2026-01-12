@@ -9,7 +9,9 @@ export default function TshirtMockup({ designImage, color = 'white', angle = 'fr
     gray: { bg: '#6b7280', sleeve: '#4b5563', shadow: 'rgba(107,114,128,0.3)', collar: '#7c8694' }
   };
 
-  const currentColor = colorMap[color];
+  const currentColor = colorMap[color] || colorMap.white;
+
+  if (!designImage) return null;
 
   return (
     <motion.div
