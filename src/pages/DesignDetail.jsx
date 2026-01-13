@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
@@ -21,22 +21,39 @@ import {
   ArrowLeft,
   Minus,
   Plus,
-  Check
+  Check,
+  UserPlus,
+  UserCheck
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Skeleton } from '@/components/ui/skeleton';
+import MockupViewer from '@/components/design/MockupViewer';
+import CommentSection from '@/components/design/CommentSection';
 
 export default function DesignDetail() {
   const navigate = useNavigate();
   const urlParams = new URLSearchParams(window.location.search);
   const designId = urlParams.get('id');
 
+  const queryClient = useQueryClient();
+  const [user, setUser] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState('camiseta');
-  const [selectedColor, setSelectedColor] = useState('branco');
+  const [selectedColor, setSelectedColor] = useState('white');
   const [selectedSize, setSelectedSize] = useState('M');
   const [quantity, setQuantity] = useState(1);
-  const [isLiked, setIsLiked] = useState(false);
   const [addedToCart, setAddedToCart] = useState(false);
+
+  useEffect(() => {
+    const loadUser = async () => {
+      try {
+        const currentUser = await base44.auth.me();
+        setUser(currentUser);
+      } catch (e) {
+        setUser(null);
+      }
+    };
+    loadUser();
+  }, []);
 
   const { data: design, isLoading } = useQuery({
     queryKey: ['design', designId],
@@ -47,21 +64,90 @@ export default function DesignDetail() {
     enabled: !!designId,
   });
 
+  const { data: isLiked = false } = useQuery({
+    queryKey: ['like', designId, user?.email],
+    queryFn: async () => {
+      if (!user) return false;
+      const likes = await base44.entities.Like.filter({ 
+        design_id: designId, 
+        user_email: user.email 
+      });
+      return likes.length > 0;
+    },
+    enabled: !!designId && !!user,
+  });
+
+  const { data: isFollowing = false } = useQuery({
+    queryKey: ['follow', design?.artist_id, user?.email],
+    queryFn: async () => {
+      if (!user || !design) return false;
+      const follows = await base44.entities.Follow.filter({ 
+        follower_email: user.email,
+        following_artist_id: design.artist_id
+      });
+      return follows.length > 0;
+    },
+    enabled: !!design?.artist_id && !!user,
+  });
+
+  const likeMutation = useMutation({
+    mutationFn: async () => {
+      if (!user) return;
+      if (isLiked) {
+        const likes = await base44.entities.Like.filter({ 
+          design_id: designId, 
+          user_email: user.email 
+        });
+        if (likes[0]) {
+          await base44.entities.Like.delete(likes[0].id);
+        }
+      } else {
+        await base44.entities.Like.create({
+          design_id: designId,
+          user_email: user.email
+        });
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['like', designId, user?.email] });
+      queryClient.invalidateQueries({ queryKey: ['design', designId] });
+    },
+  });
+
+  const followMutation = useMutation({
+    mutationFn: async () => {
+      if (!user || !design) return;
+      if (isFollowing) {
+        const follows = await base44.entities.Follow.filter({ 
+          follower_email: user.email,
+          following_artist_id: design.artist_id
+        });
+        if (follows[0]) {
+          await base44.entities.Follow.delete(follows[0].id);
+        }
+      } else {
+        await base44.entities.Follow.create({
+          follower_email: user.email,
+          following_artist_id: design.artist_id
+        });
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['follow', design?.artist_id, user?.email] });
+    },
+  });
+
   const products = [
-    { type: 'camiseta', label: 'Camiseta', price: 79.90, emoji: '👕' },
-    { type: 'bone', label: 'Boné', price: 59.90, emoji: '🧢' },
-    { type: 'caneca', label: 'Caneca', price: 49.90, emoji: '☕' },
-    { type: 'quadro', label: 'Quadro', price: 129.90, emoji: '🖼️' },
-    { type: 'ecobag', label: 'Ecobag', price: 39.90, emoji: '👜' },
-    { type: 'almofada', label: 'Almofada', price: 69.90, emoji: '🛋️' },
+    { type: 'camiseta', label: 'Camiseta', price: 49.90, emoji: '👕' },
+    { type: 'caneca', label: 'Caneca', price: 39.90, emoji: '☕' },
+    { type: 'quadro', label: 'Quadro', price: 89.90, emoji: '🖼️' },
   ];
 
   const colors = [
-    { value: 'branco', label: 'Branco', hex: '#FFFFFF' },
-    { value: 'preto', label: 'Preto', hex: '#1A1A1A' },
-    { value: 'azul', label: 'Azul Marinho', hex: '#1E3A5F' },
-    { value: 'cinza', label: 'Cinza', hex: '#6B7280' },
-    { value: 'vermelho', label: 'Vermelho', hex: '#DC2626' },
+    { name: 'white', label: 'Branco', hex: '#FFFFFF' },
+    { name: 'black', label: 'Preto', hex: '#1a1a1a' },
+    { name: 'navy', label: 'Azul Marinho', hex: '#1e3a8a' },
+    { name: 'gray', label: 'Cinza', hex: '#6b7280' },
   ];
 
   const sizes = ['PP', 'P', 'M', 'G', 'GG', 'XG'];
@@ -143,48 +229,52 @@ export default function DesignDetail() {
         </Link>
 
         <div className="grid lg:grid-cols-2 gap-12">
-          {/* Image */}
+          {/* Mockup Viewer */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
           >
-            <div className="sticky top-28">
-              <div className="relative aspect-square rounded-3xl overflow-hidden bg-white shadow-xl">
-                <img
-                  src={design.image_url}
-                  alt={design.title}
-                  className="w-full h-full object-cover"
-                />
-                
-                {/* Badges */}
-                <div className="absolute top-4 left-4 flex gap-2">
-                  {design.is_featured && (
-                    <Badge className="bg-yellow-400 text-yellow-900 border-0">
-                      ⭐ Destaque
-                    </Badge>
-                  )}
-                  {design.is_ai_generated && (
-                    <Badge className="bg-purple-600 text-white border-0">
-                      <Sparkles className="w-3 h-3 mr-1" />
-                      IA
-                    </Badge>
-                  )}
-                </div>
+            <div className="sticky top-28 space-y-4">
+              <MockupViewer 
+                designImage={design.image_url}
+                selectedProduct={selectedProduct}
+                selectedColor={selectedColor}
+              />
+              
+              {/* Badges */}
+              <div className="flex gap-2">
+                {design.is_featured && (
+                  <Badge className="bg-yellow-400 text-yellow-900 border-0">
+                    ⭐ Destaque
+                  </Badge>
+                )}
+                {design.is_ai_generated && (
+                  <Badge className="bg-purple-600 text-white border-0">
+                    <Sparkles className="w-3 h-3 mr-1" />
+                    IA
+                  </Badge>
+                )}
+              </div>
 
-                {/* Actions */}
-                <div className="absolute top-4 right-4 flex gap-2">
-                  <button
-                    onClick={() => setIsLiked(!isLiked)}
-                    className="w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center hover:scale-110 transition-transform"
-                  >
-                    <Heart
-                      className={`w-6 h-6 ${isLiked ? 'fill-red-500 text-red-500' : 'text-gray-600'}`}
-                    />
-                  </button>
-                  <button className="w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center hover:scale-110 transition-transform">
-                    <Share2 className="w-6 h-6 text-gray-600" />
-                  </button>
-                </div>
+              {/* Action Buttons */}
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => user ? likeMutation.mutate() : base44.auth.redirectToLogin()}
+                  variant="outline"
+                  className={`flex-1 h-12 rounded-xl ${
+                    isLiked ? 'bg-red-50 border-red-300 text-red-600' : ''
+                  }`}
+                  disabled={likeMutation.isPending}
+                >
+                  <Heart className={`w-5 h-5 mr-2 ${isLiked ? 'fill-current' : ''}`} />
+                  {isLiked ? 'Curtido' : 'Curtir'}
+                </Button>
+                <Button
+                  variant="outline"
+                  className="h-12 rounded-xl"
+                >
+                  <Share2 className="w-5 h-5" />
+                </Button>
               </div>
             </div>
           </motion.div>
@@ -203,22 +293,46 @@ export default function DesignDetail() {
               <h1 className="text-4xl font-bold text-gray-900 mb-4">
                 {design.title}
               </h1>
-              <Link 
-                to={createPageUrl(`ArtistProfile?id=${design.artist_id}`)}
-                className="inline-flex items-center gap-3 group"
-              >
-                <div className="w-12 h-12 rounded-xl ceu-gradient flex items-center justify-center">
-                  <span className="text-white font-bold">
-                    {design.artist_name?.charAt(0) || 'A'}
-                  </span>
-                </div>
-                <div>
-                  <p className="font-medium text-gray-900 group-hover:text-purple-600 transition-colors">
-                    {design.artist_name || 'Artista'}
-                  </p>
-                  <p className="text-sm text-gray-500">Ver perfil</p>
-                </div>
-              </Link>
+              <div className="flex items-center justify-between mb-6">
+                <Link 
+                  to={createPageUrl(`ArtistProfile?id=${design.artist_id}`)}
+                  className="inline-flex items-center gap-3 group"
+                >
+                  <div className="w-12 h-12 rounded-xl ceu-gradient flex items-center justify-center">
+                    <span className="text-white font-bold">
+                      {design.artist_name?.charAt(0) || 'A'}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-900 group-hover:text-purple-600 transition-colors">
+                      {design.artist_name || 'Artista'}
+                    </p>
+                    <p className="text-sm text-gray-500">Ver perfil</p>
+                  </div>
+                </Link>
+                {user && user.id !== design.artist_id && (
+                  <Button
+                    onClick={() => followMutation.mutate()}
+                    variant={isFollowing ? 'outline' : 'default'}
+                    className={`rounded-xl ${
+                      isFollowing ? '' : 'ceu-gradient text-white'
+                    }`}
+                    disabled={followMutation.isPending}
+                  >
+                    {isFollowing ? (
+                      <>
+                        <UserCheck className="w-4 h-4 mr-2" />
+                        Seguindo
+                      </>
+                    ) : (
+                      <>
+                        <UserPlus className="w-4 h-4 mr-2" />
+                        Seguir
+                      </>
+                    )}
+                  </Button>
+                )}
+              </div>
             </div>
 
             {/* Description */}
@@ -265,30 +379,32 @@ export default function DesignDetail() {
               </div>
 
               {/* Color */}
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-3">Cor</h3>
-                <div className="flex gap-3">
-                  {colors.map((color) => (
-                    <button
-                      key={color.value}
-                      onClick={() => setSelectedColor(color.value)}
-                      className={`relative w-10 h-10 rounded-full transition-all ${
-                        selectedColor === color.value
-                          ? 'ring-2 ring-offset-2 ring-purple-500'
-                          : ''
-                      }`}
-                      style={{ backgroundColor: color.hex }}
-                      title={color.label}
-                    >
-                      {selectedColor === color.value && (
-                        <Check className={`w-5 h-5 absolute inset-0 m-auto ${
-                          color.value === 'branco' ? 'text-gray-800' : 'text-white'
-                        }`} />
-                      )}
-                    </button>
-                  ))}
+              {selectedProduct === 'camiseta' && (
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-3">Cor</h3>
+                  <div className="flex gap-3">
+                    {colors.map((color) => (
+                      <button
+                        key={color.name}
+                        onClick={() => setSelectedColor(color.name)}
+                        className={`relative w-10 h-10 rounded-full transition-all ${
+                          selectedColor === color.name
+                            ? 'ring-2 ring-offset-2 ring-purple-500'
+                            : ''
+                        }`}
+                        style={{ backgroundColor: color.hex }}
+                        title={color.label}
+                      >
+                        {selectedColor === color.name && (
+                          <Check className={`w-5 h-5 absolute inset-0 m-auto ${
+                            color.name === 'white' ? 'text-gray-800' : 'text-white'
+                          }`} />
+                        )}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Size */}
               {(selectedProduct === 'camiseta') && (
@@ -372,7 +488,7 @@ export default function DesignDetail() {
             </div>
 
             {/* Stats */}
-            <div className="flex items-center gap-8 py-4">
+            <div className="flex items-center gap-8 py-4 border-t">
               <div className="text-center">
                 <p className="text-2xl font-bold text-gray-900">{design.likes_count || 0}</p>
                 <p className="text-sm text-gray-500">Curtidas</p>
@@ -383,6 +499,11 @@ export default function DesignDetail() {
               </div>
             </div>
           </motion.div>
+        </div>
+
+        {/* Comments Section */}
+        <div className="max-w-4xl mx-auto mt-16">
+          <CommentSection designId={designId} />
         </div>
       </div>
     </div>
