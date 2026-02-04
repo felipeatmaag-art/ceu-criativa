@@ -482,18 +482,24 @@ export default function Create() {
 
                     {/* Color Selector */}
                     {(selectedProduct === 'camiseta' || selectedProduct === 'moletom') &&
-                  <div className="mb-4">
-                        <Label className="text-sm font-medium mb-2 block text-gray-700">Cor</Label>
-                        <div className="flex gap-2 flex-wrap">
+                  <div className="mb-6">
+                        <Label className="text-sm font-semibold mb-3 block text-gray-900 tracking-tight">Cor</Label>
+                        <div className="flex gap-3">
                           {colors.map((color) =>
                       <button
                         key={color.name}
                         onClick={() => setProductColor(color.name)}
-                        className={`w-10 h-10 rounded-full border-2 transition-all hover:scale-110 ${
-                        productColor === color.name ? 'border-purple-600 scale-110' : 'border-gray-200'}`
+                        className={`relative w-12 h-12 rounded-full transition-all duration-300 hover:scale-110 ${
+                        productColor === color.name ? 'ring-2 ring-offset-2 ring-gray-900 scale-110' : 'ring-1 ring-gray-200 hover:ring-gray-300'}`
                         }
                         style={{ backgroundColor: color.hex }}
-                        title={color.label} />
+                        title={color.label}>
+                        {productColor === color.name && (
+                          <span className="absolute inset-0 flex items-center justify-center">
+                            <span className={`w-2 h-2 rounded-full ${color.name === 'white' ? 'bg-gray-900' : 'bg-white'}`} />
+                          </span>
+                        )}
+                      </button>
 
                       )}
                         </div>
@@ -501,15 +507,15 @@ export default function Create() {
                   }
 
                     {/* Mockup Display */}
-                    <div className="relative aspect-square rounded-2xl overflow-hidden bg-gradient-to-br from-slate-100 to-stone-100">
+                    <div className="relative aspect-square rounded-3xl overflow-hidden bg-[#F5F5F7] shadow-sm group">
                       <AnimatePresence mode="wait">
                         <motion.div
                           key={selectedProduct}
-                          initial={{ opacity: 0, scale: 0.95 }}
+                          initial={{ opacity: 0, scale: 0.98 }}
                           animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.95 }}
-                          transition={{ duration: 0.3 }}
-                          className="w-full h-full"
+                          exit={{ opacity: 0, scale: 0.98 }}
+                          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                          className="w-full h-full group-hover:scale-105 transition-transform duration-500"
                         >
                           {selectedProduct === 'camiseta' && <TshirtMockup designImage={selectedImage} color={productColor} />}
                           {selectedProduct === 'moletom' && <TshirtMockup designImage={selectedImage} color={productColor} />}
@@ -521,7 +527,7 @@ export default function Create() {
                                 <span className="text-6xl block mb-2">
                                   {selectedProduct === 'caneca_termica' ? '🥤' : '🖱️'}
                                 </span>
-                                <p className="text-sm">Preview em breve</p>
+                                <p className="text-sm font-medium">Preview em breve</p>
                               </div>
                             </div>
                           )}
