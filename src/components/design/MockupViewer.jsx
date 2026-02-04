@@ -7,6 +7,8 @@ import FrameMockup from '@/components/create/FrameMockup';
 import HoodieMockup from '@/components/create/HoodieMockup';
 import TravelMugMockup from '@/components/create/TravelMugMockup';
 import MousepadMockup from '@/components/create/MousepadMockup';
+import TshirtInUseMockup from '@/components/create/TshirtInUseMockup';
+import MugInHandMockup from '@/components/create/MugInHandMockup';
 
 export default function MockupViewer({ designImage, selectedProduct, selectedColor }) {
   const [viewAngle, setViewAngle] = useState('front');
@@ -29,12 +31,14 @@ export default function MockupViewer({ designImage, selectedProduct, selectedCol
         return [
           { value: 'front', label: 'Frontal' },
           { value: 'angled', label: '3/4' },
+          { value: 'inuse', label: 'Em Uso' },
         ];
       case 'caneca':
       case 'caneca_termica':
         return [
           { value: 'front', label: 'Frontal' },
           { value: 'angled', label: '3/4' },
+          { value: 'inhand', label: 'Na Mão' },
         ];
       case 'quadro':
         return [
@@ -88,11 +92,42 @@ export default function MockupViewer({ designImage, selectedProduct, selectedCol
             transition={{ duration: 0.3 }}
             className="w-full h-full"
           >
-            <MockupComponent 
-              designImage={designImage} 
-              color={selectedColor}
-              angle={viewAngle}
-            />
+            {/* Renderizar mockup baseado no produto e ângulo */}
+            {selectedProduct === 'camiseta' && viewAngle === 'inuse' && (
+              <TshirtInUseMockup designImage={designImage} color={selectedColor} />
+            )}
+            {selectedProduct === 'camiseta' && viewAngle !== 'inuse' && (
+              <TshirtMockup designImage={designImage} color={selectedColor} angle={viewAngle} />
+            )}
+            
+            {selectedProduct === 'moletom' && viewAngle === 'inuse' && (
+              <TshirtInUseMockup designImage={designImage} color={selectedColor} />
+            )}
+            {selectedProduct === 'moletom' && viewAngle !== 'inuse' && (
+              <HoodieMockup designImage={designImage} color={selectedColor} angle={viewAngle} />
+            )}
+            
+            {selectedProduct === 'caneca' && viewAngle === 'inhand' && (
+              <MugInHandMockup designImage={designImage} />
+            )}
+            {selectedProduct === 'caneca' && viewAngle !== 'inhand' && (
+              <MugMockup designImage={designImage} angle={viewAngle} />
+            )}
+            
+            {selectedProduct === 'caneca_termica' && viewAngle === 'inhand' && (
+              <MugInHandMockup designImage={designImage} />
+            )}
+            {selectedProduct === 'caneca_termica' && viewAngle !== 'inhand' && (
+              <TravelMugMockup designImage={designImage} angle={viewAngle} />
+            )}
+            
+            {selectedProduct === 'quadro' && (
+              <FrameMockup designImage={designImage} angle={viewAngle} />
+            )}
+            
+            {selectedProduct === 'mousepad' && (
+              <MousepadMockup designImage={designImage} angle={viewAngle} />
+            )}
           </motion.div>
         </AnimatePresence>
       </div>
