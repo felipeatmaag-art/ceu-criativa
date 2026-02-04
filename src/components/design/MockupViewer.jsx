@@ -4,32 +4,57 @@ import { Button } from '@/components/ui/button';
 import TshirtMockup from '@/components/create/TshirtMockup';
 import MugMockup from '@/components/create/MugMockup';
 import FrameMockup from '@/components/create/FrameMockup';
+import HoodieMockup from '@/components/create/HoodieMockup';
+import TravelMugMockup from '@/components/create/TravelMugMockup';
+import MousepadMockup from '@/components/create/MousepadMockup';
 
 export default function MockupViewer({ designImage, selectedProduct, selectedColor }) {
   const [viewAngle, setViewAngle] = useState('front');
 
   const mockupComponents = {
     camiseta: TshirtMockup,
+    moletom: HoodieMockup,
     caneca: MugMockup,
+    caneca_termica: TravelMugMockup,
     quadro: FrameMockup,
+    mousepad: MousepadMockup,
   };
 
   const MockupComponent = mockupComponents[selectedProduct] || TshirtMockup;
 
-  const angles = selectedProduct === 'camiseta' 
-    ? [
-        { value: 'front', label: 'Frontal' },
-        { value: 'angled', label: '3/4' },
-      ]
-    : selectedProduct === 'caneca'
-    ? [
-        { value: 'front', label: 'Frontal' },
-        { value: 'angled', label: '3/4' },
-      ]
-    : [
-        { value: 'front', label: 'Frontal' },
-        { value: 'angled', label: '3/4' },
-      ];
+  const getAnglesForProduct = () => {
+    switch(selectedProduct) {
+      case 'camiseta':
+      case 'moletom':
+        return [
+          { value: 'front', label: 'Frontal' },
+          { value: 'angled', label: '3/4' },
+        ];
+      case 'caneca':
+      case 'caneca_termica':
+        return [
+          { value: 'front', label: 'Frontal' },
+          { value: 'angled', label: '3/4' },
+        ];
+      case 'quadro':
+        return [
+          { value: 'front', label: 'Frontal' },
+          { value: 'angled', label: 'Perspectiva' },
+        ];
+      case 'mousepad':
+        return [
+          { value: 'front', label: 'Vista Superior' },
+          { value: 'angled', label: 'Ângulo 3D' },
+        ];
+      default:
+        return [
+          { value: 'front', label: 'Frontal' },
+          { value: 'angled', label: '3/4' },
+        ];
+    }
+  };
+
+  const angles = getAnglesForProduct();
 
   return (
     <div className="space-y-4">

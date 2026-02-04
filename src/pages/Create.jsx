@@ -179,14 +179,20 @@ export default function Create() {
 
   const productPrices = {
     camiseta: 49.90,
+    moletom: 89.90,
     quadro: 89.90,
-    caneca: 39.90
+    caneca: 39.90,
+    caneca_termica: 69.90,
+    mousepad: 29.90
   };
 
   const productSizes = {
     camiseta: ['P', 'M', 'G', 'GG'],
+    moletom: ['P', 'M', 'G', 'GG'],
     quadro: ['30x40cm', '50x70cm', '70x100cm'],
-    caneca: ['300ml', '500ml']
+    caneca: ['Padrão'],
+    caneca_termica: ['500ml'],
+    mousepad: ['Médio', 'Grande', 'XL']
   };
 
   const colors = [
@@ -453,8 +459,11 @@ export default function Create() {
                     <div className="grid grid-cols-3 gap-2 mb-6">
                       {[
                     { value: 'camiseta', label: 'Camiseta', icon: '👕' },
+                    { value: 'moletom', label: 'Moletom', icon: '🧥' },
                     { value: 'quadro', label: 'Quadro', icon: '🖼️' },
-                    { value: 'caneca', label: 'Caneca', icon: '☕' }].
+                    { value: 'caneca', label: 'Caneca', icon: '☕' },
+                    { value: 'caneca_termica', label: 'Térmica', icon: '🥤' },
+                    { value: 'mousepad', label: 'Mousepad', icon: '🖱️' }].
                     map((prod) =>
                     <button
                       key={prod.value}
@@ -472,15 +481,15 @@ export default function Create() {
                     </div>
 
                     {/* Color Selector */}
-                    {selectedProduct === 'camiseta' &&
+                    {(selectedProduct === 'camiseta' || selectedProduct === 'moletom') &&
                   <div className="mb-4">
                         <Label className="text-sm font-medium mb-2 block text-gray-700">Cor</Label>
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 flex-wrap">
                           {colors.map((color) =>
                       <button
                         key={color.name}
                         onClick={() => setProductColor(color.name)}
-                        className={`w-10 h-10 rounded-full border-2 transition-all ${
+                        className={`w-10 h-10 rounded-full border-2 transition-all hover:scale-110 ${
                         productColor === color.name ? 'border-purple-600 scale-110' : 'border-gray-200'}`
                         }
                         style={{ backgroundColor: color.hex }}
@@ -492,41 +501,31 @@ export default function Create() {
                   }
 
                     {/* Mockup Display */}
-                    <div className="relative aspect-square rounded-2xl overflow-hidden">
+                    <div className="relative aspect-square rounded-2xl overflow-hidden bg-gradient-to-br from-slate-100 to-stone-100">
                       <AnimatePresence mode="wait">
-                        {selectedProduct === 'camiseta' &&
-                      <motion.div
-                        key="tshirt"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="w-full h-full">
-
-                            <TshirtMockup designImage={selectedImage} color={productColor} />
-                          </motion.div>
-                      }
-                        {selectedProduct === 'quadro' &&
-                      <motion.div
-                        key="frame"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="w-full h-full">
-
-                            <FrameMockup designImage={selectedImage} />
-                          </motion.div>
-                      }
-                        {selectedProduct === 'caneca' &&
-                      <motion.div
-                        key="mug"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="w-full h-full">
-
-                            <MugMockup designImage={selectedImage} />
-                          </motion.div>
-                      }
+                        <motion.div
+                          key={selectedProduct}
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.95 }}
+                          transition={{ duration: 0.3 }}
+                          className="w-full h-full"
+                        >
+                          {selectedProduct === 'camiseta' && <TshirtMockup designImage={selectedImage} color={productColor} />}
+                          {selectedProduct === 'moletom' && <TshirtMockup designImage={selectedImage} color={productColor} />}
+                          {selectedProduct === 'quadro' && <FrameMockup designImage={selectedImage} />}
+                          {selectedProduct === 'caneca' && <MugMockup designImage={selectedImage} />}
+                          {(selectedProduct === 'caneca_termica' || selectedProduct === 'mousepad') && (
+                            <div className="w-full h-full flex items-center justify-center text-gray-400">
+                              <div className="text-center">
+                                <span className="text-6xl block mb-2">
+                                  {selectedProduct === 'caneca_termica' ? '🥤' : '🖱️'}
+                                </span>
+                                <p className="text-sm">Preview em breve</p>
+                              </div>
+                            </div>
+                          )}
+                        </motion.div>
                       </AnimatePresence>
                     </div>
                   </div>

@@ -139,8 +139,11 @@ export default function DesignDetail() {
 
   const products = [
     { type: 'camiseta', label: 'Camiseta', price: 49.90, emoji: '👕' },
+    { type: 'moletom', label: 'Moletom', price: 89.90, emoji: '🧥' },
     { type: 'caneca', label: 'Caneca', price: 39.90, emoji: '☕' },
+    { type: 'caneca_termica', label: 'Caneca Térmica', price: 69.90, emoji: '🥤' },
     { type: 'quadro', label: 'Quadro', price: 89.90, emoji: '🖼️' },
+    { type: 'mousepad', label: 'Mousepad', price: 29.90, emoji: '🖱️' },
   ];
 
   const colors = [
@@ -359,37 +362,37 @@ export default function DesignDetail() {
               {/* Product Type */}
               <div>
                 <h3 className="font-semibold text-gray-900 mb-3">Produto</h3>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {products.map((product) => (
                     <button
                       key={product.type}
                       onClick={() => setSelectedProduct(product.type)}
-                      className={`p-3 rounded-xl border-2 transition-all ${
+                      className={`p-3 rounded-xl border-2 transition-all hover:scale-105 ${
                         selectedProduct === product.type
-                          ? 'border-purple-500 bg-purple-50'
+                          ? 'border-purple-500 bg-purple-50 shadow-md'
                           : 'border-gray-200 hover:border-gray-300'
                       }`}
                     >
                       <span className="text-2xl block mb-1">{product.emoji}</span>
-                      <span className="text-sm font-medium">{product.label}</span>
-                      <span className="text-xs text-gray-500 block">R$ {product.price.toFixed(2)}</span>
+                      <span className="text-xs font-medium block leading-tight">{product.label}</span>
+                      <span className="text-xs text-gray-500 block mt-1">R$ {product.price.toFixed(2)}</span>
                     </button>
                   ))}
                 </div>
               </div>
 
               {/* Color */}
-              {selectedProduct === 'camiseta' && (
+              {(selectedProduct === 'camiseta' || selectedProduct === 'moletom') && (
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-3">Cor</h3>
-                  <div className="flex gap-3">
+                  <div className="flex gap-3 flex-wrap">
                     {colors.map((color) => (
                       <button
                         key={color.name}
                         onClick={() => setSelectedColor(color.name)}
-                        className={`relative w-10 h-10 rounded-full transition-all ${
+                        className={`relative w-10 h-10 rounded-full transition-all hover:scale-110 ${
                           selectedColor === color.name
-                            ? 'ring-2 ring-offset-2 ring-purple-500'
+                            ? 'ring-2 ring-offset-2 ring-purple-500 scale-110'
                             : ''
                         }`}
                         style={{ backgroundColor: color.hex }}
@@ -407,17 +410,60 @@ export default function DesignDetail() {
               )}
 
               {/* Size */}
-              {(selectedProduct === 'camiseta') && (
+              {(selectedProduct === 'camiseta' || selectedProduct === 'moletom') && (
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-3">Tamanho</h3>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 flex-wrap">
                     {sizes.map((size) => (
                       <button
                         key={size}
                         onClick={() => setSelectedSize(size)}
-                        className={`w-12 h-12 rounded-xl font-medium transition-all ${
+                        className={`w-12 h-12 rounded-xl font-medium transition-all hover:scale-105 ${
                           selectedSize === size
-                            ? 'bg-gray-900 text-white'
+                            ? 'bg-gray-900 text-white scale-105 shadow-md'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        {size}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Dimensions for frame and mousepad */}
+              {(selectedProduct === 'quadro') && (
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-3">Dimensões</h3>
+                  <div className="flex gap-2 flex-wrap">
+                    {['30x40cm', '50x70cm', '70x100cm'].map((size) => (
+                      <button
+                        key={size}
+                        onClick={() => setSelectedSize(size)}
+                        className={`px-4 h-12 rounded-xl font-medium transition-all hover:scale-105 ${
+                          selectedSize === size
+                            ? 'bg-gray-900 text-white scale-105 shadow-md'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        {size}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {selectedProduct === 'mousepad' && (
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-3">Tamanho</h3>
+                  <div className="flex gap-2 flex-wrap">
+                    {['Médio', 'Grande', 'XL'].map((size) => (
+                      <button
+                        key={size}
+                        onClick={() => setSelectedSize(size)}
+                        className={`px-4 h-12 rounded-xl font-medium transition-all hover:scale-105 ${
+                          selectedSize === size
+                            ? 'bg-gray-900 text-white scale-105 shadow-md'
                             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                         }`}
                       >
