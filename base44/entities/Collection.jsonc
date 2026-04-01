@@ -1,0 +1,42 @@
+{
+  "name": "Collection",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Nome da cole\u00e7\u00e3o"
+    },
+    "description": {
+      "type": "string",
+      "description": "Descri\u00e7\u00e3o da cole\u00e7\u00e3o"
+    },
+    "cover_image": {
+      "type": "string",
+      "description": "Imagem de capa"
+    },
+    "artist_id": {
+      "type": "string",
+      "description": "ID do artista"
+    },
+    "artist_name": {
+      "type": "string",
+      "description": "Nome do artista"
+    },
+    "design_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs dos designs da cole\u00e7\u00e3o"
+    },
+    "is_public": {
+      "type": "boolean",
+      "default": false,
+      "description": "Cole\u00e7\u00e3o p\u00fablica"
+    }
+  },
+  "required": [
+    "title",
+    "artist_id"
+  ]
+}
