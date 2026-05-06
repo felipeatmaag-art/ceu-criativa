@@ -47,7 +47,7 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
-import ArtistDashboard from './pages/ArtistDashboard.jsx';
+import ArtistDashboard from './pages/ArtistDashboard';
 import ArtistProfile from './pages/ArtistProfile';
 import Artists from './pages/Artists';
 import Brindes from './pages/Brindes';
