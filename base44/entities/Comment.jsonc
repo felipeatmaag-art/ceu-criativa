@@ -1,0 +1,36 @@
+{
+  "name": "Comment",
+  "type": "object",
+  "properties": {
+    "design_id": {
+      "type": "string",
+      "description": "ID do design"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "Email do usu\u00e1rio"
+    },
+    "user_name": {
+      "type": "string",
+      "description": "Nome do usu\u00e1rio"
+    },
+    "user_avatar": {
+      "type": "string",
+      "description": "Avatar do usu\u00e1rio"
+    },
+    "comment": {
+      "type": "string",
+      "description": "Texto do coment\u00e1rio"
+    },
+    "likes": {
+      "type": "number",
+      "default": 0,
+      "description": "Curtidas no coment\u00e1rio"
+    }
+  },
+  "required": [
+    "design_id",
+    "user_email",
+    "comment"
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "name": "Follow",
+  "type": "object",
+  "properties": {
+    "follower_email": {
+      "type": "string",
+      "description": "Email de quem segue"
+    },
+    "following_artist_id": {
+      "type": "string",
+      "description": "ID do artista seguido"
+    }
+  },
+  "required": [
+    "follower_email",
+    "following_artist_id"
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "name": "LoyaltyPoint",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Email do usu\u00e1rio"
+    },
+    "points": {
+      "type": "number",
+      "default": 0,
+      "description": "Saldo de pontos"
+    },
+    "points_earned_total": {
+      "type": "number",
+      "default": 0,
+      "description": "Total de pontos ganhos historicamente"
+    },
+    "points_spent_total": {
+      "type": "number",
+      "default": 0,
+      "description": "Total de pontos gastos"
+    },
+    "referrals_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Quantidade de indica\u00e7\u00f5es feitas"
+    },
+    "purchases_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Quantidade de compras realizadas"
+    }
+  },
+  "required": [
+    "user_email"
+  ]
+}

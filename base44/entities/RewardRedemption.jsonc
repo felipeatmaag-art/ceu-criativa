@@ -1,0 +1,58 @@
+{
+  "name": "RewardRedemption",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Email do usu\u00e1rio"
+    },
+    "reward_id": {
+      "type": "string",
+      "description": "ID do brinde resgatado"
+    },
+    "reward_title": {
+      "type": "string",
+      "description": "Nome do brinde"
+    },
+    "points_spent": {
+      "type": "number",
+      "description": "Pontos gastos"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "processing",
+        "shipped",
+        "delivered"
+      ],
+      "default": "pending",
+      "description": "Status da entrega"
+    },
+    "shipping_address": {
+      "type": "object",
+      "properties": {
+        "street": {
+          "type": "string"
+        },
+        "number": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "zipcode": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "required": [
+    "user_email",
+    "reward_id",
+    "points_spent"
+  ]
+}

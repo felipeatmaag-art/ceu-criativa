@@ -1,0 +1,66 @@
+{
+  "name": "Product",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Nome do produto"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "camiseta",
+        "bone",
+        "quadro",
+        "caneca",
+        "poster",
+        "ecobag",
+        "almofada"
+      ],
+      "description": "Tipo do produto"
+    },
+    "design_id": {
+      "type": "string",
+      "description": "ID do design aplicado"
+    },
+    "design_image": {
+      "type": "string",
+      "description": "URL da imagem do design"
+    },
+    "base_price": {
+      "type": "number",
+      "description": "Pre\u00e7o base do produto"
+    },
+    "final_price": {
+      "type": "number",
+      "description": "Pre\u00e7o final com design"
+    },
+    "mockup_url": {
+      "type": "string",
+      "description": "URL do mockup do produto"
+    },
+    "colors_available": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Cores dispon\u00edveis"
+    },
+    "sizes_available": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Tamanhos dispon\u00edveis"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "name",
+    "type",
+    "base_price"
+  ]
+}

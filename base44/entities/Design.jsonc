@@ -1,0 +1,92 @@
+{
+  "name": "Design",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Nome da estampa"
+    },
+    "description": {
+      "type": "string",
+      "description": "Descri\u00e7\u00e3o art\u00edstica do design"
+    },
+    "image_url": {
+      "type": "string",
+      "description": "URL da imagem do design"
+    },
+    "artist_id": {
+      "type": "string",
+      "description": "ID do artista criador"
+    },
+    "artist_name": {
+      "type": "string",
+      "description": "Nome do artista"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "abstrato",
+        "natureza",
+        "urbano",
+        "minimalista",
+        "ilustracao",
+        "tipografia",
+        "geometrico",
+        "vintage",
+        "pop_art",
+        "surreal"
+      ],
+      "description": "Categoria do design"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Tags para busca"
+    },
+    "price_base": {
+      "type": "number",
+      "description": "Pre\u00e7o base do design"
+    },
+    "commission_rate": {
+      "type": "number",
+      "description": "Taxa de comiss\u00e3o do artista (0-100)"
+    },
+    "sales_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Quantidade de vendas"
+    },
+    "likes_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Quantidade de curtidas"
+    },
+    "is_featured": {
+      "type": "boolean",
+      "default": false,
+      "description": "Design em destaque"
+    },
+    "is_ai_generated": {
+      "type": "boolean",
+      "default": false,
+      "description": "Criado com IA"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "rascunho",
+        "pendente",
+        "aprovado",
+        "rejeitado"
+      ],
+      "default": "rascunho"
+    }
+  },
+  "required": [
+    "title",
+    "image_url",
+    "category"
+  ]
+}

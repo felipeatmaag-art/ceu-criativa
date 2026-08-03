@@ -1,0 +1,64 @@
+{
+  "name": "Competition",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Nome da competi\u00e7\u00e3o"
+    },
+    "description": {
+      "type": "string",
+      "description": "Descri\u00e7\u00e3o e regras"
+    },
+    "theme": {
+      "type": "string",
+      "description": "Tema da competi\u00e7\u00e3o"
+    },
+    "cover_image": {
+      "type": "string",
+      "description": "Imagem de capa"
+    },
+    "prize_description": {
+      "type": "string",
+      "description": "Descri\u00e7\u00e3o do pr\u00eamio"
+    },
+    "prize_value": {
+      "type": "number",
+      "description": "Valor do pr\u00eamio"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de in\u00edcio"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de t\u00e9rmino"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "upcoming",
+        "active",
+        "voting",
+        "finished"
+      ],
+      "default": "upcoming"
+    },
+    "participants_count": {
+      "type": "number",
+      "default": 0
+    },
+    "winner_design_id": {
+      "type": "string",
+      "description": "ID do design vencedor"
+    }
+  },
+  "required": [
+    "title",
+    "theme",
+    "start_date",
+    "end_date"
+  ]
+}

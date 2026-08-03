@@ -1,0 +1,60 @@
+{
+  "name": "User",
+  "type": "object",
+  "properties": {
+    "artist_name": {
+      "type": "string",
+      "description": "Nome art\u00edstico do usu\u00e1rio"
+    },
+    "bio": {
+      "type": "string",
+      "description": "Biografia do artista"
+    },
+    "avatar_url": {
+      "type": "string",
+      "description": "URL do avatar"
+    },
+    "cover_image": {
+      "type": "string",
+      "description": "Imagem de capa do perfil"
+    },
+    "instagram": {
+      "type": "string",
+      "description": "Username do Instagram"
+    },
+    "twitter": {
+      "type": "string",
+      "description": "Username do Twitter"
+    },
+    "website": {
+      "type": "string",
+      "description": "Website pessoal"
+    },
+    "artist_commission_rate": {
+      "type": "number",
+      "default": 25,
+      "minimum": 10,
+      "maximum": 50,
+      "description": "Taxa de comiss\u00e3o do artista (10-50%)"
+    },
+    "total_sales": {
+      "type": "number",
+      "default": 0,
+      "description": "Total de vendas realizadas"
+    },
+    "total_earnings": {
+      "type": "number",
+      "default": 0,
+      "description": "Total ganho em comiss\u00f5es"
+    }
+  },
+  "required": [
+    "artist_name",
+    "bio",
+    "avatar_url",
+    "cover_image",
+    "instagram",
+    "twitter",
+    "website"
+  ]
+}
