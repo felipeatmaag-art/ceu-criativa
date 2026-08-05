@@ -22,6 +22,7 @@ import InsightsPanel from '@/components/dashboard/InsightsPanel';
 import DesignPerformanceChart from '@/components/dashboard/DesignPerformanceChart';
 import MonthlySalesChart from '@/components/dashboard/MonthlySalesChart';
 import NotificationsPanel from '@/components/dashboard/NotificationsPanel';
+import RealtimeToasts from '@/components/dashboard/RealtimeToasts';
 
 export default function ArtistDashboard() {
   const [tab, setTab] = useState('overview');
@@ -102,6 +103,7 @@ export default function ArtistDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <RealtimeToasts userId={user.id} designs={designs} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         {/* Header */}
         <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
