@@ -20,6 +20,7 @@ import DesignManagementGrid from '@/components/dashboard/DesignManagementGrid';
 import CollectionsManager from '@/components/dashboard/CollectionsManager';
 import InsightsPanel from '@/components/dashboard/InsightsPanel';
 import DesignPerformanceChart from '@/components/dashboard/DesignPerformanceChart';
+import MonthlySalesChart from '@/components/dashboard/MonthlySalesChart';
 import NotificationsPanel from '@/components/dashboard/NotificationsPanel';
 
 export default function ArtistDashboard() {
@@ -221,6 +222,11 @@ export default function ArtistDashboard() {
                   </ResponsiveContainer>
                 </CardContent>
               </Card>
+            </div>
+
+            {/* Monthly Sales & Earnings Chart */}
+            <div className="mb-6">
+              <MonthlySalesChart orders={myOrders} userId={user.id} />
             </div>
 
             {/* Design Performance */}
