@@ -4,7 +4,10 @@ import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ShoppingBag, ArrowLeft, Trash2, CreditCard, Package } from 'lucide-react';
+import {
+  ShoppingBag, ArrowLeft, Trash2, CreditCard, Package,
+  ShieldCheck, Lock, Zap, Minus, Plus
+} from 'lucide-react';
 import { motion } from 'framer-motion';
 import {
   Dialog,
@@ -12,12 +15,18 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import PaymentMethodSelector, { PAYMENT_METHODS } from '@/components/checkout/PaymentMethodSelector';
+import FreeShippingBar, { FREE_SHIPPING_THRESHOLD } from '@/components/checkout/FreeShippingBar';
 
 export default function Cart() {
   const navigate = useNavigate();
   const [cartItems, setCartItems] = useState([]);
   const [showCheckout, setShowCheckout] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState('pix');
+  const [coupon, setCoupon] = useState('');
+  const [couponApplied, setCouponApplied] = useState(null);
+  const [couponError, setCouponError] = useState('');
   const [shippingAddress, setShippingAddress] = useState({
     street: '',
     number: '',
@@ -33,16 +42,39 @@ export default function Cart() {
     }
   }, []);
 
+  const persist = (items) => {
+    setCartItems(items);
+    localStorage.setItem('cart', JSON.stringify(items));
+  };
+
   const removeItem = (index) => {
-    const newCart = cartItems.filter((_, i) => i !== index);
-    setCartItems(newCart);
-    localStorage.setItem('cart', JSON.stringify(newCart));
+    persist(cartItems.filter((_, i) => i !== index));
+  };
+
+  const updateQty = (index, delta) => {
+    const newCart = [...cartItems];
+    const newQty = Math.max(1, (newCart[index].quantity || 1) + delta);
+    newCart[index] = { ...newCart[index], quantity: newQty };
+    persist(newCart);
+  };
+
+  const applyCoupon = () => {
+    setCouponError('');
+    const code = coupon.trim().toUpperCase();
+    if (!code) return;
+    if (code === 'CRIATIVO10') {
+      setCouponApplied({ code, discount: 0.10 });
+    } else if (code === 'BEMVINDO') {
+      setCouponApplied({ code, discount: 0.05 });
+    } else {
+      setCouponApplied(null);
+      setCouponError('Cupom inválido');
+    }
   };
 
   const handleCheckout = async () => {
     setIsProcessing(true);
     try {
-      // Simular processamento de pagamento
       await new Promise(resolve => setTimeout(resolve, 2000));
       localStorage.removeItem('cart');
       setCartItems([]);
@@ -54,9 +86,16 @@ export default function Cart() {
     setIsProcessing(false);
   };
 
-  const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const shipping = subtotal > 0 ? 15.00 : 0;
-  const total = subtotal + shipping;
+  const subtotal = cartItems.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
+  const hasFreeShipping = subtotal >= FREE_SHIPPING_THRESHOLD;
+  const shipping = subtotal > 0 ? (hasFreeShipping ? 0 : 15.00) : 0;
+
+  const paymentDiscount = PAYMENT_METHODS.find(m => m.id === paymentMethod)?.discount || 0;
+  const couponDiscount = couponApplied?.discount || 0;
+  const discountValue = subtotal * (paymentDiscount + couponDiscount);
+  const total = Math.max(0, subtotal - discountValue + shipping);
+
+  const isAddressValid = shippingAddress.zipcode && shippingAddress.street && shippingAddress.number;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-12">
@@ -68,7 +107,7 @@ export default function Cart() {
           </Link>
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Meu Carrinho</h1>
-            <p className="text-gray-500">{cartItems.length} itens</p>
+            <p className="text-gray-500">{cartItems.length} {cartItems.length === 1 ? 'item' : 'itens'}</p>
           </div>
         </div>
 
@@ -76,6 +115,7 @@ export default function Cart() {
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Items */}
             <div className="lg:col-span-2 space-y-4">
+              <FreeShippingBar subtotal={subtotal} />
               {cartItems.map((item, index) => (
                 <motion.div
                   key={index}
@@ -83,24 +123,39 @@ export default function Cart() {
                   animate={{ opacity: 1, y: 0 }}
                   className="bg-white rounded-2xl p-4 shadow-sm flex gap-4"
                 >
-                  <div className="w-20 h-20 rounded-xl overflow-hidden bg-gray-100">
+                  <div className="w-20 h-20 rounded-xl overflow-hidden bg-gray-100 shrink-0">
                     <img
                       src={item.design_image}
                       alt={item.design_title}
                       className="w-full h-full object-cover"
                     />
                   </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold">{item.design_title}</h3>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold truncate">{item.design_title}</h3>
                     <p className="text-sm text-gray-500 capitalize">
                       {item.product_type} • {item.size}
                       {item.color && ` • ${item.color}`}
                     </p>
-                    <p className="text-sm font-medium text-gray-900 mt-2">
+                    <p className="text-sm font-medium text-gray-900 mt-1">
                       R$ {item.price.toFixed(2)}
                     </p>
+                    <div className="flex items-center gap-2 mt-2">
+                      <button
+                        onClick={() => updateQty(index, -1)}
+                        className="w-7 h-7 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-700"
+                      >
+                        <Minus className="w-3.5 h-3.5" />
+                      </button>
+                      <span className="text-sm font-medium w-6 text-center">{item.quantity || 1}</span>
+                      <button
+                        onClick={() => updateQty(index, 1)}
+                        className="w-7 h-7 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-700"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </div>
-                  <button 
+                  <button
                     onClick={() => removeItem(index)}
                     className="text-red-500 hover:text-red-600 self-start"
                   >
@@ -111,25 +166,61 @@ export default function Cart() {
             </div>
 
             {/* Summary */}
-            <div className="bg-white rounded-2xl p-6 shadow-sm h-fit">
+            <div className="bg-white rounded-2xl p-6 shadow-sm h-fit lg:sticky lg:top-6">
               <h3 className="font-semibold text-lg mb-4">Resumo do Pedido</h3>
-              <div className="space-y-3 text-sm">
+
+              {/* Coupon */}
+              <div className="mb-4">
+                <Label className="text-xs text-gray-500">Cupom de desconto</Label>
+                <div className="flex gap-2 mt-1">
+                  <Input
+                    placeholder="Ex: CRIATIVO10"
+                    value={coupon}
+                    onChange={e => setCoupon(e.target.value)}
+                    className="rounded-xl text-sm h-10"
+                  />
+                  <Button
+                    variant="outline"
+                    onClick={applyCoupon}
+                    className="rounded-xl h-10 px-4 shrink-0"
+                  >
+                    Aplicar
+                  </Button>
+                </div>
+                {couponError && <p className="text-xs text-red-500 mt-1">{couponError}</p>}
+                {couponApplied && (
+                  <p className="text-xs text-emerald-600 mt-1">
+                    ✓ {couponApplied.code} aplicado ({couponApplied.discount * 100}% off)
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2.5 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-500">Subtotal ({cartItems.length} {cartItems.length === 1 ? 'item' : 'itens'})</span>
                   <span className="font-medium">R$ {subtotal.toFixed(2)}</span>
                 </div>
+                {discountValue > 0 && (
+                  <div className="flex justify-between text-emerald-600">
+                    <span>Descontos</span>
+                    <span className="font-medium">- R$ {discountValue.toFixed(2)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between">
                   <span className="text-gray-500">Frete</span>
-                  <span className="font-medium">R$ {shipping.toFixed(2)}</span>
+                  <span className="font-medium">
+                    {shipping === 0 ? <span className="text-emerald-600">Grátis</span> : `R$ ${shipping.toFixed(2)}`}
+                  </span>
                 </div>
                 <div className="pt-3 border-t flex justify-between text-lg font-semibold">
                   <span>Total</span>
                   <span className="ceu-text-gradient">R$ {total.toFixed(2)}</span>
                 </div>
               </div>
-              <Button 
+
+              <Button
                 onClick={() => setShowCheckout(true)}
-                className="w-full mt-6 h-12 rounded-xl ceu-gradient text-white"
+                className="w-full mt-5 h-12 rounded-xl ceu-gradient text-white font-semibold"
               >
                 <CreditCard className="w-4 h-4 mr-2" />
                 Finalizar Compra
@@ -139,6 +230,22 @@ export default function Cart() {
                   Continuar Comprando
                 </Button>
               </Link>
+
+              {/* Trust signals */}
+              <div className="mt-5 pt-5 border-t space-y-2">
+                <div className="flex items-center gap-2 text-xs text-gray-500">
+                  <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                  Pagamento 100% seguro
+                </div>
+                <div className="flex items-center gap-2 text-xs text-gray-500">
+                  <Zap className="w-4 h-4 text-amber-500" />
+                  Aprovação imediata via Pix
+                </div>
+                <div className="flex items-center gap-2 text-xs text-gray-500">
+                  <Lock className="w-4 h-4 text-gray-400" />
+                  Compra protegida
+                </div>
+              </div>
             </div>
           </div>
         ) : (
@@ -166,89 +273,126 @@ export default function Cart() {
 
         {/* Checkout Dialog */}
         <Dialog open={showCheckout} onOpenChange={setShowCheckout}>
-          <DialogContent className="max-w-md">
+          <DialogContent className="max-w-lg max-h-[92vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Package className="w-5 h-5" />
                 Finalizar Compra
               </DialogTitle>
             </DialogHeader>
-            
-            <div className="space-y-4">
+
+            <div className="space-y-5">
+              {/* Order summary mini */}
+              <div className="bg-gray-50 rounded-xl p-4">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Resumo</p>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Subtotal</span>
+                    <span className="font-medium">R$ {subtotal.toFixed(2)}</span>
+                  </div>
+                  {discountValue > 0 && (
+                    <div className="flex justify-between text-emerald-600">
+                      <span>Descontos</span>
+                      <span className="font-medium">- R$ {discountValue.toFixed(2)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Frete</span>
+                    <span className="font-medium">
+                      {shipping === 0 ? <span className="text-emerald-600">Grátis</span> : `R$ ${shipping.toFixed(2)}`}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-base font-bold pt-2 border-t">
+                    <span>Total</span>
+                    <span className="ceu-text-gradient">R$ {total.toFixed(2)}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Shipping address */}
               <div>
-                <Label>CEP</Label>
-                <Input
-                  placeholder="00000-000"
-                  value={shippingAddress.zipcode}
-                  onChange={(e) => setShippingAddress({...shippingAddress, zipcode: e.target.value})}
-                  className="rounded-xl"
-                />
-              </div>
-              
-              <div className="grid grid-cols-3 gap-2">
-                <div className="col-span-2">
-                  <Label>Rua</Label>
-                  <Input
-                    placeholder="Nome da rua"
-                    value={shippingAddress.street}
-                    onChange={(e) => setShippingAddress({...shippingAddress, street: e.target.value})}
-                    className="rounded-xl"
-                  />
-                </div>
-                <div>
-                  <Label>Número</Label>
-                  <Input
-                    placeholder="123"
-                    value={shippingAddress.number}
-                    onChange={(e) => setShippingAddress({...shippingAddress, number: e.target.value})}
-                    className="rounded-xl"
-                  />
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Endereço de Entrega</p>
+                <div className="space-y-3">
+                  <div>
+                    <Label className="text-xs">CEP</Label>
+                    <Input
+                      placeholder="00000-000"
+                      value={shippingAddress.zipcode}
+                      onChange={(e) => setShippingAddress({ ...shippingAddress, zipcode: e.target.value })}
+                      className="rounded-xl"
+                    />
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="col-span-2">
+                      <Label className="text-xs">Rua</Label>
+                      <Input
+                        placeholder="Nome da rua"
+                        value={shippingAddress.street}
+                        onChange={(e) => setShippingAddress({ ...shippingAddress, street: e.target.value })}
+                        className="rounded-xl"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs">Número</Label>
+                      <Input
+                        placeholder="123"
+                        value={shippingAddress.number}
+                        onChange={(e) => setShippingAddress({ ...shippingAddress, number: e.target.value })}
+                        className="rounded-xl"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <Label className="text-xs">Cidade</Label>
+                      <Input
+                        placeholder="Cidade"
+                        value={shippingAddress.city}
+                        onChange={(e) => setShippingAddress({ ...shippingAddress, city: e.target.value })}
+                        className="rounded-xl"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs">Estado</Label>
+                      <Input
+                        placeholder="UF"
+                        value={shippingAddress.state}
+                        onChange={(e) => setShippingAddress({ ...shippingAddress, state: e.target.value })}
+                        className="rounded-xl"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <Label>Cidade</Label>
-                  <Input
-                    placeholder="Cidade"
-                    value={shippingAddress.city}
-                    onChange={(e) => setShippingAddress({...shippingAddress, city: e.target.value})}
-                    className="rounded-xl"
-                  />
-                </div>
-                <div>
-                  <Label>Estado</Label>
-                  <Input
-                    placeholder="UF"
-                    value={shippingAddress.state}
-                    onChange={(e) => setShippingAddress({...shippingAddress, state: e.target.value})}
-                    className="rounded-xl"
-                  />
-                </div>
-              </div>
-
-              <div className="bg-purple-50 rounded-xl p-4">
-                <div className="flex justify-between text-sm mb-2">
-                  <span className="text-gray-600">Subtotal</span>
-                  <span className="font-medium">R$ {subtotal.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-sm mb-2">
-                  <span className="text-gray-600">Frete</span>
-                  <span className="font-medium">R$ {shipping.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-lg font-bold pt-2 border-t">
-                  <span>Total</span>
-                  <span className="ceu-text-gradient">R$ {total.toFixed(2)}</span>
-                </div>
+              {/* Payment method */}
+              <div>
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Forma de Pagamento</p>
+                <PaymentMethodSelector value={paymentMethod} onChange={setPaymentMethod} />
               </div>
 
               <Button
                 onClick={handleCheckout}
-                disabled={isProcessing || !shippingAddress.zipcode || !shippingAddress.street}
-                className="w-full h-12 rounded-xl ceu-gradient text-white"
+                disabled={isProcessing || !isAddressValid}
+                className="w-full h-12 rounded-xl ceu-gradient text-white font-semibold"
               >
-                {isProcessing ? 'Processando...' : 'Confirmar Pagamento'}
+                {isProcessing ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
+                    Processando...
+                  </>
+                ) : (
+                  <>
+                    <Lock className="w-4 h-4 mr-2" />
+                    Pagar R$ {total.toFixed(2)}
+                  </>
+                )}
               </Button>
+
+              <p className="text-xs text-center text-gray-400 flex items-center justify-center gap-1.5">
+                <ShieldCheck className="w-3.5 h-3.5" />
+                Compra protegida • Dados criptografados
+              </p>
             </div>
           </DialogContent>
         </Dialog>
