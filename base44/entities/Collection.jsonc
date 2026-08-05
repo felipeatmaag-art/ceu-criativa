@@ -33,6 +33,23 @@
       "type": "boolean",
       "default": false,
       "description": "Cole\u00e7\u00e3o p\u00fablica"
+    },
+    "theme": {
+      "type": "string",
+      "enum": [
+        "verao",
+        "inverno",
+        "minimalista",
+        "natureza",
+        "urbano",
+        "vintage",
+        "geometrico",
+        "pop_art",
+        "surreal",
+        "personalizado"
+      ],
+      "default": "personalizado",
+      "description": "Tema do kit tem\u00e1tico"
     }
   },
   "required": [

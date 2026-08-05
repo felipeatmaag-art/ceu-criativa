@@ -7,16 +7,32 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Plus, FolderOpen, Pencil, Trash2, Globe, Lock, ImageIcon } from 'lucide-react';
+import { Plus, FolderOpen, Pencil, Trash2, Globe, Lock, ImageIcon, Sparkles, Eye, EyeOff } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
+
+const THEMES = [
+  { value: 'verao', label: 'Verão', emoji: '☀️' },
+  { value: 'inverno', label: 'Inverno', emoji: '❄️' },
+  { value: 'minimalista', label: 'Minimalista', emoji: '⚪' },
+  { value: 'natureza', label: 'Natureza', emoji: '🌿' },
+  { value: 'urbano', label: 'Urbano', emoji: '🏙️' },
+  { value: 'vintage', label: 'Vintage', emoji: '📼' },
+  { value: 'geometrico', label: 'Geométrico', emoji: '📐' },
+  { value: 'pop_art', label: 'Pop Art', emoji: '🎨' },
+  { value: 'surreal', label: 'Surreal', emoji: '🌀' },
+  { value: 'personalizado', label: 'Personalizado', emoji: '✨' },
+];
+
+const THEME_MAP = Object.fromEntries(THEMES.map(t => [t.value, t]));
 
 export default function CollectionsManager({ designs, user }) {
   const queryClient = useQueryClient();
   const [createOpen, setCreateOpen] = useState(false);
   const [editTarget, setEditTarget] = useState(null);
-  const [form, setForm] = useState({ title: '', description: '', is_public: false, design_ids: [] });
+  const [form, setForm] = useState({ title: '', description: '', is_public: false, theme: 'personalizado', design_ids: [] });
   const [loading, setLoading] = useState(false);
+  const [themeFilter, setThemeFilter] = useState('all');
 
   const { data: collections = [] } = useQuery({
     queryKey: ['artist-collections', user?.id],
@@ -25,7 +41,7 @@ export default function CollectionsManager({ designs, user }) {
   });
 
   const openCreate = () => {
-    setForm({ title: '', description: '', is_public: false, design_ids: [] });
+    setForm({ title: '', description: '', is_public: false, theme: 'personalizado', design_ids: [] });
     setCreateOpen(true);
     setEditTarget(null);
   };
@@ -35,10 +51,18 @@ export default function CollectionsManager({ designs, user }) {
       title: col.title,
       description: col.description || '',
       is_public: col.is_public || false,
+      theme: col.theme || 'personalizado',
       design_ids: col.design_ids || []
     });
     setEditTarget(col);
     setCreateOpen(true);
+  };
+
+  const toggleVisibility = async (col) => {
+    const newPublic = !col.is_public;
+    await base44.entities.Collection.update(col.id, { is_public: newPublic });
+    queryClient.invalidateQueries({ queryKey: ['artist-collections', user?.id] });
+    toast.success(newPublic ? 'Coleção agora é pública 🌐' : 'Coleção agora é privada 🔒');
   };
 
   const toggleDesign = (id) => {
@@ -84,6 +108,35 @@ export default function CollectionsManager({ designs, user }) {
         </Button>
       </div>
 
+      {collections.length > 0 && (
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 mb-4">
+          <button
+            onClick={() => setThemeFilter('all')}
+            className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+              themeFilter === 'all' ? 'bg-gray-900 text-white' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+            }`}
+          >
+            Todos os kits
+          </button>
+          {THEMES.map(t => {
+            const count = collections.filter(c => (c.theme || 'personalizado') === t.value).length;
+            if (count === 0) return null;
+            return (
+              <button
+                key={t.value}
+                onClick={() => setThemeFilter(t.value)}
+                className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all flex items-center gap-1 ${
+                  themeFilter === t.value ? 'bg-gray-900 text-white' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                <span>{t.emoji}</span> {t.label}
+                <span className={`text-[10px] rounded-full px-1.5 py-0 ${themeFilter === t.value ? 'bg-white/20' : 'bg-gray-100'}`}>{count}</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
       {collections.length === 0 ? (
         <div className="text-center py-16 bg-gray-50 rounded-2xl">
           <FolderOpen className="w-12 h-12 mx-auto mb-3 text-gray-300" />
@@ -95,7 +148,9 @@ export default function CollectionsManager({ designs, user }) {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {collections.map((col, i) => {
+          {collections
+            .filter(c => themeFilter === 'all' || (c.theme || 'personalizado') === themeFilter)
+            .map((col, i) => {
             const colDesigns = designs.filter(d => (col.design_ids || []).includes(d.id));
             return (
               <motion.div
@@ -126,15 +181,24 @@ export default function CollectionsManager({ designs, user }) {
                       <div className="min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                           <h4 className="font-semibold text-gray-900 truncate">{col.title}</h4>
-                          <Badge className={`text-xs rounded-full border-0 flex items-center gap-1 ${col.is_public ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600'}`}>
-                            {col.is_public ? <Globe className="w-3 h-3" /> : <Lock className="w-3 h-3" />}
-                            {col.is_public ? 'Pública' : 'Privada'}
-                          </Badge>
+                          {THEME_MAP[col.theme || 'personalizado'] && (
+                            <Badge className="text-xs rounded-full border-0 bg-purple-50 text-purple-700 flex items-center gap-1">
+                              <Sparkles className="w-3 h-3" />
+                              {THEME_MAP[col.theme || 'personalizado'].emoji} {THEME_MAP[col.theme || 'personalizado'].label}
+                            </Badge>
+                          )}
                         </div>
                         {col.description && <p className="text-xs text-gray-500 mt-1 truncate">{col.description}</p>}
                         <p className="text-xs text-gray-400 mt-1">{colDesigns.length} design(s)</p>
                       </div>
                       <div className="flex gap-1 shrink-0">
+                        <button
+                          onClick={() => toggleVisibility(col)}
+                          title={col.is_public ? 'Tornar privada' : 'Tornar pública'}
+                          className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${col.is_public ? 'hover:bg-emerald-50 text-emerald-600' : 'hover:bg-gray-100 text-gray-400'}`}
+                        >
+                          {col.is_public ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                        </button>
                         <button onClick={() => openEdit(col)} className="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors">
                           <Pencil className="w-3.5 h-3.5 text-gray-500" />
                         </button>
@@ -142,6 +206,12 @@ export default function CollectionsManager({ designs, user }) {
                           <Trash2 className="w-3.5 h-3.5 text-red-500" />
                         </button>
                       </div>
+                    </div>
+                    <div className="mt-2 pt-2 border-t border-gray-50 flex items-center gap-1.5">
+                      <span className={`text-xs flex items-center gap-1 ${col.is_public ? 'text-emerald-600' : 'text-gray-400'}`}>
+                        {col.is_public ? <Globe className="w-3 h-3" /> : <Lock className="w-3 h-3" />}
+                        {col.is_public ? 'Pública' : 'Privada'}
+                      </span>
                     </div>
                   </CardContent>
                 </Card>
@@ -188,6 +258,26 @@ export default function CollectionsManager({ designs, user }) {
               >
                 <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all ${form.is_public ? 'left-7' : 'left-1'}`} />
               </button>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-gray-700 block mb-2">Tema do kit</label>
+              <div className="flex flex-wrap gap-2">
+                {THEMES.map(t => (
+                  <button
+                    key={t.value}
+                    type="button"
+                    onClick={() => setForm(f => ({ ...f, theme: t.value }))}
+                    className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all flex items-center gap-1 ${
+                      (form.theme || 'personalizado') === t.value
+                        ? 'bg-gray-900 text-white'
+                        : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+                    }`}
+                  >
+                    <span>{t.emoji}</span> {t.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div>
