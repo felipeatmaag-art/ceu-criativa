@@ -26,6 +26,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { motion, AnimatePresence } from 'framer-motion';
+import BrandLogo from '@/components/BrandLogo';
 
 export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
@@ -225,16 +226,11 @@ export default function Layout({ children, currentPageName }) {
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
             {/* Logo */}
-            <Link to={createPageUrl('Home')} className="flex items-center gap-2 group">
+            <Link to={createPageUrl('Home')} className="flex items-center group relative">
               <div className="relative">
-                <div className="w-10 h-10 rounded-2xl ceu-gradient flex items-center justify-center group-hover:shadow-lg group-hover:shadow-emerald-500/50 transition-all duration-300">
-                  <span className="text-white font-bold text-xl">C</span>
-                </div>
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full animate-pulse shadow-lg shadow-emerald-400/50" />
+                <BrandLogo size="md" />
+                <div className="absolute -top-1 -right-2 w-3 h-3 bg-emerald-400 rounded-full animate-pulse shadow-lg shadow-emerald-400/50" />
               </div>
-              <span className="text-2xl font-bold tracking-tight">
-                <span className="text-white group-hover:text-emerald-400 transition-colors duration-300">Céu</span>
-              </span>
             </Link>
 
             {/* Desktop Navigation */}
@@ -409,11 +405,8 @@ export default function Layout({ children, currentPageName }) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
             <div className="col-span-1 md:col-span-2">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-10 h-10 rounded-2xl ceu-gradient flex items-center justify-center">
-                  <span className="text-white font-bold text-xl">C</span>
-                </div>
-                <span className="text-2xl font-bold">Céu</span>
+              <div className="mb-4">
+                <BrandLogo size="lg" />
               </div>
               <p className="text-gray-400 max-w-sm">
                 Democratizando a criatividade e dando voz aos artistas. 
