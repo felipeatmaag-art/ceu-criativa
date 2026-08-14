@@ -7,6 +7,7 @@ import BentoShowcase from '@/components/home/BentoShowcase';
 import FeaturedDesigns from '@/components/home/FeaturedDesigns';
 import CommissionHighlight from '@/components/home/CommissionHighlight';
 import HowItWorks from '@/components/home/HowItWorks';
+import HumanScenes from '@/components/home/HumanScenes';
 import CompetitionBanner from '@/components/home/CompetitionBanner';
 import ReferralProgram from '@/components/home/ReferralProgram';
 import Testimonials from '@/components/home/Testimonials';
@@ -72,6 +73,8 @@ export default function Home() {
       <ArtistSpotlight />
       
       <HowItWorks />
+      
+      <HumanScenes />
       
       {activeCompetition && <CompetitionBanner competition={activeCompetition} />}
       
