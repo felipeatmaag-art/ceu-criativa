@@ -7,6 +7,7 @@ import BentoShowcase from '@/components/home/BentoShowcase';
 import FeaturedDesigns from '@/components/home/FeaturedDesigns';
 import CommissionHighlight from '@/components/home/CommissionHighlight';
 import HowItWorks from '@/components/home/HowItWorks';
+import CreationStudio from '@/components/home/CreationStudio';
 import HumanScenes from '@/components/home/HumanScenes';
 import KioskExperience from '@/components/home/KioskExperience';
 import CompetitionBanner from '@/components/home/CompetitionBanner';
@@ -74,7 +75,9 @@ export default function Home() {
       <ArtistSpotlight />
       
       <HowItWorks />
-      
+
+      <CreationStudio />
+
       <HumanScenes />
 
       <KioskExperience />
