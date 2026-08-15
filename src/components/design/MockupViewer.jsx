@@ -9,9 +9,13 @@ import TravelMugMockup from '@/components/create/TravelMugMockup';
 import MousepadMockup from '@/components/create/MousepadMockup';
 import TshirtInUseMockup from '@/components/create/TshirtInUseMockup';
 import MugInHandMockup from '@/components/create/MugInHandMockup';
+import MockupViewer3D from '@/components/design/MockupViewer3D';
 
 export default function MockupViewer({ designImage, selectedProduct, selectedColor }) {
   const [viewAngle, setViewAngle] = useState('front');
+  const [view3D, setView3D] = useState(false);
+
+  const supports3D = ['camiseta', 'moletom', 'caneca', 'caneca_termica'].includes(selectedProduct);
 
   const mockupComponents = {
     camiseta: TshirtMockup,
@@ -62,28 +66,61 @@ export default function MockupViewer({ designImage, selectedProduct, selectedCol
 
   return (
     <div className="space-y-4">
-      {/* Angle Selector */}
+      {/* View Mode Toggle */}
       <div className="flex gap-2">
-        {angles.map((angle) => (
+        {supports3D && (
           <Button
-            key={angle.value}
-            variant={viewAngle === angle.value ? 'default' : 'outline'}
+            variant={view3D ? 'default' : 'outline'}
             size="sm"
-            onClick={() => setViewAngle(angle.value)}
-            className={`rounded-xl ${
-              viewAngle === angle.value 
-                ? 'ceu-gradient text-white' 
-                : ''
-            }`}
+            onClick={() => setView3D(true)}
+            className={`rounded-xl ${view3D ? 'ceu-gradient text-white' : ''}`}
           >
-            {angle.label}
+            3D Interativo
           </Button>
-        ))}
+        )}
+        {!view3D && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setView3D(false)}
+            className="rounded-xl"
+          >
+            2D
+          </Button>
+        )}
       </div>
+
+      {/* Angle Selector (2D only) */}
+      {!view3D && (
+        <div className="flex gap-2">
+          {angles.map((angle) => (
+            <Button
+              key={angle.value}
+              variant={viewAngle === angle.value ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setViewAngle(angle.value)}
+              className={`rounded-xl ${
+                viewAngle === angle.value 
+                  ? 'ceu-gradient text-white' 
+                  : ''
+              }`}
+            >
+              {angle.label}
+            </Button>
+          ))}
+        </div>
+      )}
 
       {/* Mockup Display */}
       <div className="relative aspect-square rounded-3xl overflow-hidden bg-gradient-to-br from-slate-100 to-stone-100">
-        <AnimatePresence mode="wait">
+        {view3D && supports3D ? (
+          <MockupViewer3D
+            productType={selectedProduct}
+            designImage={designImage}
+            productColor={selectedColor}
+          />
+        ) : (
+          <AnimatePresence mode="wait">
           <motion.div
             key={`${selectedProduct}-${viewAngle}`}
             initial={{ opacity: 0, scale: 0.95 }}
@@ -130,6 +167,7 @@ export default function MockupViewer({ designImage, selectedProduct, selectedCol
             )}
           </motion.div>
         </AnimatePresence>
+        )}
       </div>
     </div>
   );
