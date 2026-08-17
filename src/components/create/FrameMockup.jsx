@@ -36,6 +36,16 @@ export default function FrameMockup({ designImage }) {
           <clipPath id="frame-image-clip">
             <rect x="60" y="60" width="220" height="220" rx="2" />
           </clipPath>
+          <filter id="frame-inner-shadow" x="-10%" y="-10%" width="120%" height="120%">
+            <feGaussianBlur in="SourceAlpha" stdDeviation="3" />
+            <feOffset dx="0" dy="2" result="offsetblur" />
+            <feFlood floodColor="rgba(0,0,0,0.25)" />
+            <feComposite in2="offsetblur" operator="in" />
+            <feMerge>
+              <feMergeNode />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
         </defs>
 
         {/* Moldura externa */}
@@ -58,6 +68,9 @@ export default function FrameMockup({ designImage }) {
             clipPath="url(#frame-image-clip)"
           />
         )}
+
+        {/* Sombra interna da moldura */}
+        <rect x="50" y="50" width="240" height="240" fill="none" stroke="rgba(0,0,0,0.15)" strokeWidth="3" filter="url(#frame-inner-shadow)" />
 
         {/* Vidro / reflexo */}
         <rect x="60" y="60" width="220" height="220" fill="url(#frame-glass)" />

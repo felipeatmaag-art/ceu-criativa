@@ -36,8 +36,14 @@ export default function MugMockup({ designImage }) {
             <stop offset="100%" stopColor="#f5f5f5" />
           </linearGradient>
           <clipPath id="mug-design-clip">
-            <rect x="70" y="110" width="150" height="130" rx="4" />
+            <rect x="85" y="125" width="120" height="110" rx="3" />
           </clipPath>
+          <linearGradient id="mug-curve-fade" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="rgba(255,255,255,0.85)" />
+            <stop offset="15%" stopColor="rgba(255,255,255,0)" />
+            <stop offset="85%" stopColor="rgba(255,255,255,0)" />
+            <stop offset="100%" stopColor="rgba(255,255,255,0.85)" />
+          </linearGradient>
         </defs>
 
         {/* Alça */}
@@ -82,15 +88,21 @@ export default function MugMockup({ designImage }) {
 
         {/* Design aplicado */}
         {designImage && (
-          <image
-            href={designImage}
-            x="70"
-            y="110"
-            width="150"
-            height="130"
-            preserveAspectRatio="xMidYMid meet"
-            clipPath="url(#mug-design-clip)"
-          />
+          <>
+            <image
+              href={designImage}
+              x="85"
+              y="125"
+              width="120"
+              height="110"
+              preserveAspectRatio="xMidYMid meet"
+              clipPath="url(#mug-design-clip)"
+            />
+            {/* Fade nas bordas para simular curvatura cilíndrica */}
+            <rect x="85" y="125" width="120" height="110" fill="url(#mug-curve-fade)" clipPath="url(#mug-design-clip)" />
+            {/* Reflexo vertical sobre o design */}
+            <path d="M 100 130 L 100 230" stroke="rgba(255,255,255,0.25)" strokeWidth="3" strokeLinecap="round" fill="none" clipPath="url(#mug-design-clip)" />
+          </>
         )}
       </svg>
 

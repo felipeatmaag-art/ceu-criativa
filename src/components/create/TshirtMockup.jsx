@@ -97,6 +97,11 @@ export default function TshirtMockup({ designImage, color = 'white' }) {
         {/* Highlight de luz */}
         <path d="M 155 105 C 168 135, 175 175, 170 250 L 160 250 C 156 175, 148 135, 140 105 Z" fill="rgba(255,255,255,0.10)" />
 
+        {/* Sombra suave da estampa no tecido */}
+        {designImage && (
+          <rect x="145" y="170" width="110" height="140" rx="6" fill="rgba(0,0,0,0.03)" />
+        )}
+
         {/* Design aplicado (dentro do SVG) */}
         {designImage && (
           <image
@@ -107,8 +112,13 @@ export default function TshirtMockup({ designImage, color = 'white' }) {
             height="140"
             preserveAspectRatio="xMidYMid meet"
             clipPath="url(#design-clip)"
-            style={{ filter: color === 'black' || color === 'navy' ? 'brightness(1.08)' : 'none' }}
+            style={{ filter: color === 'black' || color === 'navy' ? 'brightness(1.08) contrast(1.05)' : 'none' }}
           />
+        )}
+
+        {/* Textura sutil do tecido sobre a estampa */}
+        {designImage && (
+          <rect x="145" y="170" width="110" height="140" rx="6" fill="rgba(255,255,255,0.04)" clipPath="url(#design-clip)" />
         )}
       </svg>
 
