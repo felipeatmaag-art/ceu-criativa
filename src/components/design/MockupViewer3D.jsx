@@ -29,7 +29,7 @@ function createCylinderConformingPlane(width, height, radius, segments = 48) {
     const x = pos.getX(i);
     const angle = x / radius;
     pos.setX(i, Math.sin(angle) * radius);
-    pos.setZ(i, (Math.cos(angle) - 1) * radius);
+    pos.setZ(i, Math.cos(angle) * radius);
   }
   geo.computeVertexNormals();
   return geo;
@@ -144,17 +144,29 @@ export default function MockupViewer3D({ productType, designImage, productColor 
       if (designImage) {
         new THREE.TextureLoader().load(designImage, (tex) => {
           tex.colorSpace = THREE.SRGBColorSpace;
-          // Largura cobre ~38% da circunferência (área de impressão realista)
-          const printWidth = radius * 2 * Math.PI * 0.38;
-          // Altura proporcional à altura da caneca com margens
-          const printHeight = height * 0.62;
-          const designGeo = createCylinderConformingPlane(printWidth, printHeight, radius + 0.012, 64);
+          // Preservar aspect ratio da imagem para evitar distorção
+          const img = tex.image;
+          const imgAspect = (img?.width || 1) / (img?.height || 1);
+          // Área máxima de impressão: 38% da circunferência × 62% da altura
+          const maxW = radius * 2 * Math.PI * 0.38;
+          const maxH = height * 0.62;
+          let printW, printH;
+          if (imgAspect >= 1) {
+            printW = maxW;
+            printH = maxW / imgAspect;
+            if (printH > maxH) { printH = maxH; printW = maxH * imgAspect; }
+          } else {
+            printH = maxH;
+            printW = maxH * imgAspect;
+            if (printW > maxW) { printW = maxW; printH = maxW / imgAspect; }
+          }
+          const designGeo = createCylinderConformingPlane(printW, printH, radius + 0.012, 64);
           const designMesh = new THREE.Mesh(designGeo, new THREE.MeshStandardMaterial({
             map: tex, transparent: true, roughness: 0.4, metalness: 0.05,
             polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1,
           }));
-          // Centralizado verticalmente, levemente acima do meio
-          designMesh.position.y = height * 0.05;
+          // Centralizado verticalmente no corpo da caneca
+          designMesh.position.y = 0;
           group.add(designMesh);
         }, undefined, () => {});
       }
@@ -178,12 +190,26 @@ export default function MockupViewer3D({ productType, designImage, productColor 
       if (designImage) {
         new THREE.TextureLoader().load(designImage, (tex) => {
           tex.colorSpace = THREE.SRGBColorSpace;
-          // Tamanho realista de estampa de peito (~35% da largura da camiseta)
-          const printSize = 1.05;
-          const designGeo = new THREE.PlaneGeometry(printSize, printSize, 48, 48);
+          // Preservar aspect ratio da imagem para evitar distorção
+          const img = tex.image;
+          const imgAspect = (img?.width || 1) / (img?.height || 1);
+          // Área máxima de impressão no peito
+          const maxW = 1.15;
+          const maxH = 1.15;
+          let printW, printH;
+          if (imgAspect >= 1) {
+            printW = maxW;
+            printH = maxW / imgAspect;
+            if (printH > maxH) { printH = maxH; printW = maxH * imgAspect; }
+          } else {
+            printH = maxH;
+            printW = maxH * imgAspect;
+            if (printW > maxW) { printW = maxW; printH = maxW / imgAspect; }
+          }
+          const designGeo = new THREE.PlaneGeometry(printW, printH, 48, 48);
           const dpos = designGeo.attributes.position;
-          // Offset base = frente da malha extrudada (0.08) + pequena folga anti-z-fighting
-          const baseZ = 0.095;
+          // Offset base = frente da malha extrudada (0.06) + folga mínima anti-z-fighting
+          const baseZ = 0.068;
           for (let i = 0; i < dpos.count; i++) {
             const x = dpos.getX(i);
             // Mesma curvatura do tecido para a estampa acompanhar a superfície
@@ -194,7 +220,7 @@ export default function MockupViewer3D({ productType, designImage, productColor 
             map: tex, transparent: true, roughness: 0.7,
             polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1,
           }));
-          // Posicionado na região do peito, levemente acima do centro
+          // Centralizado na região do peito
           designMesh.position.set(0, 0.15, 0);
           group.add(designMesh);
         }, undefined, () => {});
