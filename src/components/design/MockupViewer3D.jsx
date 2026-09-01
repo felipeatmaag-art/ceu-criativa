@@ -144,10 +144,18 @@ export default function MockupViewer3D({ productType, designImage, productColor 
       if (designImage) {
         new THREE.TextureLoader().load(designImage, (tex) => {
           tex.colorSpace = THREE.SRGBColorSpace;
-          const designGeo = createCylinderConformingPlane(radius * 2.2, radius * 1.9, radius + 0.015, 48);
-          group.add(new THREE.Mesh(designGeo, new THREE.MeshStandardMaterial({
+          // Largura cobre ~38% da circunferência (área de impressão realista)
+          const printWidth = radius * 2 * Math.PI * 0.38;
+          // Altura proporcional à altura da caneca com margens
+          const printHeight = height * 0.62;
+          const designGeo = createCylinderConformingPlane(printWidth, printHeight, radius + 0.012, 64);
+          const designMesh = new THREE.Mesh(designGeo, new THREE.MeshStandardMaterial({
             map: tex, transparent: true, roughness: 0.4, metalness: 0.05,
-          })));
+            polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1,
+          }));
+          // Centralizado verticalmente, levemente acima do meio
+          designMesh.position.y = height * 0.05;
+          group.add(designMesh);
         }, undefined, () => {});
       }
     } else {
@@ -166,21 +174,28 @@ export default function MockupViewer3D({ productType, designImage, productColor 
       shirtGeo.computeVertexNormals();
       group.add(new THREE.Mesh(shirtGeo, bodyMat));
 
-      // Design (plano curvo no peito)
+      // Design (plano curvo no peito — acompanha a curvatura do tecido)
       if (designImage) {
         new THREE.TextureLoader().load(designImage, (tex) => {
           tex.colorSpace = THREE.SRGBColorSpace;
-          const designGeo = new THREE.PlaneGeometry(1.6, 1.6, 32, 32);
+          // Tamanho realista de estampa de peito (~35% da largura da camiseta)
+          const printSize = 1.05;
+          const designGeo = new THREE.PlaneGeometry(printSize, printSize, 48, 48);
           const dpos = designGeo.attributes.position;
+          // Offset base = frente da malha extrudada (0.08) + pequena folga anti-z-fighting
+          const baseZ = 0.095;
           for (let i = 0; i < dpos.count; i++) {
             const x = dpos.getX(i);
-            dpos.setZ(i, -Math.pow(x / 1.5, 2) * 0.18 + 0.15);
+            // Mesma curvatura do tecido para a estampa acompanhar a superfície
+            dpos.setZ(i, baseZ - Math.pow(x / 1.5, 2) * 0.18);
           }
           designGeo.computeVertexNormals();
           const designMesh = new THREE.Mesh(designGeo, new THREE.MeshStandardMaterial({
             map: tex, transparent: true, roughness: 0.7,
+            polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1,
           }));
-          designMesh.position.set(0, 0.25, 0);
+          // Posicionado na região do peito, levemente acima do centro
+          designMesh.position.set(0, 0.15, 0);
           group.add(designMesh);
         }, undefined, () => {});
       }
