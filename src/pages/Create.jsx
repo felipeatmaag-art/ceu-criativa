@@ -464,7 +464,7 @@ export default function Create() {
                     </TabsTrigger>
                   </TabsList>
 
-                  <TabsContent value="ai" className="mt-6">
+                  <TabsContent value="ai" className="mt-6" forceMount>
                     <div className="space-y-5">
                       <div>
                         <Label className="text-base font-semibold mb-3 block">
@@ -557,7 +557,7 @@ export default function Create() {
                     </div>
                   </TabsContent>
 
-                  <TabsContent value="upload" className="mt-6">
+                  <TabsContent value="upload" className="mt-6" forceMount>
                     <div className="space-y-5">
                       <div
                       className={`relative border-2 border-dashed rounded-3xl p-10 text-center transition-all ${
@@ -597,23 +597,35 @@ export default function Create() {
                     }
                       </div>
 
-                      {selectedImage && mode === 'upload' &&
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="text-center">
 
-                        <p className="text-sm text-green-600 font-medium mb-2 flex items-center justify-center gap-1">
-                          <Check className="w-4 h-4" /> Arte anexada com sucesso
-                        </p>
-                        <Button variant="ghost" size="sm" onClick={() => setSelectedImage(null)}>
-                          Trocar imagem
-                        </Button>
-                      </motion.div>
-                  }
                     </div>
                   </TabsContent>
                 </Tabs>
+
+                {/* Persisted selected image indicator — shared across both tabs */}
+                {selectedImage &&
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-4 flex items-center gap-3 p-3 rounded-2xl bg-emerald-50 border border-emerald-200">
+                  <img src={selectedImage} alt="Arte selecionada" className="w-14 h-14 rounded-xl object-cover" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-emerald-700 flex items-center gap-1">
+                      <Check className="w-4 h-4" /> Arte selecionada
+                    </p>
+                    <p className="text-xs text-emerald-600 truncate">
+                      {mode === 'ai' ? 'Gerada com IA' : 'Enviada por upload'}
+                    </p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setSelectedImage(null)}
+                    className="text-gray-500 hover:text-red-500 h-8">
+                    Remover
+                  </Button>
+                </motion.div>
+                }
 
                 {/* Continue */}
                 {selectedImage &&
