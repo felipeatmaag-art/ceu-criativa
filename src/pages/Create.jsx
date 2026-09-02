@@ -31,6 +31,7 @@ import ProductOptionButton from '@/components/create/ProductOptionButton';
 import TshirtMockup from '@/components/create/TshirtMockup';
 import MugMockup from '@/components/create/MugMockup';
 import FrameMockup from '@/components/create/FrameMockup';
+import InteractiveMockupViewer from '@/components/create/InteractiveMockupViewer';
 
 const PRODUCTS = [
   { value: 'camiseta', label: 'Camiseta', icon: '👕' },
@@ -64,6 +65,7 @@ export default function Create() {
   const [selectedProduct, setSelectedProduct] = useState('camiseta');
   const [productColor, setProductColor] = useState('white');
   const [cart, setCart] = useState([]);
+  const [designTransform, setDesignTransform] = useState({ x: 0, y: 0, scale: 1, rotation: 0 });
 
   const categories = [
   { value: 'abstrato', label: 'Abstrato' },
@@ -429,14 +431,21 @@ export default function Create() {
                 <div className="relative aspect-square rounded-3xl overflow-hidden bg-[#F5F5F7] shadow-sm">
                   <AnimatePresence mode="wait">
                     <motion.div
-                      key={selectedProduct + productColor + (selectedImage || 'empty')}
+                      key={selectedProduct + productColor}
                       initial={{ opacity: 0, scale: 0.98 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.98 }}
                       transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
                       className="w-full h-full"
                     >
-                      {renderMockup(selectedImage)}
+                      <InteractiveMockupViewer
+                        productType={selectedProduct}
+                        designImage={selectedImage}
+                        color={productColor}
+                        renderMockup={() => renderMockup(null)}
+                        transform={designTransform}
+                        onTransformChange={setDesignTransform}
+                      />
                     </motion.div>
                   </AnimatePresence>
                   {!selectedImage && (
@@ -712,7 +721,7 @@ export default function Create() {
                 }
 
                   {/* Mockup Display */}
-                  <div className="relative aspect-square rounded-3xl overflow-hidden bg-[#F5F5F7] shadow-sm group">
+                  <div className="relative aspect-square rounded-3xl overflow-hidden bg-[#F5F5F7] shadow-sm">
                     <AnimatePresence mode="wait">
                       <motion.div
                         key={selectedProduct + productColor}
@@ -720,9 +729,16 @@ export default function Create() {
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.98 }}
                         transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                        className="w-full h-full group-hover:scale-105 transition-transform duration-500"
+                        className="w-full h-full"
                       >
-                        {renderMockup(selectedImage)}
+                        <InteractiveMockupViewer
+                          productType={selectedProduct}
+                          designImage={selectedImage}
+                          color={productColor}
+                          renderMockup={() => renderMockup(null)}
+                          transform={designTransform}
+                          onTransformChange={setDesignTransform}
+                        />
                       </motion.div>
                     </AnimatePresence>
                   </div>
