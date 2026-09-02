@@ -51,8 +51,9 @@ export default function MockupViewer3D({ productType, designImage, productColor 
     white: '#f0f0f0', black: '#1a1a1a', navy: '#1e3a8a', gray: '#6b7280',
   }[productColor] || '#f0f0f0';
 
-  const isMug = productType === 'caneca' || productType === 'caneca_termica';
-  const isThermal = productType === 'caneca_termica';
+  const isMug = productType === 'caneca';
+  const isFrame = productType === 'quadro';
+  const isShirt = productType === 'camiseta' || productType === 'baby_look';
 
   useEffect(() => {
     const mount = mountRef.current;
@@ -64,7 +65,7 @@ export default function MockupViewer3D({ productType, designImage, productColor 
 
     // --- Camera ---
     const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
-    camera.position.set(0, isMug ? 1.5 : 0.3, isThermal ? 8.5 : 7.5);
+    camera.position.set(0, isMug ? 1.5 : 0.3, isFrame ? 6 : 7.5);
     camera.lookAt(0, 0, 0);
 
     // --- Renderer ---
@@ -102,8 +103,8 @@ export default function MockupViewer3D({ productType, designImage, productColor 
     });
 
     if (isMug) {
-      const radius = isThermal ? 0.85 : 1.0;
-      const height = isThermal ? 3.0 : 2.4;
+      const radius = 1.0;
+      const height = 2.4;
 
       // Corpo
       const bodyGeo = new THREE.CylinderGeometry(radius, radius, height, 80, 1, true);
@@ -170,8 +171,64 @@ export default function MockupViewer3D({ productType, designImage, productColor 
           group.add(designMesh);
         }, undefined, () => {});
       }
+    } else if (isFrame) {
+      // Quadro — caixa rasa com moldura e design na face frontal
+      const frameW = 2.4, frameH = 3.0, frameDepth = 0.15;
+      const borderW = 0.18;
+
+      // Corpo do quadro (moldura de madeira)
+      const frameMat = new THREE.MeshStandardMaterial({ color: '#3a2a1a', roughness: 0.7, metalness: 0.05 });
+      const frameGeo = new THREE.BoxGeometry(frameW, frameH, frameDepth);
+      const frameMesh = new THREE.Mesh(frameGeo, frameMat);
+      group.add(frameMesh);
+
+      // Face interna (área da imagem) — fundo branco
+      const innerW = frameW - borderW * 2;
+      const innerH = frameH - borderW * 2;
+      const innerGeo = new THREE.PlaneGeometry(innerW, innerH);
+      const innerMesh = new THREE.Mesh(innerGeo, new THREE.MeshStandardMaterial({
+        color: '#f5f5f0', roughness: 0.9,
+      }));
+      innerMesh.position.z = frameDepth / 2 + 0.001;
+      group.add(innerMesh);
+
+      // Design na face frontal do quadro
+      if (designImage) {
+        new THREE.TextureLoader().load(designImage, (tex) => {
+          tex.colorSpace = THREE.SRGBColorSpace;
+          const img = tex.image;
+          const imgAspect = (img?.width || 1) / (img?.height || 1);
+          const maxW = innerW * 0.92;
+          const maxH = innerH * 0.92;
+          let printW, printH;
+          if (imgAspect >= 1) {
+            printW = maxW;
+            printH = maxW / imgAspect;
+            if (printH > maxH) { printH = maxH; printW = maxH * imgAspect; }
+          } else {
+            printH = maxH;
+            printW = maxH * imgAspect;
+            if (printW > maxW) { printW = maxW; printH = maxW / imgAspect; }
+          }
+          const designGeo = new THREE.PlaneGeometry(printW, printH);
+          const designMesh = new THREE.Mesh(designGeo, new THREE.MeshStandardMaterial({
+            map: tex, transparent: true, roughness: 0.6,
+            polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1,
+          }));
+          designMesh.position.z = frameDepth / 2 + 0.003;
+          group.add(designMesh);
+        }, undefined, () => {});
+      }
+
+      // Vidro (leve reflexo)
+      const glassGeo = new THREE.PlaneGeometry(frameW - borderW * 0.5, frameH - borderW * 0.5);
+      const glassMesh = new THREE.Mesh(glassGeo, new THREE.MeshStandardMaterial({
+        color: '#ffffff', transparent: true, opacity: 0.06, roughness: 0.05, metalness: 0.3,
+      }));
+      glassMesh.position.z = frameDepth / 2 + 0.005;
+      group.add(glassMesh);
     } else {
-      // Camiseta / Moletom
+      // Camiseta / Baby Look
       const shirtGeo = new THREE.ExtrudeGeometry(createShirtShape(), {
         depth: 0.12, bevelEnabled: true, bevelSegments: 2, bevelSize: 0.03, bevelThickness: 0.02,
       });
@@ -241,7 +298,7 @@ export default function MockupViewer3D({ productType, designImage, productColor 
       new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(sCanvas), transparent: true, depthWrite: false })
     );
     shadow.rotation.x = -Math.PI / 2;
-    shadow.position.y = isMug ? -1.4 : -2.0;
+    shadow.position.y = isMug ? -1.4 : isFrame ? -1.8 : -2.0;
     scene.add(shadow);
 
     // --- Resize ---
@@ -320,7 +377,7 @@ export default function MockupViewer3D({ productType, designImage, productColor 
       renderer.dispose();
       if (canvasEl.parentNode) canvasEl.parentNode.removeChild(canvasEl);
     };
-  }, [productType, designImage, colorHex, isMug, isThermal]);
+  }, [productType, designImage, colorHex, isMug, isFrame, isShirt]);
 
   return (
     <div className="relative w-full h-full">

@@ -2,8 +2,9 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Upload, GalleryHorizontalEnd, Save, History, Trash2,
-  FlipHorizontal2, Check, X,
+  FlipHorizontal2, Check, X, Box, Image as ImageIcon, MoveHorizontal,
 } from 'lucide-react';
+import MockupViewer3D from '@/components/design/MockupViewer3D';
 
 /**
  * Editor de mockup inspirado no Marketgen 2026.
@@ -72,6 +73,7 @@ export default function InteractiveMockupViewer({
   onTransformChange,
 }) {
   const [side, setSide] = useState('front');
+  const [viewMode, setViewMode] = useState('2d'); // '2d' | '3d'
   const [baseImage, setBaseImage] = useState(null);
   const [isUploadingBase, setIsUploadingBase] = useState(false);
   const [presets, setPresets] = useState({});
@@ -148,36 +150,80 @@ export default function InteractiveMockupViewer({
 
   return (
     <div className="w-full h-full bg-[#0f0f0f] rounded-2xl overflow-hidden flex flex-col">
-      {/* Toggle FRENTE / COSTAS */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-800/60">
+      {/* Toggle 2D/3D + FRENTE/COSTAS */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-800/60 gap-2 flex-wrap">
+        {/* Modo de visualização 2D/3D */}
         <div className="flex gap-1 bg-neutral-900 rounded-full p-1">
           <button
-            onClick={() => setSide('front')}
-            className={`px-4 py-1.5 rounded-full text-xs font-bold tracking-wider uppercase transition-all ${
-              side === 'front' ? 'bg-[#ff6600] text-white' : 'text-gray-500 hover:text-gray-300'
+            onClick={() => setViewMode('2d')}
+            className={`px-3 py-1.5 rounded-full text-xs font-bold tracking-wider uppercase transition-all flex items-center gap-1 ${
+              viewMode === '2d' ? 'bg-[#ff6600] text-white' : 'text-gray-500 hover:text-gray-300'
             }`}
           >
-            Frente
+            <ImageIcon className="w-3 h-3" />
+            2D
           </button>
           <button
-            onClick={() => setSide('back')}
-            className={`px-4 py-1.5 rounded-full text-xs font-bold tracking-wider uppercase transition-all flex items-center gap-1 ${
-              side === 'back' ? 'bg-[#ff6600] text-white' : 'text-gray-500 hover:text-gray-300'
+            onClick={() => setViewMode('3d')}
+            className={`px-3 py-1.5 rounded-full text-xs font-bold tracking-wider uppercase transition-all flex items-center gap-1 ${
+              viewMode === '3d' ? 'bg-[#ff6600] text-white' : 'text-gray-500 hover:text-gray-300'
             }`}
           >
-            <FlipHorizontal2 className="w-3 h-3" />
-            Costas
+            <Box className="w-3 h-3" />
+            3D
           </button>
         </div>
-        <div className="flex items-center gap-1.5 text-[10px] text-gray-600 uppercase tracking-wider">
-          <GalleryHorizontalEnd className="w-3.5 h-3.5" />
-          {baseImage ? 'Peça carregada' : 'Sem peça base'}
+
+        {/* Frente/Costas (só em 2D) */}
+        {viewMode === '2d' && (
+          <div className="flex gap-1 bg-neutral-900 rounded-full p-1">
+            <button
+              onClick={() => setSide('front')}
+              className={`px-3 py-1.5 rounded-full text-xs font-bold tracking-wider uppercase transition-all ${
+                side === 'front' ? 'bg-[#ff6600] text-white' : 'text-gray-500 hover:text-gray-300'
+              }`}
+            >
+              Frente
+            </button>
+            <button
+              onClick={() => setSide('back')}
+              className={`px-3 py-1.5 rounded-full text-xs font-bold tracking-wider uppercase transition-all flex items-center gap-1 ${
+                side === 'back' ? 'bg-[#ff6600] text-white' : 'text-gray-500 hover:text-gray-300'
+              }`}
+            >
+              <FlipHorizontal2 className="w-3 h-3" />
+              Costas
+            </button>
+          </div>
+        )}
+
+        <div className="flex items-center gap-1.5 text-[10px] text-gray-600 uppercase tracking-wider ml-auto">
+          {viewMode === '3d' ? (
+            <>
+              <MoveHorizontal className="w-3.5 h-3.5" />
+              Arraste p/ girar
+            </>
+          ) : (
+            <>
+              <GalleryHorizontalEnd className="w-3.5 h-3.5" />
+              {baseImage ? 'Peça carregada' : 'Sem peça base'}
+            </>
+          )}
         </div>
       </div>
 
       {/* Área de preview */}
       <div className="flex-1 relative min-h-[280px] flex items-center justify-center p-4">
-        {baseImage ? (
+        {/* Modo 3D — rotação 360° por arraste */}
+        {viewMode === '3d' && designImage ? (
+          <div className="absolute inset-0">
+            <MockupViewer3D
+              productType={productType}
+              designImage={designImage}
+              productColor={color}
+            />
+          </div>
+        ) : baseImage ? (
           <>
             {/* Foto base do produto */}
             <img
@@ -214,13 +260,6 @@ export default function InteractiveMockupViewer({
             disabled={isUploadingBase}
             className="w-full h-full min-h-[240px] rounded-xl border border-dashed border-neutral-700 hover:border-[#ff6600]/50 hover:bg-orange-500/5 transition-all flex flex-col items-center justify-center gap-3 group"
           >
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleBaseUpload}
-              className="hidden"
-            />
             {isUploadingBase ? (
               <div className="flex flex-col items-center gap-2">
                 <div className="w-8 h-8 border-2 border-[#ff6600] border-t-transparent rounded-full animate-spin" />
@@ -267,8 +306,8 @@ export default function InteractiveMockupViewer({
         />
       </div>
 
-      {/* Painel de controles — 4 sliders */}
-      {baseImage && designImage && (
+      {/* Painel de controles — 4 sliders (apenas 2D) */}
+      {viewMode === '2d' && baseImage && designImage && (
         <div className="px-4 py-3 border-t border-neutral-800/60 space-y-3">
           <div className="grid grid-cols-2 gap-x-4 gap-y-3">
             <SliderControl
