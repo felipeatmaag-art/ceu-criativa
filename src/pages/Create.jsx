@@ -35,11 +35,9 @@ import InteractiveMockupViewer from '@/components/create/InteractiveMockupViewer
 
 const PRODUCTS = [
   { value: 'camiseta', label: 'Camiseta', icon: '👕' },
-  { value: 'moletom', label: 'Moletom', icon: '🧥' },
-  { value: 'quadro', label: 'Quadro', icon: '🖼️' },
+  { value: 'baby_look', label: 'Baby Look', icon: '👚' },
   { value: 'caneca', label: 'Caneca', icon: '☕' },
-  { value: 'caneca_termica', label: 'Térmica', icon: '🥤' },
-  { value: 'mousepad', label: 'Mousepad', icon: '🖱️' }
+  { value: 'quadro', label: 'Quadro', icon: '🖼️' }
 ];
 
 export default function Create() {
@@ -189,20 +187,16 @@ export default function Create() {
 
   const productPrices = {
     camiseta: 49.90,
-    moletom: 89.90,
+    baby_look: 49.90,
     quadro: 89.90,
-    caneca: 39.90,
-    caneca_termica: 69.90,
-    mousepad: 29.90
+    caneca: 39.90
   };
 
   const productSizes = {
     camiseta: ['P', 'M', 'G', 'GG'],
-    moletom: ['P', 'M', 'G', 'GG'],
+    baby_look: ['P', 'M', 'G', 'GG'],
     quadro: ['30x40cm', '50x70cm', '70x100cm'],
-    caneca: ['Padrão'],
-    caneca_termica: ['500ml'],
-    mousepad: ['Médio', 'Grande', 'XL']
+    caneca: ['Padrão']
   };
 
   const colors = [
@@ -217,20 +211,11 @@ export default function Create() {
   const renderMockup = (designImage, side = 'front') => {
     return (
       <>
-        {selectedProduct === 'camiseta' && <TshirtMockup designImage={designImage} color={productColor} side={side} />}
-        {selectedProduct === 'moletom' && <TshirtMockup designImage={designImage} color={productColor} side={side} />}
+        {(selectedProduct === 'camiseta' || selectedProduct === 'baby_look') && (
+          <TshirtMockup designImage={designImage} color={productColor} side={side} />
+        )}
         {selectedProduct === 'quadro' && <FrameMockup designImage={designImage} />}
         {selectedProduct === 'caneca' && <MugMockup designImage={designImage} />}
-        {(selectedProduct === 'caneca_termica' || selectedProduct === 'mousepad') && (
-          <div className="w-full h-full flex items-center justify-center text-gray-400">
-            <div className="text-center">
-              <span className="text-6xl block mb-2">
-                {selectedProduct === 'caneca_termica' ? '🥤' : '🖱️'}
-              </span>
-              <p className="text-sm font-medium">Preview em breve</p>
-            </div>
-          </div>
-        )}
       </>
     );
   };
@@ -343,7 +328,7 @@ export default function Create() {
 
               {/* Color + Info */}
               <div className="space-y-6">
-                {(selectedProduct === 'camiseta' || selectedProduct === 'moletom') &&
+                {(selectedProduct === 'camiseta' || selectedProduct === 'baby_look') &&
                 <div>
                   <Label className="text-sm font-semibold mb-3 block text-gray-900 tracking-tight">Cor do produto</Label>
                   <div className="flex gap-3">
@@ -374,11 +359,9 @@ export default function Create() {
                   </h3>
                   <p className="text-sm text-gray-500 mb-3">
                     {selectedProduct === 'camiseta' && 'Camiseta 100% algodão, impressão DTG de alta resolução.'}
-                    {selectedProduct === 'moletom' && 'Moletom premium com capuz, estampa durável.'}
+                    {selectedProduct === 'baby_look' && 'Baby look feminina 100% algodão, corte ajustado ao corpo.'}
                     {selectedProduct === 'quadro' && 'Quadro decorativo com moldura de madeira.'}
                     {selectedProduct === 'caneca' && 'Caneca cerâmica 325ml, impressão sublimática.'}
-                    {selectedProduct === 'caneca_termica' && 'Caneca térmica inox 500ml, mantém temperatura.'}
-                    {selectedProduct === 'mousepad' && 'Mousepad com base emborrachada, tecido premium.'}
                   </p>
                   <div className="flex items-center justify-between">
                     <span className="text-gray-600 font-medium">Preço base</span>
@@ -695,7 +678,7 @@ export default function Create() {
                   </div>
 
                   {/* Color Selector */}
-                  {(selectedProduct === 'camiseta' || selectedProduct === 'moletom') &&
+                  {(selectedProduct === 'camiseta' || selectedProduct === 'baby_look') &&
                 <div className="mb-6">
                       <Label className="text-sm font-semibold mb-3 block text-gray-900 tracking-tight">Cor</Label>
                       <div className="flex gap-3">

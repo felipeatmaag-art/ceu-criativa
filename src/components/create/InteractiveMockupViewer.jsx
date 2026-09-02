@@ -20,15 +20,13 @@ import {
  *  - Controles com alvos de toque grandes para mobile
  */
 const PRINT_AREAS = {
-  camiseta:       { x: 38.5, y: 35.4, w: 22.9, h: 29.2 },
-  moletom:        { x: 38.5, y: 35.4, w: 22.9, h: 29.2 },
-  caneca:         { x: 26.4, y: 34.7, w: 33.3, h: 30.6 },
-  caneca_termica: { x: 26.4, y: 34.7, w: 33.3, h: 30.6 },
-  quadro:         { x: 17.6, y: 17.6, w: 64.7, h: 64.7 },
-  mousepad:       { x: 15, y: 15, w: 70, h: 70 },
+  camiseta:  { x: 38.5, y: 35.4, w: 22.9, h: 29.2 },
+  baby_look: { x: 38.5, y: 35.4, w: 22.9, h: 29.2 },
+  caneca:    { x: 26.4, y: 34.7, w: 33.3, h: 30.6 },
+  quadro:    { x: 17.6, y: 17.6, w: 64.7, h: 64.7 },
 };
 
-const HAS_BACK_SIDE = ['camiseta', 'moletom'];
+const HAS_BACK_SIDE = ['camiseta', 'baby_look'];
 
 // Marcador de canto (L-shaped bracket) para delinear a área de impressão
 function CornerMarker({ position, side }) {
