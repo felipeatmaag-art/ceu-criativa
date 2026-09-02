@@ -214,11 +214,11 @@ export default function Create() {
 
   const stepLabels = ['Produto', 'Sua Arte', 'Finalizar'];
 
-  const renderMockup = (designImage) => {
+  const renderMockup = (designImage, side = 'front') => {
     return (
       <>
-        {selectedProduct === 'camiseta' && <TshirtMockup designImage={designImage} color={productColor} />}
-        {selectedProduct === 'moletom' && <TshirtMockup designImage={designImage} color={productColor} />}
+        {selectedProduct === 'camiseta' && <TshirtMockup designImage={designImage} color={productColor} side={side} />}
+        {selectedProduct === 'moletom' && <TshirtMockup designImage={designImage} color={productColor} side={side} />}
         {selectedProduct === 'quadro' && <FrameMockup designImage={designImage} />}
         {selectedProduct === 'caneca' && <MugMockup designImage={designImage} />}
         {(selectedProduct === 'caneca_termica' || selectedProduct === 'mousepad') && (

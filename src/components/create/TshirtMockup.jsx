@@ -4,8 +4,10 @@ import React from 'react';
  * Mockup de camiseta responsivo.
  * O SVG escala com o container e o design é um <image> dentro do próprio SVG,
  * garantindo alinhamento perfeito em qualquer tamanho.
+ *
+ * Suporta frente (`side="front"`) e verso (`side="back"`).
  */
-export default function TshirtMockup({ designImage, color = 'white' }) {
+export default function TshirtMockup({ designImage, color = 'white', side = 'front' }) {
   const palette = {
     white: { body: '#ffffff', shadow: '#e8e8e8', collar: '#dcdcdc', seam: 'rgba(0,0,0,0.06)' },
     black: { body: '#1c1c1c', shadow: '#0a0a0a', collar: '#2a2a2a', seam: 'rgba(255,255,255,0.08)' },
@@ -13,6 +15,7 @@ export default function TshirtMockup({ designImage, color = 'white' }) {
     gray:  { body: '#6b7280', shadow: '#4b5563', collar: '#7c8694', seam: 'rgba(255,255,255,0.08)' },
   };
   const c = palette[color] || palette.white;
+  const isBack = side === 'back';
 
   return (
     <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
@@ -29,20 +32,20 @@ export default function TshirtMockup({ designImage, color = 'white' }) {
         className="relative z-10 h-full w-auto max-w-full drop-shadow-[0_20px_40px_rgba(0,0,0,0.18)]"
       >
         <defs>
-          <linearGradient id="tshirt-body" x1="0%" y1="0%" x2="0%" y2="100%">
+          <linearGradient id={`tshirt-body-${side}`} x1="0%" y1="0%" x2="0%" y2="100%">
             <stop offset="0%" stopColor={c.body} />
             <stop offset="55%" stopColor={c.body} />
             <stop offset="100%" stopColor={c.shadow} />
           </linearGradient>
-          <linearGradient id="tshirt-sleeve-l" x1="100%" y1="0%" x2="0%" y2="100%">
+          <linearGradient id={`tshirt-sleeve-l-${side}`} x1="100%" y1="0%" x2="0%" y2="100%">
             <stop offset="0%" stopColor={c.body} />
             <stop offset="100%" stopColor={c.shadow} />
           </linearGradient>
-          <linearGradient id="tshirt-sleeve-r" x1="0%" y1="0%" x2="100%" y2="100%">
+          <linearGradient id={`tshirt-sleeve-r-${side}`} x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor={c.body} />
             <stop offset="100%" stopColor={c.shadow} />
           </linearGradient>
-          <clipPath id="design-clip">
+          <clipPath id={`design-clip-${side}`}>
             <rect x="145" y="170" width="110" height="140" rx="6" />
           </clipPath>
         </defs>
@@ -50,12 +53,12 @@ export default function TshirtMockup({ designImage, color = 'white' }) {
         {/* Manga esquerda */}
         <path
           d="M 145 95 L 95 105 C 80 112, 76 135, 82 155 L 118 162 C 126 145, 136 125, 145 108 Z"
-          fill="url(#tshirt-sleeve-l)"
+          fill={`url(#tshirt-sleeve-l-${side})`}
         />
         {/* Manga direita */}
         <path
           d="M 255 95 L 305 105 C 320 112, 324 135, 318 155 L 282 162 C 274 145, 264 125, 255 108 Z"
-          fill="url(#tshirt-sleeve-r)"
+          fill={`url(#tshirt-sleeve-r-${side})`}
         />
 
         {/* Corpo */}
@@ -75,20 +78,39 @@ export default function TshirtMockup({ designImage, color = 'white' }) {
              L 125 180
              L 122 165
              Z"
-          fill="url(#tshirt-body)"
+          fill={`url(#tshirt-body-${side})`}
         />
 
-        {/* Gola */}
-        <path
-          d="M 180 60 C 188 73, 196 79, 200 79 C 204 79, 212 73, 220 60 C 216 55, 208 51, 200 51 C 192 51, 184 55, 180 60 Z"
-          fill={c.collar}
-        />
-        <path
-          d="M 178 62 C 188 75, 196 81, 200 81 C 204 81, 212 75, 222 62"
-          stroke={c.seam}
-          strokeWidth="1.5"
-          fill="none"
-        />
+        {/* Gola - frente tem V, verso é reta */}
+        {isBack ? (
+          <>
+            {/* Gola vista de trás - curva simples */}
+            <path
+              d="M 180 60 C 190 54, 210 54, 220 60 C 218 56, 210 51, 200 51 C 190 51, 182 56, 180 60 Z"
+              fill={c.collar}
+            />
+            <path
+              d="M 178 62 C 190 56, 210 56, 222 62"
+              stroke={c.seam}
+              strokeWidth="1.5"
+              fill="none"
+            />
+          </>
+        ) : (
+          <>
+            {/* Gola V da frente */}
+            <path
+              d="M 180 60 C 188 73, 196 79, 200 79 C 204 79, 212 73, 220 60 C 216 55, 208 51, 200 51 C 192 51, 184 55, 180 60 Z"
+              fill={c.collar}
+            />
+            <path
+              d="M 178 62 C 188 75, 196 81, 200 81 C 204 81, 212 75, 222 62"
+              stroke={c.seam}
+              strokeWidth="1.5"
+              fill="none"
+            />
+          </>
+        )}
 
         {/* Costuras laterais */}
         <line x1="136" y1="180" x2="133" y2="450" stroke={c.seam} strokeWidth="1" strokeDasharray="3 3" />
@@ -111,14 +133,14 @@ export default function TshirtMockup({ designImage, color = 'white' }) {
             width="110"
             height="140"
             preserveAspectRatio="xMidYMid meet"
-            clipPath="url(#design-clip)"
+            clipPath={`url(#design-clip-${side})`}
             style={{ filter: color === 'black' || color === 'navy' ? 'brightness(1.08) contrast(1.05)' : 'none' }}
           />
         )}
 
         {/* Textura sutil do tecido sobre a estampa */}
         {designImage && (
-          <rect x="145" y="170" width="110" height="140" rx="6" fill="rgba(255,255,255,0.04)" clipPath="url(#design-clip)" />
+          <rect x="145" y="170" width="110" height="140" rx="6" fill="rgba(255,255,255,0.04)" clipPath={`url(#design-clip-${side})`} />
         )}
       </svg>
 
