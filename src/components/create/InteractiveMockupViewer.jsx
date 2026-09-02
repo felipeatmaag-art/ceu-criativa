@@ -1,44 +1,66 @@
-import React, { useRef, useState, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  ZoomIn, ZoomOut, RotateCw, Crosshair, Maximize2, Hand,
-  FlipHorizontal2, Check,
+  Upload, GalleryHorizontalEnd, Save, History, Trash2,
+  FlipHorizontal2, Check, X,
 } from 'lucide-react';
 
 /**
- * Editor interativo de estampa — experiência premium touchscreen.
+ * Editor de mockup inspirado no Marketgen 2026.
  *
- * Renderiza o mockup do produto (sem design) e sobrepõe a arte como camada
- * arrastável, redimensionável e rotacionável em tempo real.
- *
- * Recursos:
- *  - Arraste com Pointer Events (mouse + toque unificados)
- *  - Pinch-to-zoom com dois dedos (touchscreen)
- *  - Frente/verso para camisetas e moletons
- *  - Área de impressão com marcadores de canto elegantes (sem linha tracejada feia)
- *  - Guias de alinhamento snap ao centro
- *  - Controles com alvos de toque grandes para mobile
+ * - Upload da foto base do produto (em vez de outline SVG)
+ * - Toggle FRENTE / COSTAS
+ * - 4 sliders precisos: Escala, Rotação, Offset X, Offset Y
+ * - Sistema de presets (salvar/carregar posições) via localStorage
+ * - Tema dark com acento laranja
  */
-const PRINT_AREAS = {
-  camiseta:  { x: 38.5, y: 35.4, w: 22.9, h: 29.2 },
-  baby_look: { x: 38.5, y: 35.4, w: 22.9, h: 29.2 },
-  caneca:    { x: 26.4, y: 34.7, w: 33.3, h: 30.6 },
-  quadro:    { x: 17.6, y: 17.6, w: 64.7, h: 64.7 },
-};
 
-const HAS_BACK_SIDE = ['camiseta', 'baby_look'];
+const ACCENT = '#ff6600';
+const PRESETS_KEY = 'ceu_mockup_presets';
 
-// Marcador de canto (L-shaped bracket) para delinear a área de impressão
-function CornerMarker({ position, side }) {
-  const base = 'absolute w-4 h-4 pointer-events-none';
-  const border = 'border-purple-500/70';
-  const styles = {
-    'top-left':     `${base} ${border} border-t-2 border-l-2 rounded-tl-md`,
-    'top-right':    `${base} ${border} border-t-2 border-r-2 rounded-tr-md`,
-    'bottom-left':  `${base} ${border} border-b-2 border-l-2 rounded-bl-md`,
-    'bottom-right': `${base} ${border} border-b-2 border-r-2 rounded-br-md`,
-  };
-  return <div className={styles[position]} />;
+function loadPresets() {
+  try {
+    return JSON.parse(localStorage.getItem(PRESETS_KEY) || '{}');
+  } catch { return {}; }
+}
+
+function savePresets(presets) {
+  localStorage.setItem(PRESETS_KEY, JSON.stringify(presets));
+}
+
+// Slider individual com label, valor e track dark
+function SliderControl({ label, value, min, max, step, unit, onChange }) {
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-1.5">
+        <span className="text-[10px] font-bold tracking-widest text-gray-500 uppercase">{label}</span>
+        <span className="text-xs font-semibold text-white tabular-nums">
+          {Math.round(value)}{unit}
+        </span>
+      </div>
+      <input
+        type="range"
+        min={min} max={max} step={step}
+        value={value}
+        onChange={(e) => onChange(parseFloat(e.target.value))}
+        className="w-full h-1.5 appearance-none rounded-full cursor-pointer
+                   bg-neutral-800
+                   [&::-webkit-slider-thumb]:appearance-none
+                   [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4
+                   [&::-webkit-slider-thumb]:rounded-full
+                   [&::-webkit-slider-thumb]:bg-[#ff6600]
+                   [&::-webkit-slider-thumb]:cursor-pointer
+                   [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:shadow-orange-500/30
+                   [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-orange-400
+                   [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4
+                   [&::-moz-range-thumb]:rounded-full
+                   [&::-moz-range-thumb]:bg-[#ff6600]
+                   [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-orange-400
+                   [&::-moz-range-thumb]:cursor-pointer"
+        style={{ accentColor: ACCENT }}
+      />
+    </div>
+  );
 }
 
 export default function InteractiveMockupViewer({
@@ -49,280 +71,315 @@ export default function InteractiveMockupViewer({
   transform,
   onTransformChange,
 }) {
-  const [isDragging, setIsDragging] = useState(false);
-  const [hasInteracted, setHasInteracted] = useState(false);
   const [side, setSide] = useState('front');
+  const [baseImage, setBaseImage] = useState(null);
+  const [isUploadingBase, setIsUploadingBase] = useState(false);
+  const [presets, setPresets] = useState({});
+  const [showPresets, setShowPresets] = useState(false);
+  const [presetName, setPresetName] = useState('');
+  const fileInputRef = useRef(null);
 
-  // Estado de drag e pinch
-  const dragState = useRef({ startX: 0, startY: 0, startTx: 0, startTy: 0 });
-  const pointers = useRef(new Map()); // pointerId -> {x, y}
-  const pinchState = useRef({ startDist: 0, startScale: 1 });
+  useEffect(() => {
+    setPresets(loadPresets());
+  }, []);
 
-  const pa = PRINT_AREAS[productType] || PRINT_AREAS.camiseta;
-  const isDark = color === 'black' || color === 'navy';
-  const canFlip = HAS_BACK_SIDE.includes(productType);
-
-  const setScale = useCallback((s) => {
-    onTransformChange({ ...transform, scale: Math.max(0.3, Math.min(2.5, s)) });
-  }, [transform, onTransformChange]);
-
-  // --- Pointer handlers com pinch-to-zoom ---
-  const handlePointerDown = (e) => {
-    e.currentTarget.setPointerCapture(e.pointerId);
-    pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
-    setHasInteracted(true);
-
-    if (pointers.current.size === 1) {
-      setIsDragging(true);
-      dragState.current = {
-        startX: e.clientX,
-        startY: e.clientY,
-        startTx: transform.x,
-        startTy: transform.y,
-      };
-    } else if (pointers.current.size === 2) {
-      // Iniciar pinch
-      const pts = Array.from(pointers.current.values());
-      const dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
-      pinchState.current = { startDist: dist, startScale: transform.scale };
-      setIsDragging(false);
+  // Upload da foto base do produto
+  const handleBaseUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsUploadingBase(true);
+    try {
+      const { base44 } = await import('@/api/base44Client');
+      const result = await base44.integrations.Core.UploadFile({ file });
+      if (result?.file_url) setBaseImage(result.file_url);
+    } catch (err) {
+      console.error('Erro no upload da base:', err);
     }
+    setIsUploadingBase(false);
   };
 
-  const handlePointerMove = (e) => {
-    if (!pointers.current.has(e.pointerId)) return;
-    pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  // --- Transform helpers ---
+  const setScale = (v) => onTransformChange({ ...transform, scale: v / 100 });
+  const setRotation = (v) => onTransformChange({ ...transform, rotation: v });
+  const setOffsetX = (v) => onTransformChange({ ...transform, x: v });
+  const setOffsetY = (v) => onTransformChange({ ...transform, y: v });
 
-    if (pointers.current.size >= 2) {
-      // Pinch-to-zoom
-      const pts = Array.from(pointers.current.values());
-      const dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
-      if (pinchState.current.startDist > 0) {
-        const ratio = dist / pinchState.current.startDist;
-        setScale(pinchState.current.startScale * ratio);
-      }
-    } else if (isDragging) {
-      // Arraste simples
-      const dx = e.clientX - dragState.current.startX;
-      const dy = e.clientY - dragState.current.startY;
-      onTransformChange({
-        ...transform,
-        x: dragState.current.startTx + dx,
-        y: dragState.current.startTy + dy,
-      });
-    }
+  const scalePct = Math.round(transform.scale * 100);
+  const rotDeg = Math.round(transform.rotation);
+  const offsetX = Math.round(transform.x);
+  const offsetY = Math.round(transform.y);
+
+  // --- Presets ---
+  const handleSavePreset = () => {
+    if (!presetName.trim()) return;
+    const key = `${productType}_${side}`;
+    const updated = {
+      ...presets,
+      [key]: [
+        ...(presets[key] || []),
+        {
+          id: Date.now(),
+          name: presetName.trim(),
+          transform: { ...transform },
+        },
+      ],
+    };
+    setPresets(updated);
+    savePresets(updated);
+    setPresetName('');
   };
 
-  const handlePointerUp = (e) => {
-    pointers.current.delete(e.pointerId);
-    if (pointers.current.size < 2) {
-      pinchState.current = { startDist: 0, startScale: 1 };
-    }
-    if (pointers.current.size === 1) {
-      // Retomar arraste com o dedo restante
-      const [pt] = Array.from(pointers.current.values());
-      dragState.current = { startX: pt.x, startY: pt.y, startTx: transform.x, startTy: transform.y };
-      setIsDragging(true);
-    } else if (pointers.current.size === 0) {
-      setIsDragging(false);
-    }
-    try { e.currentTarget.releasePointerCapture(e.pointerId); } catch { /* noop */ }
+  const handleApplyPreset = (preset) => {
+    onTransformChange({ ...preset.transform });
+    setShowPresets(false);
   };
 
-  // --- Controles ---
-  const setRotation = (r) => onTransformChange({ ...transform, rotation: r });
-  const center = () => onTransformChange({ ...transform, x: 0, y: 0 });
-  const reset = () => onTransformChange({ x: 0, y: 0, scale: 1, rotation: 0 });
+  const handleDeletePreset = (presetId) => {
+    const key = `${productType}_${side}`;
+    const updated = {
+      ...presets,
+      [key]: (presets[key] || []).filter((p) => p.id !== presetId),
+    };
+    setPresets(updated);
+    savePresets(updated);
+  };
 
-  // Guias de alinhamento (snap visual quando próximo ao centro)
-  const isCenteredX = Math.abs(transform.x) < 6;
-  const isCenteredY = Math.abs(transform.y) < 6;
+  const currentPresets = presets[`${productType}_${side}`] || [];
 
   return (
-    <div className="relative w-full h-full overflow-hidden">
-      {/* Mockup do produto sem a estampa (passa o lado ativo) */}
-      {renderMockup(side)}
-
-      {designImage && (
-        <>
-          {/* Área de impressão — marcadores de canto elegantes + glow sutil */}
-          <motion.div
-            className="absolute pointer-events-none z-10"
-            style={{ left: `${pa.x}%`, top: `${pa.y}%`, width: `${pa.w}%`, height: `${pa.h}%` }}
-            animate={{ opacity: isDragging ? 1 : 0.45 }}
-            transition={{ duration: 0.2 }}
+    <div className="w-full h-full bg-[#0f0f0f] rounded-2xl overflow-hidden flex flex-col">
+      {/* Toggle FRENTE / COSTAS */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-800/60">
+        <div className="flex gap-1 bg-neutral-900 rounded-full p-1">
+          <button
+            onClick={() => setSide('front')}
+            className={`px-4 py-1.5 rounded-full text-xs font-bold tracking-wider uppercase transition-all ${
+              side === 'front' ? 'bg-[#ff6600] text-white' : 'text-gray-500 hover:text-gray-300'
+            }`}
           >
-            {/* Glow de fundo da área de impressão */}
-            <div
-              className="absolute inset-0 rounded-lg"
-              style={{
-                background: 'radial-gradient(ellipse at center, rgba(168,85,247,0.06) 0%, transparent 70%)',
-              }}
+            Frente
+          </button>
+          <button
+            onClick={() => setSide('back')}
+            className={`px-4 py-1.5 rounded-full text-xs font-bold tracking-wider uppercase transition-all flex items-center gap-1 ${
+              side === 'back' ? 'bg-[#ff6600] text-white' : 'text-gray-500 hover:text-gray-300'
+            }`}
+          >
+            <FlipHorizontal2 className="w-3 h-3" />
+            Costas
+          </button>
+        </div>
+        <div className="flex items-center gap-1.5 text-[10px] text-gray-600 uppercase tracking-wider">
+          <GalleryHorizontalEnd className="w-3.5 h-3.5" />
+          {baseImage ? 'Peça carregada' : 'Sem peça base'}
+        </div>
+      </div>
+
+      {/* Área de preview */}
+      <div className="flex-1 relative min-h-[280px] flex items-center justify-center p-4">
+        {baseImage ? (
+          <>
+            {/* Foto base do produto */}
+            <img
+              src={baseImage}
+              alt="Peça base"
+              className="absolute inset-0 w-full h-full object-contain"
+              draggable={false}
             />
-            {/* Marcadores de canto */}
-            <CornerMarker position="top-left" />
-            <CornerMarker position="top-right" />
-            <CornerMarker position="bottom-left" />
-            <CornerMarker position="bottom-right" />
-          </motion.div>
-
-          {/* Guias de alinhamento */}
-          <AnimatePresence>
-            {isDragging && isCenteredX && (
-              <motion.div
-                className="absolute pointer-events-none w-px bg-purple-500/80 z-20"
-                style={{ left: `${pa.x + pa.w / 2}%`, top: `${pa.y}%`, height: `${pa.h}%` }}
-                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              />
-            )}
-            {isDragging && isCenteredY && (
-              <motion.div
-                className="absolute pointer-events-none h-px bg-purple-500/80 z-20"
-                style={{ left: `${pa.x}%`, top: `${pa.y + pa.h / 2}%`, width: `${pa.w}%` }}
-                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              />
-            )}
-          </AnimatePresence>
-
-          {/* Camada da estampa (arrastável) */}
-          <div
-            className="absolute z-20 touch-none"
-            style={{ left: `${pa.x}%`, top: `${pa.y}%`, width: `${pa.w}%`, height: `${pa.h}%` }}
-            onPointerDown={handlePointerDown}
-            onPointerMove={handlePointerMove}
-            onPointerUp={handlePointerUp}
-            onPointerCancel={handlePointerUp}
-          >
-            <div className="w-full h-full flex items-center justify-center cursor-grab active:cursor-grabbing">
-              <img
-                src={designImage}
-                draggable={false}
-                alt="Estampa"
-                className="select-none max-w-full max-h-full"
+            {/* Estampa sobreposta */}
+            {designImage && (
+              <div
+                className="absolute z-10 touch-none"
                 style={{
-                  transform: `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale}) rotate(${transform.rotation}deg)`,
-                  transition: isDragging ? 'none' : 'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
-                  filter: isDark ? 'brightness(1.08) contrast(1.05)' : 'none',
-                  boxShadow: isDragging
-                    ? '0 0 0 2px rgba(168,85,247,0.5), 0 8px 30px rgba(168,85,247,0.25)'
-                    : '0 2px 12px rgba(0,0,0,0.08)',
-                  borderRadius: '4px',
+                  left: '50%',
+                  top: '50%',
+                  transform: `translate(-50%, -50%) translate(${offsetX}px, ${offsetY}px) scale(${transform.scale}) rotate(${rotDeg}deg)`,
+                  transition: 'transform 0.15s ease-out',
                 }}
-              />
-            </div>
+              >
+                <img
+                  src={designImage}
+                  alt="Estampa"
+                  draggable={false}
+                  className="max-w-[60%] max-h-[60%] object-contain pointer-events-none select-none"
+                  style={{ filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.15))' }}
+                />
+              </div>
+            )}
+          </>
+        ) : (
+          /* Upload prompt — AGUARDANDO PEÇA BASE */
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isUploadingBase}
+            className="w-full h-full min-h-[240px] rounded-xl border border-dashed border-neutral-700 hover:border-[#ff6600]/50 hover:bg-orange-500/5 transition-all flex flex-col items-center justify-center gap-3 group"
+          >
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleBaseUpload}
+              className="hidden"
+            />
+            {isUploadingBase ? (
+              <div className="flex flex-col items-center gap-2">
+                <div className="w-8 h-8 border-2 border-[#ff6600] border-t-transparent rounded-full animate-spin" />
+                <span className="text-xs text-gray-500 uppercase tracking-wider">Carregando...</span>
+              </div>
+            ) : (
+              <>
+                <div className="w-14 h-14 rounded-2xl bg-neutral-800 group-hover:bg-orange-500/10 flex items-center justify-center transition-colors">
+                  <GalleryHorizontalEnd className="w-7 h-7 text-gray-500 group-hover:text-[#ff6600] transition-colors" />
+                </div>
+                <div className="text-center">
+                  <p className="text-sm font-bold text-white uppercase tracking-wider mb-1">
+                    Aguardando peça base
+                  </p>
+                  <p className="text-xs text-gray-600 max-w-xs">
+                    Faça upload de uma foto do produto em branco para posicionar a estampa
+                  </p>
+                </div>
+                <div className="flex items-center gap-1.5 mt-1 text-[10px] text-[#ff6600] uppercase tracking-wider font-semibold">
+                  <Upload className="w-3 h-3" />
+                  Enviar foto
+                </div>
+              </>
+            )}
+          </button>
+        )}
+
+        {/* Trocar peça base */}
+        {baseImage && (
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="absolute top-2 right-2 z-20 w-8 h-8 rounded-lg bg-neutral-900/80 hover:bg-[#ff6600] flex items-center justify-center transition-colors"
+            title="Trocar peça base"
+          >
+            <Upload className="w-4 h-4 text-gray-400" />
+          </button>
+        )}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleBaseUpload}
+          className="hidden"
+        />
+      </div>
+
+      {/* Painel de controles — 4 sliders */}
+      {baseImage && designImage && (
+        <div className="px-4 py-3 border-t border-neutral-800/60 space-y-3">
+          <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+            <SliderControl
+              label="Escala da estampa"
+              value={scalePct}
+              min={10} max={250} step={1}
+              unit="%"
+              onChange={setScale}
+            />
+            <SliderControl
+              label="Rotação da arte"
+              value={rotDeg}
+              min={0} max={360} step={1}
+              unit="°"
+              onChange={setRotation}
+            />
+            <SliderControl
+              label="Offset horizontal (X)"
+              value={offsetX}
+              min={-200} max={200} step={1}
+              unit="px"
+              onChange={setOffsetX}
+            />
+            <SliderControl
+              label="Offset vertical (Y)"
+              value={offsetY}
+              min={-200} max={200} step={1}
+              unit="px"
+              onChange={setOffsetY}
+            />
           </div>
 
-          {/* Dica de arraste */}
-          <AnimatePresence>
-            {!hasInteracted && (
-              <motion.div
-                className="absolute inset-0 flex items-center justify-center pointer-events-none z-30"
-                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              >
-                <motion.div
-                  className="bg-white/90 backdrop-blur px-4 py-2.5 rounded-full shadow-lg flex items-center gap-2"
-                  animate={{ y: [0, -6, 0] }}
-                  transition={{ repeat: Infinity, duration: 2 }}
-                >
-                  <Hand className="w-4 h-4 text-purple-600" />
-                  <span className="text-sm font-medium text-gray-700">Arraste para posicionar</span>
-                </motion.div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Toggle Frente/Verso */}
-          {canFlip && (
-            <div className="absolute top-3 left-1/2 -translate-x-1/2 z-40">
-              <div className="bg-white/90 backdrop-blur-xl rounded-full shadow-lg p-1 flex gap-1 border border-white/60">
-                <button
-                  onClick={() => setSide('front')}
-                  className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all flex items-center gap-1.5 ${
-                    side === 'front' ? 'ceu-gradient text-white shadow' : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  Frente
-                </button>
-                <button
-                  onClick={() => setSide('back')}
-                  className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all flex items-center gap-1.5 ${
-                    side === 'back' ? 'ceu-gradient text-white shadow' : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  <FlipHorizontal2 className="w-3 h-3" />
-                  Verso
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Indicador de lado ativo (quando não pode flipar) */}
-          {!canFlip && (
-            <div className="absolute top-3 left-1/2 -translate-x-1/2 z-40">
-              <div className="bg-white/90 backdrop-blur-xl rounded-full shadow-lg px-4 py-1.5 border border-white/60">
-                <span className="text-xs font-semibold text-gray-600">Frente</span>
-              </div>
-            </div>
-          )}
-
-          {/* Painel de controles — alvos de toque grandes para mobile */}
-          <motion.div
-            className="absolute bottom-3 left-3 right-3 z-40"
-            initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-          >
-            <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl p-3.5 space-y-3 border border-white/60">
-              {/* Tamanho */}
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => setScale(transform.scale - 0.1)}
-                  className="w-10 h-10 rounded-xl bg-gray-100 hover:bg-gray-200 active:scale-95 flex items-center justify-center transition-all shrink-0"
-                >
-                  <ZoomOut className="w-5 h-5 text-gray-600" />
-                </button>
-                <input
-                  type="range" min="0.3" max="2.5" step="0.05"
-                  value={transform.scale}
-                  onChange={(e) => setScale(parseFloat(e.target.value))}
-                  className="flex-1 h-2 accent-purple-500 cursor-pointer"
-                />
-                <button
-                  onClick={() => setScale(transform.scale + 0.1)}
-                  className="w-10 h-10 rounded-xl bg-gray-100 hover:bg-gray-200 active:scale-95 flex items-center justify-center transition-all shrink-0"
-                >
-                  <ZoomIn className="w-5 h-5 text-gray-600" />
-                </button>
-                <span className="text-xs font-semibold text-gray-500 w-11 text-right tabular-nums">
-                  {Math.round(transform.scale * 100)}%
+          {/* Presets */}
+          <div className="pt-2 border-t border-neutral-800/60">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-1.5">
+                <History className="w-3.5 h-3.5 text-gray-500" />
+                <span className="text-[10px] font-bold tracking-widest text-gray-500 uppercase">
+                  Presets de posição
                 </span>
               </div>
-
-              {/* Rotação + Ações */}
-              <div className="flex items-center gap-3">
-                <RotateCw className="w-5 h-5 text-gray-400 ml-1 shrink-0" />
-                <input
-                  type="range" min="0" max="360" step="1"
-                  value={transform.rotation}
-                  onChange={(e) => setRotation(parseFloat(e.target.value))}
-                  className="flex-1 h-2 accent-purple-500 cursor-pointer"
-                />
-                <button
-                  onClick={center}
-                  className="w-10 h-10 rounded-xl bg-gray-100 hover:bg-gray-200 active:scale-95 flex items-center justify-center transition-all shrink-0"
-                  title="Centralizar"
-                >
-                  <Crosshair className="w-5 h-5 text-gray-600" />
-                </button>
-                <button
-                  onClick={reset}
-                  className="w-10 h-10 rounded-xl bg-gray-100 hover:bg-gray-200 active:scale-95 flex items-center justify-center transition-all shrink-0"
-                  title="Resetar"
-                >
-                  <Maximize2 className="w-5 h-5 text-gray-600" />
-                </button>
-              </div>
+              <button
+                onClick={() => setShowPresets(!showPresets)}
+                className="text-[10px] text-gray-500 hover:text-[#ff6600] uppercase tracking-wider font-semibold"
+              >
+                {showPresets ? 'Ocultar' : 'Ver'} ({currentPresets.length})
+              </button>
             </div>
-          </motion.div>
-        </>
+
+            {/* Salvar preset */}
+            <div className="flex gap-2 mb-2">
+              <input
+                type="text"
+                placeholder="Nome do preset..."
+                value={presetName}
+                onChange={(e) => setPresetName(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSavePreset()}
+                className="flex-1 h-8 px-3 rounded-lg bg-neutral-900 border border-neutral-800 text-xs text-white placeholder:text-gray-600 focus:outline-none focus:border-[#ff6600]/50"
+              />
+              <button
+                onClick={handleSavePreset}
+                disabled={!presetName.trim()}
+                className="h-8 px-3 rounded-lg border border-neutral-700 hover:border-[#ff6600] hover:text-[#ff6600] text-gray-400 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                <Save className="w-3 h-3" />
+                Salvar
+              </button>
+            </div>
+
+            {/* Lista de presets */}
+            <AnimatePresence>
+              {showPresets && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden"
+                >
+                  {currentPresets.length === 0 ? (
+                    <p className="text-[10px] text-gray-600 uppercase tracking-wider py-2 text-center">
+                      Nenhum preset salvo ainda
+                    </p>
+                  ) : (
+                    <div className="space-y-1.5 max-h-32 overflow-y-auto">
+                      {currentPresets.map((preset) => (
+                        <div
+                          key={preset.id}
+                          className="flex items-center gap-2 p-2 rounded-lg bg-neutral-900 hover:bg-neutral-800 transition-colors group"
+                        >
+                          <button
+                            onClick={() => handleApplyPreset(preset)}
+                            className="flex-1 text-left flex items-center gap-2"
+                          >
+                            <Check className="w-3 h-3 text-gray-600 group-hover:text-[#ff6600]" />
+                            <span className="text-xs text-gray-300 font-medium">{preset.name}</span>
+                          </button>
+                          <button
+                            onClick={() => handleDeletePreset(preset.id)}
+                            className="opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <Trash2 className="w-3.5 h-3.5 text-gray-600 hover:text-red-500" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
       )}
     </div>
   );
