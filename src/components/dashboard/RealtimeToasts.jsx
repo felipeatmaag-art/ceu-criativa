@@ -1,18 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Heart, ShoppingBag, MessageCircle, X } from 'lucide-react';
+import { Heart, MessageCircle, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const ICONS = {
   like: Heart,
   comment: MessageCircle,
-  sale: ShoppingBag,
 };
 
 const COLORS = {
   like: { bg: 'bg-rose-50', ring: 'ring-rose-100', text: 'text-rose-500', accent: 'bg-rose-500' },
   comment: { bg: 'bg-blue-50', ring: 'ring-blue-100', text: 'text-blue-500', accent: 'bg-blue-500' },
-  sale: { bg: 'bg-emerald-50', ring: 'ring-emerald-100', text: 'text-emerald-500', accent: 'bg-emerald-500' },
 };
 
 export default function RealtimeToasts({ userId, designs = [] }) {
@@ -60,25 +58,6 @@ export default function RealtimeToasts({ userId, designs = [] }) {
     });
     return unsub;
   }, [userId, designs.length]);
-
-  // Orders / sales
-  useEffect(() => {
-    if (!userId) return;
-    const unsub = base44.entities.Order.subscribe((event) => {
-      if (event.type === 'create') {
-        const hasMyItems = event.data?.items?.some(it => it.artist_id === userId);
-        if (hasMyItems) {
-          pushToast({
-            type: 'sale',
-            key: event.data.id || event.data.order_number,
-            title: 'Nova venda! 🎉',
-            text: `Pedido #${event.data.order_number || 'novo'} confirmado`,
-          });
-        }
-      }
-    });
-    return unsub;
-  }, [userId]);
 
   const dismiss = (id) => setToasts(prev => prev.filter(t => t.id !== id));
 

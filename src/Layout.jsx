@@ -27,6 +27,7 @@ import {
 "@/components/ui/dropdown-menu";
 import { motion, AnimatePresence } from 'framer-motion';
 import BrandLogo from '@/components/BrandLogo';
+import SaleRealtimeAlert from '@/components/notifications/SaleRealtimeAlert';
 
 export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
@@ -209,6 +210,8 @@ export default function Layout({ children, currentPageName }) {
           height: 300px;
         }
       `}</style>
+
+      <SaleRealtimeAlert userId={user?.id} />
 
       {/* Animated Background */}
       <div className="animated-gradient-bg">

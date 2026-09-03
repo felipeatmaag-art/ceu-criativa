@@ -66,17 +66,16 @@ export default function NotificationsPanel({ userId, designs }) {
   useEffect(() => {
     if (!userId) return;
     const unsub = base44.entities.Order.subscribe((event) => {
-      if (event.type === 'create') {
-        const hasMyItems = event.data?.items?.some(it => it.artist_id === userId);
-        if (hasMyItems) {
-          addNotification({
-            id: Date.now() + 2,
-            type: 'sale',
-            text: `Nova venda! Pedido #${event.data.order_number || 'novo'}`,
-            time: new Date(),
-            read: false
-          });
-        }
+      const isConfirmed = (event.type === 'create' || event.type === 'update') && event.data?.status === 'paid';
+      const hasMyItems = event.data?.items?.some(it => it.artist_id === userId);
+      if (isConfirmed && hasMyItems) {
+        addNotification({
+          id: Date.now() + 2,
+          type: 'sale',
+          text: `Nova venda confirmada! Pedido #${event.data.order_number || 'novo'}`,
+          time: new Date(),
+          read: false
+        });
       }
     });
     return unsub;
