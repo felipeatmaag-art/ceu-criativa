@@ -9,6 +9,13 @@ import React from 'react';
  */
 export default function TshirtMockup({ designImage, color = 'white', side = 'front' }) {
   const tshirtImage = 'https://media.base44.com/images/public/69431e0c00397efc6e14e9df/5c58a6c71_generated_a3b8e9d6.png';
+  const shirtFilters = {
+    white: 'grayscale(1) brightness(3.7) contrast(0.72)',
+    black: 'grayscale(1) brightness(0.42) contrast(1.18)',
+    navy: 'brightness(0) saturate(100%) invert(20%) sepia(39%) saturate(1818%) hue-rotate(190deg) brightness(86%) contrast(95%)',
+    gray: 'grayscale(1) brightness(1.45) contrast(0.82)'
+  };
+  const colorLabels = { white: 'branca', black: 'preta', navy: 'azul-marinho', gray: 'cinza' };
   const isBack = side === 'back';
   const designBlend = color === 'black' || color === 'navy' ? 'screen' : 'multiply';
   const designArea = isBack
@@ -27,8 +34,9 @@ export default function TshirtMockup({ designImage, color = 'white', side = 'fro
       <div className="relative z-10 h-[94%] w-[94%] max-w-[560px] overflow-hidden rounded-[2rem]">
         <img
           src={tshirtImage}
-          alt={`Camiseta branca premium ${isBack ? 'vista de costas' : 'vista de frente'}`}
-          className="h-full w-full object-contain"
+          alt={`Camiseta ${colorLabels[color] || colorLabels.white} premium ${isBack ? 'vista de costas' : 'vista de frente'}`}
+          className="h-full w-full object-contain transition-[filter] duration-300"
+          style={{ filter: shirtFilters[color] || shirtFilters.white }}
         />
         {designImage && (
           <img
