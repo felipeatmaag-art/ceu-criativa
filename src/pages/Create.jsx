@@ -112,14 +112,14 @@ export default function Create() {
 
 
   const promptSuggestions = [
-  "Retrato artístico de mulher forte e empoderada",
-  "Pessoa sorrindo com cores vibrantes e alegres",
-  "Família abraçada em ilustração calorosa",
-  "Retrato de criança com olhar sonhador",
-  "Diversidade humana celebrada em cores",
-  "Mãos entrelaçadas representando união",
-  "Rosto feminino com flores e natureza",
-  "Pessoa meditando em paz e harmonia"];
+  "Frase divertida com tipografia retrô e cores vibrantes",
+  "Ilustração botânica centralizada em estilo serigrafia",
+  "Composição geométrica abstrata com formas fluidas",
+  "Mascote original em traço cartoon para estampa",
+  "Lettering motivacional com elementos decorativos",
+  "Ilustração minimalista de natureza em duas cores",
+  "Arte urbana com lettering e textura de spray",
+  "Emblema vintage com frase e ornamentos gráficos"];
 
 
   const handleGenerateAI = async () => {
@@ -130,7 +130,7 @@ export default function Create() {
 
     try {
       const result = await base44.integrations.Core.GenerateImage({
-        prompt: `Arte digital de alta qualidade pronta para impressão em ${selectedProduct}: ${aiPrompt}. Composição centralizada em formato quadrado, alta definição, elemento isolado e fundo totalmente transparente. Sem mockup, cenário, sombras externas ou margens.`
+        prompt: `Você é Iara, uma designer especializada exclusivamente em criar estampas. Crie SOMENTE a arte gráfica plana solicitada pelo usuário: "${aiPrompt}". Mostre apenas os desenhos, símbolos e textos que compõem a estampa, isolados e centralizados em formato quadrado, com alta definição e fundo totalmente transparente. Se o pedido contiver uma frase, reproduza o texto exatamente como foi escrito, sem corrigir, trocar ou acrescentar palavras. É terminantemente proibido desenhar ou mostrar camiseta, roupa, caneca, quadro, produto, manequim, pessoa vestindo, embalagem, etiqueta, mockup, ambiente, cenário ou a estampa aplicada em qualquer superfície. Não inclua bordas de fotografia, sombras externas ou margens. A saída deve ser exclusivamente o arquivo da estampa, pronto para impressão.`
       });
 
       if (result?.url) {

@@ -22,7 +22,7 @@ async function uploadPng(sourceUrl) {
 
 async function removeBackground(sourceUrl) {
   const result = await base44.integrations.Core.GenerateImage({
-    prompt: 'Remova somente o fundo desta arte e deixe-o totalmente transparente. Preserve exatamente o desenho original, suas cores, contornos, proporções, textos e detalhes. Não adicione sombras, cenário, mockup, margem ou novos elementos. Entregue uma arte isolada, centralizada e pronta para impressão em camiseta.',
+    prompt: 'Extraia exclusivamente a estampa desta imagem e deixe o fundo totalmente transparente. Preserve exatamente os desenhos, cores, contornos, proporções, textos e detalhes da arte. Se houver camiseta, roupa, caneca, quadro, produto, manequim, embalagem, etiqueta, mockup, ambiente ou superfície, elimine esses elementos por completo e mantenha somente a estampa isolada. Não adicione sombras, cenário, margem ou novos elementos. Entregue apenas o arquivo gráfico da estampa, centralizado e pronto para impressão.',
     existing_image_urls: [sourceUrl]
   });
   if (!result?.url) throw new Error('Não foi possível remover o fundo da imagem.');
