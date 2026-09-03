@@ -23,7 +23,7 @@ const SLIDES = [
     cta: 'Criar com IA',
     ctaLink: 'Create',
     icon: Sparkles,
-    image: 'https://images.unsplash.com/photo-1558769132-cb1aea672c11?w=1200',
+    image: 'https://media.base44.com/images/public/69431e0c00397efc6e14e9df/81a7eef58_AI_creation_studio_mockups_202608141301.jpeg',
     accent: 'bg-ceu-aqua',
   },
   {

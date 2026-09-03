@@ -11,7 +11,7 @@ export default function BentoShowcase() {
       description: 'Use IA ou faça upload das suas próprias artes. Você decide como criar.',
       icon: Sparkles,
       gradient: 'from-emerald-500 to-blue-500',
-      image: 'https://images.unsplash.com/photo-1558769132-cb1aea672c11?w=600'
+      image: 'https://media.base44.com/images/public/69431e0c00397efc6e14e9df/81a7eef58_AI_creation_studio_mockups_202608141301.jpeg'
     },
     {
       span: 'bento-span-6',
