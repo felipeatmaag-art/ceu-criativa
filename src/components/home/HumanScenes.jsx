@@ -3,25 +3,25 @@ import { motion } from 'framer-motion';
 import { Scissors, Smartphone, Store } from 'lucide-react';
 
 const scenes = [
-  {
-    image: 'https://media.base44.com/images/public/69431e0c00397efc6e14e9df/bbbd59412_Seamstress_sewing_tag_on_shirt_202608132018.jpeg',
-    icon: Scissors,
-    title: 'Feito à mão, com cuidado',
-    text: 'Cada peça carrega o toque de quem a produziu — do ateliê até a sua porta.',
-  },
-  {
-    image: 'https://media.base44.com/images/public/69431e0c00397efc6e14e9df/864130525_Man_smiling_at_smartphone_screen_202608171950jpeg_202608172008-Copia.jpeg',
-    icon: Smartphone,
-    title: 'Seu estúdio no bolso',
-    text: 'Acompanhe vendas, saldo e pontos de fidelidade de onde estiver.',
-  },
-  {
-    image: 'https://media.base44.com/images/public/69431e0c00397efc6e14e9df/029ad947b_Artisans_personalizing_customize_202608181036.jpeg',
-    icon: Store,
-    title: 'A Céu no mundo real',
-    text: 'Pop-ups e experiências que levam a sua arte para além da tela.',
-  },
-];
+{
+  image: 'https://media.base44.com/images/public/69431e0c00397efc6e14e9df/bbbd59412_Seamstress_sewing_tag_on_shirt_202608132018.jpeg',
+  icon: Scissors,
+  title: 'Feito à mão, com cuidado',
+  text: 'Cada peça carrega o toque de quem a produziu — do ateliê até a sua porta.'
+},
+{
+  image: 'https://media.base44.com/images/public/69431e0c00397efc6e14e9df/864130525_Man_smiling_at_smartphone_screen_202608171950jpeg_202608172008-Copia.jpeg',
+  icon: Smartphone,
+  title: 'Seu estúdio no bolso',
+  text: 'Acompanhe vendas, saldo e pontos de fidelidade de onde estiver.'
+},
+{
+  image: 'https://media.base44.com/images/public/69431e0c00397efc6e14e9df/029ad947b_Artisans_personalizing_customize_202608181036.jpeg',
+  icon: Store,
+  title: 'A Céu no mundo real',
+  text: 'Pop-ups e experiências que levam a sua arte para além da tela.'
+}];
+
 
 export default function HumanScenes() {
   return (
@@ -31,12 +31,12 @@ export default function HumanScenes() {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-14"
-        >
+          className="text-center mb-14">
+          
           <span className="inline-block px-4 py-1.5 rounded-full glass-effect text-xs font-medium tracking-wide text-gray-200 mb-4">
             Por trás da marca
           </span>
-          <h2 className="text-3xl lg:text-5xl font-bold text-white mb-4">
+          <h2 className="text-3xl lg:text-5xl font-bold mb-4 text-[hsl(var(--muted-foreground))]">
             Pessoas reais, <span className="ceu-text-gradient">arte real</span>
           </h2>
           <p className="text-xl text-gray-400 max-w-2xl mx-auto">
@@ -54,14 +54,14 @@ export default function HumanScenes() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.12 }}
-                className="group relative rounded-3xl overflow-hidden glass-card"
-              >
+                className="group relative rounded-3xl overflow-hidden glass-card">
+                
                 <div className="aspect-[4/5] overflow-hidden">
                   <img
                     src={scene.image}
                     alt={scene.title}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  />
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                  
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-6">
@@ -75,11 +75,11 @@ export default function HumanScenes() {
                     {scene.text}
                   </p>
                 </div>
-              </motion.div>
-            );
+              </motion.div>);
+
           })}
         </div>
       </div>
-    </section>
-  );
+    </section>);
+
 }
