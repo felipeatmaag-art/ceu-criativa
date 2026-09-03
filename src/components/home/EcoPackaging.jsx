@@ -19,7 +19,7 @@ export default function EcoPackaging() {
         </div>
         <div className="grid overflow-hidden rounded-[2rem] border border-ceu-sun/40 bg-card shadow-xl lg:grid-cols-[1.25fr_0.75fr]">
           <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="min-h-[360px] lg:min-h-[560px]">
-            <img src="https://media.base44.com/images/public/69431e0c00397efc6e14e9df/208543d05_generated_image.png" alt="Caixa kraft ecológica Céu aberta com uma peça autoral" className="h-full w-full object-cover" />
+            <img src="https://media.base44.com/images/public/69431e0c00397efc6e14e9df/c12040953_WhatsAppImage2026-08-17at214509.jpeg" alt="Linha real de embalagens kraft Céu com forro azul de nuvens" className="h-full w-full object-cover" />
           </motion.div>
           <div className="flex flex-col justify-center p-7 sm:p-10 lg:p-12">
             <span className="mb-4 text-sm font-black uppercase tracking-widest text-ceu-aqua">Design tátil e emocional</span>
