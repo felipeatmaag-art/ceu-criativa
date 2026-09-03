@@ -7,34 +7,34 @@ export default function ProductShowcase() {
 
   const mockups = [
     {
-      image: "https://media.base44.com/images/public/69431e0c00397efc6e14e9df/24c9709df_Merchandise_displayed_in_clothin_202608181036.jpeg",
-      person: "Céu Criativa",
-      design: "Marca que ganha espaço"
-    },
-    {
-      image: "https://media.base44.com/images/public/69431e0c00397efc6e14e9df/029ad947b_Artisans_personalizing_customize_202608181036.jpeg",
-      person: "Rede de Produtores",
-      design: "Produção com propósito"
-    },
-    {
-      image: "https://media.base44.com/images/public/69431e0c00397efc6e14e9df/72e5f4157_Customers_browsing_in_clothing_s_202608181052.jpeg",
-      person: "Comunidade Céu",
-      design: "Arte no mundo real"
-    },
-    {
-      image: "https://media.base44.com/images/public/69431e0c00397efc6e14e9df/3e0a97ac8_WhatsAppImage2026-08-17at214509.jpeg",
-      person: "Experiência Céu",
-      design: "Da criação à entrega"
+      image: "https://media.base44.com/images/public/69431e0c00397efc6e14e9df/3622ebebb_AI_creation_studio_mockups_2K_20260814131222.jpeg",
+      person: "Pedro Martins",
+      design: "Ilustrador digital"
     },
     {
       image: "https://media.base44.com/images/public/69431e0c00397efc6e14e9df/bbbd59412_Seamstress_sewing_tag_on_shirt_202608132018.jpeg",
-      person: "Feito por pessoas",
-      design: "Cuidado em cada detalhe"
+      person: "Helena Costa",
+      design: "Artista têxtil"
     },
     {
-      image: "https://media.base44.com/images/public/69431e0c00397efc6e14e9df/4791d6c1f_Dashboard_app_showing_earnings_g_202608161225-Copia.jpeg",
-      person: "Painel do Artista",
-      design: "Controle e monetização"
+      image: "https://media.base44.com/images/public/69431e0c00397efc6e14e9df/864130525_Man_smiling_at_smartphone_screen_202608171950jpeg_202608172008-Copia.jpeg",
+      person: "José Andrade",
+      design: "Tatuador e desenhista"
+    },
+    {
+      image: "https://media.base44.com/images/public/69431e0c00397efc6e14e9df/029ad947b_Artisans_personalizing_customize_202608181036.jpeg",
+      person: "Marina Alves",
+      design: "Designer de estampas"
+    },
+    {
+      image: "https://media.base44.com/images/public/69431e0c00397efc6e14e9df/72e5f4157_Customers_browsing_in_clothing_s_202608181052.jpeg",
+      person: "Camila Rocha",
+      design: "Artista visual"
+    },
+    {
+      image: "https://media.base44.com/images/public/69431e0c00397efc6e14e9df/24c9709df_Merchandise_displayed_in_clothin_202608181036.jpeg",
+      person: "Rafael Nunes",
+      design: "Serigrafista"
     }
   ];
 
@@ -61,13 +61,13 @@ export default function ProductShowcase() {
           className="text-center mb-16"
         >
           <span className="inline-block px-4 py-2 rounded-full glass-card text-emerald-400 text-sm font-medium mb-4 hover-glow">
-            Vista a Arte
+            Talentos Céu
           </span>
           <h2 className="text-3xl lg:text-5xl font-bold text-white mb-4">
-            Da Ideia ao Mundo Real
+            Artistas da Comunidade
           </h2>
           <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-            Criação, produção, venda e entrega conectadas em uma única jornada
+            Pessoas criativas que transformam experiências, traços e ideias em arte
           </p>
         </motion.div>
 
@@ -98,8 +98,8 @@ export default function ProductShowcase() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
                   <div className="absolute bottom-6 left-6 right-6 text-white">
-                    <p className="font-bold text-lg mb-1 text-emerald-400">{mockup.design}</p>
-                    <p className="text-sm text-white/80">por {mockup.person}</p>
+                    <p className="font-bold text-xl mb-1 text-white">{mockup.person}</p>
+                    <p className="text-sm font-medium text-emerald-400">{mockup.design}</p>
                   </div>
                 </div>
               </motion.div>
@@ -108,12 +108,14 @@ export default function ProductShowcase() {
 
           {/* Navigation Buttons */}
           <button
+            aria-label="Artista anterior"
             onClick={() => setCurrentIndex((prev) => (prev - 1 + mockups.length) % mockups.length)}
             className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full glass-card hover-glow flex items-center justify-center transition-all z-20"
           >
             <ChevronLeft className="w-6 h-6 text-emerald-400" />
           </button>
           <button
+            aria-label="Próximo artista"
             onClick={() => setCurrentIndex((prev) => (prev + 1) % mockups.length)}
             className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full glass-card hover-glow flex items-center justify-center transition-all z-20"
           >
