@@ -1,4 +1,5 @@
 import { base44 } from '@/api/base44Client';
+import clearImageBackground from '@/components/create/clearImageBackground';
 
 async function uploadPng(sourceUrl) {
   const response = await fetch(sourceUrl);
@@ -9,8 +10,10 @@ async function uploadPng(sourceUrl) {
   const canvas = document.createElement('canvas');
   canvas.width = bitmap.width;
   canvas.height = bitmap.height;
-  canvas.getContext('2d').drawImage(bitmap, 0, 0);
+  const context = canvas.getContext('2d');
+  context.drawImage(bitmap, 0, 0);
   bitmap.close();
+  clearImageBackground(context, canvas.width, canvas.height);
 
   const pngBlob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
   if (!pngBlob) throw new Error('Não foi possível converter a imagem para PNG.');
