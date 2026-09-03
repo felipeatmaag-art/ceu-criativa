@@ -11,5 +11,5 @@ export default function ProductModelUploads({ files, onChange }) {
       <input type="file" accept="image/*" required={required} className="sr-only" onChange={(event) => onChange(side, event.target.files?.[0] || null)} />
     </label>
   );
-  return <div className="grid gap-4 sm:grid-cols-2"><div><Label className="mb-2 block">Modelo de frente *</Label>{upload('front', 'Enviar frente', true)}</div><div><Label className="mb-2 block">Modelo de costas</Label>{upload('back', 'Enviar costas', false)}</div></div>;
+  return <div className="grid gap-4 sm:grid-cols-2"><div><Label className="mb-2 block">Foto de frente *</Label>{upload('front', 'Enviar foto da frente', true)}</div><div><Label className="mb-2 block">Foto de costas</Label>{upload('back', 'Enviar foto das costas', false)}</div></div>;
 }

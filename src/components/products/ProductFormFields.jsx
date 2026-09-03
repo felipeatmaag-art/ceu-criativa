@@ -14,7 +14,7 @@ export default function ProductFormFields({ form, onChange }) {
       <div><Label>Modelagem</Label><Input {...field('fit')} placeholder="Oversized" required /></div>
       <div><Label>Preço base</Label><Input {...field('base_price')} type="number" min="0" step="0.01" required /></div>
       <div><Label>Tamanhos</Label><Input {...field('sizes')} placeholder="P, M, G, GG" /></div>
-      <div className="sm:col-span-2"><Label>Descrição</Label><Input {...field('description')} placeholder="Detalhes que o artista verá no estúdio" /></div>
+      <div className="sm:col-span-2"><Label>Descrição</Label><Input {...field('description')} placeholder="Detalhes do produto exibidos no Criar" /></div>
       <div className="sm:col-span-2"><Label>Cores disponíveis</Label><Input {...field('colors')} placeholder="Branco, Preto, Azul marinho" /></div>
     </div>
   );
