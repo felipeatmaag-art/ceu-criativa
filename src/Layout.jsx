@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from './utils';
 import { base44 } from '@/api/base44Client';
-import { 
-  Menu, 
-  X, 
-  Search, 
-  ShoppingBag, 
-  User, 
+import {
+  Menu,
+  X,
+  Search,
+  ShoppingBag,
+  User,
   Sparkles,
   Heart,
   LogOut,
@@ -15,16 +15,16 @@ import {
   Palette,
   Trophy,
   Home,
-  Gift
-} from 'lucide-react';
+  Gift } from
+'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  DropdownMenuTrigger } from
+"@/components/ui/dropdown-menu";
 import { motion, AnimatePresence } from 'framer-motion';
 import BrandLogo from '@/components/BrandLogo';
 
@@ -52,12 +52,12 @@ export default function Layout({ children, currentPageName }) {
   }, []);
 
   const navItems = [
-    { name: 'Explorar', page: 'Explore', icon: Home },
-    { name: 'Criar', page: 'Create', icon: Sparkles },
-    { name: 'Competições', page: 'Competitions', icon: Trophy },
-    { name: 'Brindes', page: 'Brindes', icon: Gift },
-    { name: 'Artistas', page: 'Artists', icon: Palette },
-  ];
+  { name: 'Explorar', page: 'Explore', icon: Home },
+  { name: 'Criar', page: 'Create', icon: Sparkles },
+  { name: 'Competições', page: 'Competitions', icon: Trophy },
+  { name: 'Brindes', page: 'Brindes', icon: Gift },
+  { name: 'Artistas', page: 'Artists', icon: Palette }];
+
 
   return (
     <div className="min-h-screen bg-[#0a0a0f] text-gray-100">
@@ -220,16 +220,16 @@ export default function Layout({ children, currentPageName }) {
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-          scrolled ? 'glass-effect shadow-lg shadow-emerald-500/10' : 'bg-transparent'
-        }`}
-      >
+        scrolled ? 'glass-effect shadow-lg shadow-emerald-500/10' : 'bg-transparent'}`
+        }>
+        
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
             {/* Logo */}
             <Link to={createPageUrl('Home')} className="flex items-center group relative">
               <div className="relative">
                 <BrandLogo size="md" />
-                <div className="absolute -top-1 -right-2 w-3 h-3 bg-emerald-400 rounded-full animate-pulse shadow-lg shadow-emerald-400/50" />
+                <div className="absolute -top-1 -right-2 w-3 h-3 rounded-full animate-pulse shadow-lg shadow-emerald-400/50" />
               </div>
             </Link>
 
@@ -243,34 +243,34 @@ export default function Layout({ children, currentPageName }) {
                     key={item.page}
                     to={createPageUrl(item.page)}
                     className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 flex items-center gap-2 ${
-                      isActive 
-                        ? 'ceu-gradient text-white shadow-lg shadow-purple-500/25' 
-                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                    }`}
-                  >
+                    isActive ?
+                    'ceu-gradient text-white shadow-lg shadow-purple-500/25' :
+                    'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`
+                    }>
+                    
                     <Icon className="w-4 h-4" />
                     {item.name}
-                  </Link>
-                );
+                  </Link>);
+
               })}
             </div>
 
             {/* Right Actions */}
             <div className="flex items-center gap-3">
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 size="icon"
-                className="rounded-xl hover:bg-white/10 hover-glow transition-all"
-              >
+                className="rounded-xl hover:bg-white/10 hover-glow transition-all">
+                
                 <Search className="w-5 h-5 text-gray-300 hover:text-emerald-400 transition-colors" />
               </Button>
 
               <Link to={createPageUrl('Cart')}>
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   size="icon"
-                  className="rounded-xl hover:bg-white/10 hover-glow relative transition-all"
-                >
+                  className="rounded-xl hover:bg-white/10 hover-glow relative transition-all">
+                  
                   <ShoppingBag className="w-5 h-5 text-gray-300 hover:text-emerald-400 transition-colors" />
                   <span className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-br from-emerald-500 to-blue-500 text-white text-xs rounded-full flex items-center justify-center shadow-lg shadow-emerald-500/50">
                     0
@@ -278,22 +278,22 @@ export default function Layout({ children, currentPageName }) {
                 </Button>
               </Link>
 
-              {user ? (
-                <DropdownMenu>
+              {user ?
+              <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="rounded-xl p-1 hover:bg-gray-100">
                       <div className="w-9 h-9 rounded-xl ceu-gradient flex items-center justify-center">
-                        {user.avatar_url ? (
-                          <img 
-                            src={user.avatar_url} 
-                            alt={user.full_name}
-                            className="w-full h-full rounded-xl object-cover"
-                          />
-                        ) : (
-                          <span className="text-white font-medium">
+                        {user.avatar_url ?
+                      <img
+                        src={user.avatar_url}
+                        alt={user.full_name}
+                        className="w-full h-full rounded-xl object-cover" /> :
+
+
+                      <span className="text-white font-medium">
                             {user.full_name?.charAt(0) || 'U'}
                           </span>
-                        )}
+                      }
                       </div>
                     </Button>
                   </DropdownMenuTrigger>
@@ -334,31 +334,31 @@ export default function Layout({ children, currentPageName }) {
                         Configurações
                       </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem 
-                      onClick={() => base44.auth.logout()}
-                      className="cursor-pointer rounded-lg text-red-600 focus:text-red-600"
-                    >
+                    <DropdownMenuItem
+                    onClick={() => base44.auth.logout()}
+                    className="cursor-pointer rounded-lg text-red-600 focus:text-red-600">
+                    
                       <LogOut className="w-4 h-4 mr-2" />
                       Sair
                     </DropdownMenuItem>
                   </DropdownMenuContent>
-                </DropdownMenu>
-              ) : (
-                <Button 
-                  onClick={() => base44.auth.redirectToLogin()}
-                  className="ceu-gradient text-white rounded-xl px-6 hover:opacity-90 transition-opacity"
-                >
+                </DropdownMenu> :
+
+              <Button
+                onClick={() => base44.auth.redirectToLogin()}
+                className="ceu-gradient text-white rounded-xl px-6 hover:opacity-90 transition-opacity">
+                
                   Entrar
                 </Button>
-              )}
+              }
 
               {/* Mobile Menu Button */}
               <Button
                 variant="ghost"
                 size="icon"
                 className="md:hidden rounded-xl"
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-              >
+                onClick={() => setIsMenuOpen(!isMenuOpen)}>
+                
                 {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </Button>
             </div>
@@ -367,31 +367,31 @@ export default function Layout({ children, currentPageName }) {
 
         {/* Mobile Menu */}
         <AnimatePresence>
-          {isMenuOpen && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="md:hidden glass-effect border-t"
-            >
+          {isMenuOpen &&
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="md:hidden glass-effect border-t">
+            
               <div className="px-4 py-6 space-y-2">
                 {navItems.map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <Link
-                      key={item.page}
-                      to={createPageUrl(item.page)}
-                      onClick={() => setIsMenuOpen(false)}
-                      className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-gray-100 transition-colors"
-                    >
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.page}
+                    to={createPageUrl(item.page)}
+                    onClick={() => setIsMenuOpen(false)}
+                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-gray-100 transition-colors">
+                    
                       <Icon className="w-5 h-5" />
                       {item.name}
-                    </Link>
-                  );
-                })}
+                    </Link>);
+
+              })}
               </div>
             </motion.div>
-          )}
+          }
         </AnimatePresence>
       </motion.header>
 
@@ -440,6 +440,6 @@ export default function Layout({ children, currentPageName }) {
           </div>
         </div>
       </footer>
-    </div>
-  );
+    </div>);
+
 }
