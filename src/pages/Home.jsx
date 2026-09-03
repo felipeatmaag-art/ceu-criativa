@@ -146,7 +146,13 @@ export default function Home() {
             alt=""
             className="h-full w-full object-cover"
           />
-          <div className="absolute inset-0 bg-ceu-cloud/25" />
+          <motion.div
+            initial={{ backdropFilter: 'blur(0px)' }}
+            whileInView={{ backdropFilter: 'blur(3px)' }}
+            viewport={{ amount: 0.35 }}
+            transition={{ duration: 0.8, ease: 'easeOut' }}
+            className="absolute inset-0 bg-ceu-cloud/25"
+          />
         </div>
         
         <div className="relative max-w-4xl mx-auto px-4 text-center">
