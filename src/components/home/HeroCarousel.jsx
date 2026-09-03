@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { ArrowRight, ChevronLeft, ChevronRight, Gift, Palette, Sparkles, Trophy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { createPageUrl } from '@/utils';
@@ -14,7 +14,6 @@ const SLIDES = [
     ctaLink: 'Create',
     icon: Palette,
     image: 'https://media.base44.com/images/public/69431e0c00397efc6e14e9df/d745a5f29_Clothing_warehouse_and_modern_fa_2026081520441-Copia.jpeg',
-    accent: 'bg-ceu-sun',
   },
   {
     eyebrow: 'Tecnologia com propósito',
@@ -24,7 +23,6 @@ const SLIDES = [
     ctaLink: 'Create',
     icon: Sparkles,
     image: 'https://media.base44.com/images/public/69431e0c00397efc6e14e9df/3622ebebb_AI_creation_studio_mockups_2K_20260814131222.jpeg',
-    accent: 'bg-ceu-aqua',
   },
   {
     eyebrow: 'Comunidade Céu',
@@ -34,7 +32,6 @@ const SLIDES = [
     ctaLink: 'Competitions',
     icon: Trophy,
     image: 'https://media.base44.com/images/public/69431e0c00397efc6e14e9df/029ad947b_Artisans_personalizing_customize_202608181036.jpeg',
-    accent: 'bg-ceu-coral',
   },
   {
     eyebrow: 'Comércio justo',
@@ -44,12 +41,16 @@ const SLIDES = [
     ctaLink: 'Create',
     icon: Gift,
     image: 'https://media.base44.com/images/public/69431e0c00397efc6e14e9df/864130525_Man_smiling_at_smartphone_screen_202608171950jpeg_202608172008-Copia.jpeg',
-    accent: 'bg-ceu-sun',
   },
 ];
 
 export default function HeroCarousel() {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const heroRef = useRef(null);
+  const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
+  const backgroundY = useTransform(scrollYProgress, [0, 1], ['0%', '22%']);
+  const contentY = useTransform(scrollYProgress, [0, 1], ['0%', '38%']);
+  const contentOpacity = useTransform(scrollYProgress, [0, 0.75], [1, 0]);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentSlide((slide) => (slide + 1) % SLIDES.length), 6000);
@@ -61,82 +62,69 @@ export default function HeroCarousel() {
   const changeSlide = (direction) => setCurrentSlide((currentSlide + direction + SLIDES.length) % SLIDES.length);
 
   return (
-    <section className="relative overflow-hidden bg-ceu-cloud py-12 sm:py-16 lg:py-20">
-      <div className="absolute -left-24 top-8 h-72 w-72 rounded-full border-[42px] border-ceu-sky/20" />
-      <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8">
+    <section ref={heroRef} className="relative min-h-[640px] h-[calc(100svh-5rem)] overflow-hidden bg-ceu-navy text-white">
+      <motion.div style={{ y: backgroundY }} className="absolute -inset-y-[12%] inset-x-0">
+        <AnimatePresence mode="sync">
+          <motion.img
+            key={slide.image}
+            src={slide.image}
+            alt=""
+            initial={{ opacity: 0, scale: 1.08 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.1, ease: 'easeOut' }}
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        </AnimatePresence>
+      </motion.div>
+
+      <div className="absolute inset-0 bg-gradient-to-r from-ceu-navy via-ceu-navy/65 to-ceu-navy/10" />
+      <div className="absolute inset-0 bg-gradient-to-t from-ceu-navy/80 via-transparent to-ceu-navy/20" />
+
+      <motion.div style={{ y: contentY, opacity: contentOpacity }} className="relative z-10 mx-auto flex h-full max-w-7xl items-center px-5 py-16 sm:px-8 lg:px-10">
         <AnimatePresence mode="wait">
           <motion.div
-            key={`copy-${currentSlide}`}
-            initial={{ opacity: 0, y: 18 }}
+            key={currentSlide}
+            initial={{ opacity: 0, y: 28 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -12 }}
-            transition={{ duration: 0.45 }}
-            className="relative z-10"
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.55 }}
+            className="max-w-3xl"
           >
-            <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-ceu-sky/40 bg-white/80 px-4 py-2 text-sm font-semibold text-ceu-navy shadow-sm backdrop-blur">
-              <Icon className="h-4 w-4 text-ceu-aqua" />
+            <div className="mb-6 inline-flex items-center gap-2 text-sm font-bold uppercase tracking-[0.18em] text-ceu-sky">
+              <Icon className="h-4 w-4" />
               {slide.eyebrow}
             </div>
-            <h1 className="max-w-2xl text-5xl font-black leading-[0.98] tracking-[-0.04em] text-ceu-navy sm:text-6xl lg:text-7xl">
+            <h1 className="text-5xl font-black leading-[0.92] tracking-[-0.05em] text-white sm:text-6xl lg:text-8xl">
               {slide.title}
             </h1>
-            <p className="mt-7 max-w-xl text-lg leading-relaxed text-ceu-navy/70 sm:text-xl">
+            <p className="mt-7 max-w-2xl text-lg leading-relaxed text-white/80 sm:text-xl lg:text-2xl">
               {slide.description}
             </p>
-            <div className="mt-9 flex flex-wrap items-center gap-4">
+            <div className="mt-9 flex flex-wrap items-center gap-5">
               <Link to={createPageUrl(slide.ctaLink)}>
-                <Button size="lg" className="h-14 rounded-full bg-ceu-navy px-7 text-base text-white shadow-xl shadow-ceu-navy/15 hover:bg-ceu-aqua">
-                  {slide.cta}
-                  <ArrowRight className="h-5 w-5" />
+                <Button size="lg" className="h-14 rounded-full bg-ceu-aqua px-8 text-base font-bold text-ceu-navy shadow-xl hover:bg-ceu-sky">
+                  {slide.cta}<ArrowRight className="h-5 w-5" />
                 </Button>
               </Link>
-              <Link to={createPageUrl('Explore')} className="text-sm font-bold text-ceu-navy underline decoration-ceu-sun decoration-4 underline-offset-8">
+              <Link to={createPageUrl('Explore')} className="text-sm font-bold text-white underline decoration-ceu-sun decoration-4 underline-offset-8">
                 Explorar a comunidade
               </Link>
             </div>
           </motion.div>
         </AnimatePresence>
+      </motion.div>
 
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={`image-${currentSlide}`}
-            initial={{ opacity: 0, scale: 0.96 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 1.02 }}
-            transition={{ duration: 0.55 }}
-            className="relative"
-          >
-            <div className={`absolute -right-12 -top-12 h-40 w-40 rounded-full ${slide.accent}`} />
-            <div className="absolute -bottom-8 -left-8 h-36 w-36 rounded-full border-[20px] border-ceu-aqua" />
-            <div className="relative overflow-hidden rounded-[2.5rem] bg-ceu-navy p-2 shadow-2xl shadow-ceu-navy/20 sm:rounded-[4rem]">
-              <div className="relative aspect-[5/4] overflow-hidden rounded-[2rem] sm:rounded-[3.5rem]">
-                <img src={slide.image} alt={slide.title} className="h-full w-full object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-ceu-navy/80 via-transparent to-transparent" />
-                <div className="absolute bottom-5 left-5 right-5 flex items-end justify-between text-white sm:bottom-8 sm:left-8 sm:right-8">
-                  <div>
-                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-ceu-sky">Céu Criativa</p>
-                    <p className="mt-1 text-xl font-semibold">Você também vai.</p>
-                  </div>
-                  <span className="rounded-full bg-white/15 px-4 py-2 text-xs backdrop-blur">Autoral por essência</span>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        </AnimatePresence>
-      </div>
-
-      <div className="relative mx-auto mt-10 flex max-w-7xl items-center gap-4 px-4 sm:px-6 lg:px-8">
-        <button aria-label="Slide anterior" onClick={() => changeSlide(-1)} className="flex h-11 w-11 items-center justify-center rounded-full border border-ceu-navy/15 text-ceu-navy hover:bg-white">
-          <ChevronLeft className="h-5 w-5" />
-        </button>
-        <div className="flex flex-1 gap-2">
+      <div className="absolute bottom-7 left-5 right-5 z-20 mx-auto flex max-w-7xl items-center justify-between gap-5 sm:bottom-9 sm:left-8 sm:right-8 lg:left-10 lg:right-10">
+        <div className="flex items-center gap-2">
           {SLIDES.map((item, index) => (
-            <button key={item.title} aria-label={`Ir para slide ${index + 1}`} onClick={() => setCurrentSlide(index)} className={`h-1.5 rounded-full transition-all ${index === currentSlide ? 'w-14 bg-ceu-aqua' : 'w-5 bg-ceu-navy/15'}`} />
+            <button key={item.title} aria-label={`Ir para slide ${index + 1}`} onClick={() => setCurrentSlide(index)} className={`h-1.5 rounded-full transition-all duration-300 ${index === currentSlide ? 'w-14 bg-ceu-aqua' : 'w-5 bg-white/40'}`} />
           ))}
         </div>
-        <button aria-label="Próximo slide" onClick={() => changeSlide(1)} className="flex h-11 w-11 items-center justify-center rounded-full bg-ceu-navy text-white hover:bg-ceu-aqua">
-          <ChevronRight className="h-5 w-5" />
-        </button>
+        <div className="flex gap-2">
+          <button aria-label="Slide anterior" onClick={() => changeSlide(-1)} className="flex h-11 w-11 items-center justify-center rounded-full border border-white/30 bg-ceu-navy/25 text-white backdrop-blur hover:bg-white/15"><ChevronLeft className="h-5 w-5" /></button>
+          <button aria-label="Próximo slide" onClick={() => changeSlide(1)} className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-ceu-navy hover:bg-ceu-sky"><ChevronRight className="h-5 w-5" /></button>
+        </div>
       </div>
     </section>
   );
