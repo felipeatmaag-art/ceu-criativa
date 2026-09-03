@@ -8,7 +8,7 @@ import React from 'react';
  * Suporta frente (`side="front"`) e verso (`side="back"`).
  */
 export default function TshirtMockup({ designImage, color = 'white', side = 'front' }) {
-  const tshirtImage = 'https://media.base44.com/images/public/69431e0c00397efc6e14e9df/3e277e906_generated_image.png';
+  const tshirtImage = 'https://media.base44.com/images/public/69431e0c00397efc6e14e9df/5c58a6c71_generated_a3b8e9d6.png';
   const isBack = side === 'back';
   const designBlend = color === 'black' || color === 'navy' ? 'screen' : 'multiply';
   const designArea = isBack
