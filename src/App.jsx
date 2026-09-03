@@ -10,6 +10,7 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import CheckoutSuccess from '@/pages/CheckoutSuccess';
+import ProductAdmin from '@/pages/ProductAdmin';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -53,6 +54,11 @@ const AuthenticatedApp = () => {
       <Route path="/CheckoutSuccess" element={
         <LayoutWrapper currentPageName="CheckoutSuccess">
           <CheckoutSuccess />
+        </LayoutWrapper>
+      } />
+      <Route path="/ProductAdmin" element={
+        <LayoutWrapper currentPageName="ProductAdmin">
+          <ProductAdmin />
         </LayoutWrapper>
       } />
       {Object.entries(Pages).map(([path, Page]) => (

@@ -20,6 +20,31 @@
       ],
       "description": "Tipo do produto"
     },
+    "description": {
+      "type": "string",
+      "description": "Descri\u00e7\u00e3o comercial do produto"
+    },
+    "material": {
+      "type": "string",
+      "description": "Material principal, como algod\u00e3o ou cer\u00e2mica"
+    },
+    "fit": {
+      "type": "string",
+      "description": "Modelagem, como tradicional, oversized ou ajustada"
+    },
+    "catalog_product": {
+      "type": "boolean",
+      "default": false,
+      "description": "Identifica um modelo dispon\u00edvel no est\u00fadio"
+    },
+    "front_model_url": {
+      "type": "string",
+      "description": "Imagem real do modelo visto de frente"
+    },
+    "back_model_url": {
+      "type": "string",
+      "description": "Imagem real do modelo visto de costas"
+    },
     "design_id": {
       "type": "string",
       "description": "ID do design aplicado"

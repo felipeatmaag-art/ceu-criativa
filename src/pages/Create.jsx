@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -34,6 +34,7 @@ import FrameMockup from '@/components/create/FrameMockup';
 import InteractiveMockupViewer from '@/components/create/InteractiveMockupViewer';
 import ArtworkSidesPanel from '@/components/create/ArtworkSidesPanel';
 import MockupStyleGenerator from '@/components/create/MockupStyleGenerator';
+import CatalogProductMockup from '@/components/create/CatalogProductMockup';
 
 const PRODUCTS = [
   { value: 'camiseta', label: 'Camiseta' },
@@ -66,6 +67,8 @@ export default function Create() {
   });
 
   const [selectedProduct, setSelectedProduct] = useState(hasRequestedProduct ? requestedProduct : 'camiseta');
+  const [catalogProducts, setCatalogProducts] = useState([]);
+  const [selectedCatalogId, setSelectedCatalogId] = useState(null);
   const [productColor, setProductColor] = useState('white');
   const [cart, setCart] = useState([]);
   const [backDesignImage, setBackDesignImage] = useState(null);
@@ -76,6 +79,17 @@ export default function Create() {
   });
   const [generatedMockups, setGeneratedMockups] = useState([]);
   const [mockupStyle, setMockupStyle] = useState('studio');
+
+  useEffect(() => {
+    base44.entities.Product.filter({ catalog_product: true, is_active: true }, '-created_date', 100).then((items) => {
+      setCatalogProducts(items);
+      if (items.length) {
+        const chosen = items.find((item) => item.type === requestedProduct) || items[0];
+        setSelectedCatalogId(chosen.id);
+        setSelectedProduct(chosen.type);
+      }
+    });
+  }, [requestedProduct]);
 
   const categories = [
   { value: 'abstrato', label: 'Abstrato' },
@@ -172,14 +186,14 @@ export default function Create() {
           design_id: design.id,
           design_image: selectedImage,
           ...(backDesignImage ? { back_design_image: backDesignImage } : {}),
-          base_price: productPrices[selectedProduct],
-          final_price: productPrices[selectedProduct],
+          base_price: currentPrice,
+          final_price: currentPrice,
           mockup_url: generatedMockups[0].url,
           mockup_gallery: generatedMockups.map((item) => item.url),
           mockup_style: mockupStyle,
           mockup_angles: generatedMockups.map((item) => item.angle),
           colors_available: [productColor],
-          sizes_available: productSizes[selectedProduct],
+          sizes_available: currentSizes,
           is_active: true
         });
       }
@@ -242,6 +256,16 @@ export default function Create() {
   { name: 'gray', label: 'Cinza', hex: '#6b7280' }];
 
 
+  const selectedCatalogProduct = catalogProducts.find((product) => product.id === selectedCatalogId);
+  const studioProducts = catalogProducts.length ? catalogProducts.map((product) => ({ value: product.id, type: product.type, label: product.name, price: product.base_price, image: product.front_model_url })) : PRODUCTS.map((product) => ({ ...product, type: product.value, price: productPrices[product.value] }));
+  const currentPrice = Number(selectedCatalogProduct?.base_price ?? productPrices[selectedProduct]);
+  const currentSizes = selectedCatalogProduct?.sizes_available?.length ? selectedCatalogProduct.sizes_available : productSizes[selectedProduct];
+  const handleProductChange = (value) => {
+    const catalogProduct = catalogProducts.find((product) => product.id === value);
+    setSelectedCatalogId(catalogProduct?.id || null);
+    setSelectedProduct(catalogProduct?.type || value);
+  };
+
   const stepLabels = ['Produto', 'Sua Arte', 'Finalizar'];
   const activeTransform = designTransforms[editorSide];
   const activeDesignImage = editorSide === 'back' ? backDesignImage : selectedImage;
@@ -252,6 +276,7 @@ export default function Create() {
   };
 
   const renderMockup = (designImage, side = 'front') => {
+    if (selectedCatalogProduct?.front_model_url) return <CatalogProductMockup product={selectedCatalogProduct} side={side} />;
     return (
       <>
         {(selectedProduct === 'camiseta' || selectedProduct === 'baby_look') && (
@@ -324,7 +349,7 @@ export default function Create() {
             </div>
 
             <div className="mb-8">
-              <ProductSelector products={PRODUCTS} prices={productPrices} value={selectedProduct} onChange={setSelectedProduct} />
+              <ProductSelector products={studioProducts} value={selectedCatalogId || selectedProduct} onChange={handleProductChange} />
             </div>
 
             <div className="grid lg:grid-cols-2 gap-8">
@@ -354,7 +379,7 @@ export default function Create() {
 
               {/* Color + Info */}
               <div className="space-y-6">
-                {(selectedProduct === 'camiseta' || selectedProduct === 'baby_look') &&
+                {!selectedCatalogProduct && (selectedProduct === 'camiseta' || selectedProduct === 'baby_look') &&
                 <div>
                   <Label className="text-sm font-semibold mb-3 block text-gray-900 tracking-tight">Cor do produto</Label>
                   <div className="flex gap-3">
@@ -381,18 +406,15 @@ export default function Create() {
 
                 <div className="bg-purple-50 rounded-2xl p-5">
                   <h3 className="font-bold text-gray-900 mb-1">
-                    {PRODUCTS.find((p) => p.value === selectedProduct)?.label}
+                    {selectedCatalogProduct?.name || PRODUCTS.find((p) => p.value === selectedProduct)?.label}
                   </h3>
                   <p className="text-sm text-gray-500 mb-3">
-                    {selectedProduct === 'camiseta' && 'Camiseta 100% algodão, impressão DTG de alta resolução.'}
-                    {selectedProduct === 'baby_look' && 'Baby look feminina 100% algodão, corte ajustado ao corpo.'}
-                    {selectedProduct === 'quadro' && 'Quadro decorativo com moldura de madeira.'}
-                    {selectedProduct === 'caneca' && 'Caneca cerâmica 325ml, impressão sublimática.'}
+                    {selectedCatalogProduct ? [selectedCatalogProduct.material, selectedCatalogProduct.fit, selectedCatalogProduct.description].filter(Boolean).join(' • ') : selectedProduct === 'camiseta' ? 'Camiseta 100% algodão, impressão DTG de alta resolução.' : selectedProduct === 'baby_look' ? 'Baby look feminina 100% algodão, corte ajustado ao corpo.' : selectedProduct === 'quadro' ? 'Quadro decorativo com moldura de madeira.' : 'Caneca cerâmica 325ml, impressão sublimática.'}
                   </p>
                   <div className="flex items-center justify-between">
                     <span className="text-gray-600 font-medium">Preço base</span>
                     <span className="text-2xl font-bold ceu-text-gradient">
-                      R$ {productPrices[selectedProduct].toFixed(2)}
+                      R$ {currentPrice.toFixed(2)}
                     </span>
                   </div>
                 </div>
@@ -698,11 +720,11 @@ export default function Create() {
 
                   <div className="mb-6 rounded-2xl border border-ceu-navy/15 bg-card p-4">
                     <p className="text-xs font-bold uppercase tracking-widest text-ceu-navy/45">Produto selecionado</p>
-                    <p className="mt-1 font-bold text-ceu-navy">{PRODUCTS.find((product) => product.value === selectedProduct)?.label}</p>
+                    <p className="mt-1 font-bold text-ceu-navy">{selectedCatalogProduct?.name || PRODUCTS.find((product) => product.value === selectedProduct)?.label}</p>
                   </div>
 
                   {/* Color Selector */}
-                  {(selectedProduct === 'camiseta' || selectedProduct === 'baby_look') &&
+                  {!selectedCatalogProduct && (selectedProduct === 'camiseta' || selectedProduct === 'baby_look') &&
                 <div className="mb-6">
                       <Label className="text-sm font-semibold mb-3 block text-gray-900 tracking-tight">Cor</Label>
                       <div className="flex gap-3">
@@ -831,13 +853,13 @@ export default function Create() {
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-gray-600 text-sm">Preço do produto</span>
                       <span className="text-xl font-bold ceu-text-gradient">
-                        R$ {productPrices[selectedProduct].toFixed(2)}
+                        R$ {currentPrice.toFixed(2)}
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-gray-600 text-sm">Sua comissão (30%)</span>
                       <span className="font-semibold text-green-600">
-                        R$ {(productPrices[selectedProduct] * 0.3).toFixed(2)}
+                        R$ {(currentPrice * 0.3).toFixed(2)}
                       </span>
                     </div>
                   </div>
