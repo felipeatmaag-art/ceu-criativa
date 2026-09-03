@@ -242,10 +242,10 @@ export default function Layout({ children, currentPageName }) {
                   <Link
                     key={item.page}
                     to={createPageUrl(item.page)}
-                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 flex items-center gap-2 ${
+                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 flex items-center gap-2 text-[hsl(var(--ceu-sky))] ${
                     isActive ?
                     'ceu-gradient text-white shadow-lg shadow-purple-500/25' :
-                    'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`
+                    "hover:text-gray-900 hover:bg-gray-100"}`
                     }>
                     
                     <Icon className="w-4 h-4" />
