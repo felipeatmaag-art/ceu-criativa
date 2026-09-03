@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -19,11 +20,12 @@ import PaymentMethodSelector, { PAYMENT_METHODS } from '@/components/checkout/Pa
 import FreeShippingBar, { FREE_SHIPPING_THRESHOLD } from '@/components/checkout/FreeShippingBar';
 
 export default function Cart() {
-  const navigate = useNavigate();
   const [cartItems, setCartItems] = useState([]);
   const [showCheckout, setShowCheckout] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState('pix');
+  const [paymentMethod, setPaymentMethod] = useState('credit');
+  const [checkoutError, setCheckoutError] = useState('');
+  const [customer, setCustomer] = useState({ name: '', email: '' });
   const [coupon, setCoupon] = useState('');
   const [couponApplied, setCouponApplied] = useState(null);
   const [couponError, setCouponError] = useState('');
@@ -73,17 +75,25 @@ export default function Cart() {
   };
 
   const handleCheckout = async () => {
-    setIsProcessing(true);
-    try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      localStorage.removeItem('cart');
-      setCartItems([]);
-      setShowCheckout(false);
-      navigate(createPageUrl('MyOrders'));
-    } catch (error) {
-      console.error('Erro ao processar:', error);
+    if (window.self !== window.top) {
+      alert('Para sua segurança, abra o app publicado em uma nova aba para concluir o pagamento.');
+      return;
     }
-    setIsProcessing(false);
+    setIsProcessing(true);
+    setCheckoutError('');
+    try {
+      const response = await base44.functions.invoke('createStripeCheckout', {
+        items: cartItems,
+        customer,
+        shippingAddress,
+        paymentMethod,
+        couponCode: couponApplied?.code || ''
+      });
+      window.location.href = response.data.checkoutUrl;
+    } catch (error) {
+      setCheckoutError(error.response?.data?.error || 'Não foi possível iniciar o pagamento.');
+      setIsProcessing(false);
+    }
   };
 
   const subtotal = cartItems.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
@@ -95,7 +105,8 @@ export default function Cart() {
   const discountValue = subtotal * (paymentDiscount + couponDiscount);
   const total = Math.max(0, subtotal - discountValue + shipping);
 
-  const isAddressValid = shippingAddress.zipcode && shippingAddress.street && shippingAddress.number;
+  const isAddressValid = shippingAddress.zipcode && shippingAddress.street && shippingAddress.number && shippingAddress.city && shippingAddress.state;
+  const isCustomerValid = customer.name.trim() && /\S+@\S+\.\S+/.test(customer.email);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-12">
@@ -309,6 +320,14 @@ export default function Cart() {
                 </div>
               </div>
 
+              <div>
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Seus dados</p>
+                <div className="grid sm:grid-cols-2 gap-3">
+                  <div><Label className="text-xs">Nome completo</Label><Input value={customer.name} onChange={(e) => setCustomer({ ...customer, name: e.target.value })} className="rounded-xl" /></div>
+                  <div><Label className="text-xs">E-mail</Label><Input type="email" value={customer.email} onChange={(e) => setCustomer({ ...customer, email: e.target.value })} className="rounded-xl" /></div>
+                </div>
+              </div>
+
               {/* Shipping address */}
               <div>
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Endereço de Entrega</p>
@@ -373,7 +392,7 @@ export default function Cart() {
 
               <Button
                 onClick={handleCheckout}
-                disabled={isProcessing || !isAddressValid}
+                disabled={isProcessing || !isAddressValid || !isCustomerValid}
                 className="w-full h-12 rounded-xl ceu-gradient text-white font-semibold"
               >
                 {isProcessing ? (
@@ -389,6 +408,7 @@ export default function Cart() {
                 )}
               </Button>
 
+              {checkoutError && <p className="text-sm text-center text-red-600">{checkoutError}</p>}
               <p className="text-xs text-center text-gray-400 flex items-center justify-center gap-1.5">
                 <ShieldCheck className="w-3.5 h-3.5" />
                 Compra protegida • Dados criptografados
