@@ -15,7 +15,7 @@ export default function TshirtMockup({ designImage, color = 'white', side = 'fro
     navy: { backgroundColor: '#1e3a8a', mixBlendMode: 'screen', opacity: 0.72 },
     gray: { backgroundColor: '#6b7280', mixBlendMode: 'screen', opacity: 0.55 }
   };
-  const shirtShape = 'polygon(29% 11%, 40% 7%, 44% 13%, 56% 13%, 60% 7%, 71% 11%, 87% 19%, 96% 30%, 86% 43%, 72% 37%, 72% 92%, 28% 92%, 28% 37%, 14% 43%, 4% 30%, 13% 19%)';
+  const shirtShape = 'polygon(29% 11%, 40% 7%, 44% 13%, 56% 13%, 60% 7%, 71% 11%, 87% 19%, 96% 30%, 86% 43%, 78% 39%, 78% 92%, 22% 92%, 22% 39%, 14% 43%, 4% 30%, 13% 19%)';
   const colorLabels = { white: 'branca', black: 'preta', navy: 'azul-marinho', gray: 'cinza' };
   const isBack = side === 'back';
   const designBlend = color === 'black' || color === 'navy' ? 'screen' : 'multiply';
