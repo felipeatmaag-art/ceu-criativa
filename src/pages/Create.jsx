@@ -32,6 +32,8 @@ import TshirtMockup from '@/components/create/TshirtMockup';
 import MugMockup from '@/components/create/MugMockup';
 import FrameMockup from '@/components/create/FrameMockup';
 import InteractiveMockupViewer from '@/components/create/InteractiveMockupViewer';
+import ArtworkSidesPanel from '@/components/create/ArtworkSidesPanel';
+import MockupStyleGenerator from '@/components/create/MockupStyleGenerator';
 
 const PRODUCTS = [
   { value: 'camiseta', label: 'Camiseta', icon: '👕' },
@@ -63,7 +65,14 @@ export default function Create() {
   const [selectedProduct, setSelectedProduct] = useState('camiseta');
   const [productColor, setProductColor] = useState('white');
   const [cart, setCart] = useState([]);
-  const [designTransform, setDesignTransform] = useState({ x: 0, y: 0, scale: 1, rotation: 0 });
+  const [backDesignImage, setBackDesignImage] = useState(null);
+  const [editorSide, setEditorSide] = useState('front');
+  const [designTransforms, setDesignTransforms] = useState({
+    front: { x: 0, y: 0, scale: 1, rotation: 0 },
+    back: { x: 0, y: 0, scale: 1, rotation: 0 }
+  });
+  const [generatedMockups, setGeneratedMockups] = useState([]);
+  const [mockupStyle, setMockupStyle] = useState('studio');
 
   const categories = [
   { value: 'abstrato', label: 'Abstrato' },
@@ -137,7 +146,7 @@ export default function Create() {
     try {
       const user = await base44.auth.me();
 
-      await base44.entities.Design.create({
+      const design = await base44.entities.Design.create({
         ...designData,
         image_url: selectedImage,
         artist_id: user.id,
@@ -148,7 +157,26 @@ export default function Create() {
         commission_rate: 30
       });
 
-      setStep(3);
+      if (generatedMockups.length) {
+        await base44.entities.Product.create({
+          name: designData.title,
+          type: selectedProduct,
+          design_id: design.id,
+          design_image: selectedImage,
+          ...(backDesignImage ? { back_design_image: backDesignImage } : {}),
+          base_price: productPrices[selectedProduct],
+          final_price: productPrices[selectedProduct],
+          mockup_url: generatedMockups[0].url,
+          mockup_gallery: generatedMockups.map((item) => item.url),
+          mockup_style: mockupStyle,
+          mockup_angles: generatedMockups.map((item) => item.angle),
+          colors_available: [productColor],
+          sizes_available: productSizes[selectedProduct],
+          is_active: true
+        });
+      }
+
+      navigate(createPageUrl('MyDesigns'));
     } catch (error) {
       console.error('Erro ao salvar:', error);
     }
@@ -207,6 +235,13 @@ export default function Create() {
 
 
   const stepLabels = ['Produto', 'Sua Arte', 'Finalizar'];
+  const activeTransform = designTransforms[editorSide];
+  const activeDesignImage = editorSide === 'back' ? backDesignImage : selectedImage;
+  const handleTransformChange = (nextTransform) => setDesignTransforms((current) => ({ ...current, [editorSide]: nextTransform }));
+  const handleMockupsGenerated = ({ style, items }) => {
+    setMockupStyle(style);
+    setGeneratedMockups(items);
+  };
 
   const renderMockup = (designImage, side = 'front') => {
     return (
@@ -423,11 +458,13 @@ export default function Create() {
                     >
                       <InteractiveMockupViewer
                         productType={selectedProduct}
-                        designImage={selectedImage}
+                        designImage={activeDesignImage}
                         color={productColor}
                         renderMockup={() => renderMockup(null)}
-                        transform={designTransform}
-                        onTransformChange={setDesignTransform}
+                        transform={activeTransform}
+                        onTransformChange={handleTransformChange}
+                        side={editorSide}
+                        onSideChange={setEditorSide}
                       />
                     </motion.div>
                   </AnimatePresence>
@@ -619,6 +656,14 @@ export default function Create() {
                 </motion.div>
                 }
 
+                {selectedImage && (
+                  <ArtworkSidesPanel
+                    frontImage={selectedImage}
+                    backImage={backDesignImage}
+                    onBackChange={setBackDesignImage}
+                  />
+                )}
+
                 {/* Continue */}
                 {selectedImage &&
               <motion.div
@@ -716,11 +761,13 @@ export default function Create() {
                       >
                         <InteractiveMockupViewer
                           productType={selectedProduct}
-                          designImage={selectedImage}
+                          designImage={activeDesignImage}
                           color={productColor}
                           renderMockup={() => renderMockup(null)}
-                          transform={designTransform}
-                          onTransformChange={setDesignTransform}
+                          transform={activeTransform}
+                          onTransformChange={handleTransformChange}
+                          side={editorSide}
+                          onSideChange={setEditorSide}
                         />
                       </motion.div>
                     </AnimatePresence>
@@ -792,6 +839,14 @@ export default function Create() {
                     className="h-11 rounded-xl" />
 
                   </div>
+
+                  <MockupStyleGenerator
+                    productType={selectedProduct}
+                    color={productColor}
+                    frontImage={selectedImage}
+                    backImage={backDesignImage}
+                    onGenerated={handleMockupsGenerated}
+                  />
 
                   <div className="bg-purple-50 rounded-2xl p-4">
                     <div className="flex items-center justify-between mb-2">

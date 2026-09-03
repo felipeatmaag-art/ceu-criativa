@@ -10,6 +10,7 @@
       "type": "string",
       "enum": [
         "camiseta",
+        "baby_look",
         "bone",
         "quadro",
         "caneca",
@@ -27,6 +28,10 @@
       "type": "string",
       "description": "URL da imagem do design"
     },
+    "back_design_image": {
+      "type": "string",
+      "description": "URL da arte aplicada nas costas"
+    },
     "base_price": {
       "type": "number",
       "description": "Pre\u00e7o base do produto"
@@ -37,7 +42,31 @@
     },
     "mockup_url": {
       "type": "string",
-      "description": "URL do mockup do produto"
+      "description": "URL principal do mockup"
+    },
+    "mockup_gallery": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Galeria de mockups gerados"
+    },
+    "mockup_style": {
+      "type": "string",
+      "enum": [
+        "studio",
+        "external",
+        "beige",
+        "artistic"
+      ],
+      "description": "Estilo visual dos mockups"
+    },
+    "mockup_angles": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "\u00c2ngulos dispon\u00edveis na galeria"
     },
     "colors_available": {
       "type": "array",

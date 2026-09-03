@@ -72,10 +72,18 @@ export default function InteractiveMockupViewer({
   renderMockup,
   transform,
   onTransformChange,
+  side: controlledSide,
+  onSideChange,
 }) {
-  const [side, setSide] = useState('front');
+  const [localSide, setLocalSide] = useState('front');
+  const side = controlledSide ?? localSide;
+  const setSide = (nextSide) => {
+    setLocalSide(nextSide);
+    onSideChange?.(nextSide);
+  };
   const [viewMode, setViewMode] = useState('2d'); // '2d' | '3d'
-  const [baseImage, setBaseImage] = useState(null);
+  const [baseImages, setBaseImages] = useState({ front: null, back: null });
+  const baseImage = baseImages[side];
   const [isUploadingBase, setIsUploadingBase] = useState(false);
   const [presets, setPresets] = useState({});
   const [showPresets, setShowPresets] = useState(false);
@@ -99,7 +107,7 @@ export default function InteractiveMockupViewer({
     try {
       const { base44 } = await import('@/api/base44Client');
       const result = await base44.integrations.Core.UploadFile({ file });
-      if (result?.file_url) setBaseImage(result.file_url);
+      if (result?.file_url) setBaseImages((images) => ({ ...images, [side]: result.file_url }));
     } catch (err) {
       console.error('Erro no upload da base:', err);
     }
