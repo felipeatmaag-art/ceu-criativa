@@ -36,6 +36,7 @@ import ArtworkSidesPanel from '@/components/create/ArtworkSidesPanel';
 import MockupStyleGenerator from '@/components/create/MockupStyleGenerator';
 import CatalogProductMockup from '@/components/create/CatalogProductMockup';
 import ProductColorSelector from '@/components/create/ProductColorSelector';
+import ProductSizeSelector from '@/components/create/ProductSizeSelector';
 
 const PRODUCTS = [
   { value: 'camiseta', label: 'Camiseta' },
@@ -71,6 +72,7 @@ export default function Create() {
   const [catalogProducts, setCatalogProducts] = useState([]);
   const [selectedCatalogId, setSelectedCatalogId] = useState(null);
   const [productColor, setProductColor] = useState('white');
+  const [selectedSize, setSelectedSize] = useState('');
   const [cart, setCart] = useState([]);
   const [backDesignImage, setBackDesignImage] = useState(null);
   const [editorSide, setEditorSide] = useState('front');
@@ -89,6 +91,7 @@ export default function Create() {
         setSelectedCatalogId(chosen.id);
         setSelectedProduct(chosen.type);
         setProductColor(chosen.product_color_variants?.[0]?.name || 'white');
+        setSelectedSize('');
       }
     });
   }, [requestedProduct]);
@@ -268,6 +271,7 @@ export default function Create() {
     setSelectedCatalogId(catalogProduct?.id || null);
     setSelectedProduct(catalogProduct?.type || value);
     setProductColor(catalogProduct?.product_color_variants?.[0]?.name || 'white');
+    setSelectedSize('');
   };
 
   const stepLabels = ['Produto', 'Sua Arte', 'Finalizar'];
@@ -387,6 +391,8 @@ export default function Create() {
                 <ProductColorSelector options={availableColors} value={productColor} onChange={setProductColor} />
                 }
 
+                <ProductSizeSelector options={currentSizes} value={selectedSize} onChange={setSelectedSize} />
+
                 <div className="bg-purple-50 rounded-2xl p-5">
                   <h3 className="font-bold text-gray-900 mb-1">
                     {selectedCatalogProduct?.name || PRODUCTS.find((p) => p.value === selectedProduct)?.label}
@@ -404,6 +410,7 @@ export default function Create() {
 
                 <Button
                   onClick={() => setStep(2)}
+                  disabled={!selectedSize}
                   className="w-full h-14 rounded-xl bg-ceu-navy text-ceu-cloud text-lg hover:bg-ceu-navy/90">
                   Continuar
                   <ArrowRight className="w-5 h-5 ml-2" />
