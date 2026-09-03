@@ -37,6 +37,7 @@ import MockupStyleGenerator from '@/components/create/MockupStyleGenerator';
 import CatalogProductMockup from '@/components/create/CatalogProductMockup';
 import ProductColorSelector from '@/components/create/ProductColorSelector';
 import ProductSizeSelector from '@/components/create/ProductSizeSelector';
+import { prepareGeneratedArtwork, prepareUploadedArtwork } from '@/components/create/preparePrintArtwork';
 
 const PRODUCTS = [
   { value: 'camiseta', label: 'Camiseta' },
@@ -53,6 +54,7 @@ export default function Create() {
   const [step, setStep] = useState(hasRequestedProduct ? 2 : 1);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadStage, setUploadStage] = useState('Enviando...');
   const [uploadError, setUploadError] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
@@ -128,12 +130,13 @@ export default function Create() {
 
     try {
       const result = await base44.integrations.Core.GenerateImage({
-        prompt: `Arte digital de alta qualidade pronta para impressão em ${selectedProduct}: ${aiPrompt}. Composição centralizada em formato quadrado, alta definição, fundo transparente ou sólido.`
+        prompt: `Arte digital de alta qualidade pronta para impressão em ${selectedProduct}: ${aiPrompt}. Composição centralizada em formato quadrado, alta definição, elemento isolado e fundo totalmente transparente. Sem mockup, cenário, sombras externas ou margens.`
       });
 
       if (result?.url) {
-        setGeneratedImages([result.url]);
-        setSelectedImage(result.url);
+        const pngUrl = await prepareGeneratedArtwork(result.url);
+        setGeneratedImages([pngUrl]);
+        setSelectedImage(pngUrl);
       }
     } catch (error) {
       console.error('Erro ao gerar imagem:', error);
@@ -160,8 +163,17 @@ export default function Create() {
       return;
     }
     setIsUploading(true);
-    const result = await base44.integrations.Core.UploadFile({ file });
-    if (result?.file_url) setSelectedImage(result.file_url);
+    setUploadStage('Enviando imagem...');
+    try {
+      const result = await base44.integrations.Core.UploadFile({ file });
+      if (result?.file_url) {
+        setUploadStage(file.type === 'image/jpeg' || /\.jpe?g$/i.test(file.name) ? 'Removendo fundo e preparando PNG...' : 'Preparando PNG...');
+        const pngUrl = await prepareUploadedArtwork(file, result.file_url);
+        setSelectedImage(pngUrl);
+      }
+    } catch (error) {
+      setUploadError(error.message || 'Não foi possível preparar a imagem.');
+    }
     setIsUploading(false);
   };
 
@@ -609,7 +621,7 @@ export default function Create() {
                         {isUploading ?
                       <div className="flex flex-col items-center">
                           <Loader2 className="w-10 h-10 text-purple-500 animate-spin mb-3" />
-                          <p className="text-purple-600 font-medium">Enviando...</p>
+                          <p className="text-purple-600 font-medium">{uploadStage}</p>
                         </div> :
 
                       <>
@@ -623,7 +635,7 @@ export default function Create() {
                             ou clique para selecionar
                           </p>
                           <p className="text-xs text-gray-400">
-                            PNG, JPG ou WEBP • mínimo 2000 × 2000 px • máximo 10 MB
+                            PNG, JPG ou WEBP • mínimo 2000 × 2000 px • máximo 10 MB<br />JPEG terá o fundo removido automaticamente • saída em PNG
                           </p>
                           {uploadError && <p className="mt-3 text-sm font-medium text-destructive">{uploadError}</p>}
                         </>
