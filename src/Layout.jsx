@@ -54,7 +54,7 @@ export default function Layout({ children, currentPageName }) {
   const navItems = [
   { name: 'Explorar', page: 'Explore', icon: Home },
   { name: 'Criar', page: 'Create', icon: Sparkles },
-  { name: 'Competições', page: 'Competitions', icon: Trophy },
+  { name: 'Concursos', page: 'Competitions', icon: Trophy },
   { name: 'Brindes', page: 'Brindes', icon: Gift },
   { name: 'Artistas', page: 'Artists', icon: Palette }];
 
@@ -425,7 +425,7 @@ export default function Layout({ children, currentPageName }) {
               <ul className="space-y-2 text-gray-400">
                 <li><Link to={createPageUrl('Explore')} className="hover:text-white transition-colors">Explorar</Link></li>
                 <li><Link to={createPageUrl('Create')} className="hover:text-white transition-colors">Criar Estampa</Link></li>
-                <li><Link to={createPageUrl('Competitions')} className="hover:text-white transition-colors">Competições</Link></li>
+                <li><Link to={createPageUrl('Competitions')} className="hover:text-white transition-colors">Concursos</Link></li>
                 <li><Link to={createPageUrl('Artists')} className="hover:text-white transition-colors">Artistas</Link></li>
               </ul>
             </div>

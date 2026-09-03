@@ -47,9 +47,9 @@ export default function CompetitionDetail() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">Competição não encontrada</h2>
+          <h2 className="text-2xl font-bold mb-4">Concurso não encontrado</h2>
           <Link to={createPageUrl('Competitions')}>
-            <Button>Voltar para Competições</Button>
+            <Button>Voltar para Concursos</Button>
           </Link>
         </div>
       </div>
@@ -138,7 +138,7 @@ export default function CompetitionDetail() {
               <ul className="space-y-3 text-gray-600">
                 <li className="flex items-start gap-2">
                   <span className="text-purple-600 mt-1">•</span>
-                  <span>O design deve seguir o tema da competição</span>
+                  <span>O design deve seguir o tema do concurso</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-purple-600 mt-1">•</span>

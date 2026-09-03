@@ -106,13 +106,13 @@ export default function Competitions() {
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-yellow-100 text-yellow-700 text-sm font-medium mb-4">
             <Trophy className="w-4 h-4" />
-            Competições
+            Concursos
           </div>
           <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
             Mostre seu Talento
           </h1>
           <p className="text-xl text-gray-500 max-w-2xl mx-auto">
-            Participe das nossas competições temáticas e concorra a prêmios incríveis
+            Participe dos nossos concursos temáticos e concorra a prêmios incríveis
           </p>
         </motion.div>
 
@@ -152,7 +152,7 @@ export default function Competitions() {
                   ))}
                 </div>
               ) : (
-                <EmptyState message="Nenhuma competição ativa no momento" />
+                <EmptyState message="Nenhum concurso ativo no momento" />
               )}
             </TabsContent>
 
@@ -164,7 +164,7 @@ export default function Competitions() {
                   ))}
                 </div>
               ) : (
-                <EmptyState message="Novas competições em breve!" />
+                <EmptyState message="Novos concursos em breve!" />
               )}
             </TabsContent>
 
@@ -176,12 +176,12 @@ export default function Competitions() {
                   ))}
                 </div>
               ) : (
-                <EmptyState message="Nenhuma competição encerrada ainda" />
+                <EmptyState message="Nenhum concurso encerrado ainda" />
               )}
             </TabsContent>
           </Tabs>
         ) : (
-          <EmptyState message="Nenhuma competição disponível" />
+          <EmptyState message="Nenhum concurso disponível" />
         )}
       </div>
     </div>
@@ -202,7 +202,7 @@ function EmptyState({ message }) {
         {message}
       </h3>
       <p className="text-gray-500">
-        Fique ligado para as próximas competições!
+        Fique ligado para os próximos concursos!
       </p>
     </motion.div>
   );
