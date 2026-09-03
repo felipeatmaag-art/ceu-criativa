@@ -3,20 +3,8 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { createPageUrl } from '@/utils';
-import { Sparkles, Cpu, Layers, Boxes, Zap, ArrowRight } from 'lucide-react';
-
-const STUDIO_IMAGES = [
-  {
-    url: 'https://media.base44.com/images/public/69431e0c00397efc6e14e9df/3622ebebb_AI_creation_studio_mockups_2K_20260814131222.jpeg',
-    label: 'Plataforma Genesis Studios',
-    caption: 'IA & 3D Mockups em tempo real',
-  },
-  {
-    url: 'https://media.base44.com/images/public/69431e0c00397efc6e14e9df/a49f28b1d_AI_creation_studio_mockups_2K_202608141308.jpeg',
-    label: 'Asset Engine v10.0',
-    caption: 'Renderização 4K de têxtil e produto',
-  },
-];
+import { Sparkles, Cpu, Layers, Boxes, Zap } from 'lucide-react';
+import StudioVisual from '@/components/home/StudioVisual';
 
 const CAPABILITIES = [
   { icon: Cpu, title: 'Geração por IA', description: 'Crie padrões únicos em segundos, do conceito ao arquivo final.' },
@@ -58,38 +46,7 @@ export default function CreationStudio() {
           </p>
         </motion.div>
 
-        {/* Studio Images */}
-        <div className="grid lg:grid-cols-2 gap-8 mb-16">
-          {STUDIO_IMAGES.map((img, i) => (
-            <motion.div
-              key={img.url}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.15 }}
-              className="group relative rounded-3xl overflow-hidden glass-effect hover-glow"
-            >
-              <div className="aspect-[4/3] overflow-hidden">
-                <img
-                  src={img.url}
-                  alt={img.label}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  loading="lazy"
-                />
-              </div>
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] via-transparent to-transparent pointer-events-none" />
-              <div className="absolute bottom-0 left-0 right-0 p-6 flex items-end justify-between">
-                <div>
-                  <p className="text-xs uppercase tracking-wider text-cyan-400 mb-1">{img.caption}</p>
-                  <h3 className="text-xl font-semibold text-white">{img.label}</h3>
-                </div>
-                <span className="w-10 h-10 rounded-full glass-effect flex items-center justify-center text-cyan-300 group-hover:bg-cyan-500 group-hover:text-white transition-colors">
-                  <ArrowRight className="w-5 h-5" />
-                </span>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+        <StudioVisual />
 
         {/* Capabilities */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-16">
