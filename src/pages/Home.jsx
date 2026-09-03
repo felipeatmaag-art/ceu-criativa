@@ -36,33 +36,34 @@ export default function Home() {
   const features = [
     {
       icon: Palette,
-      title: "IA Criativa",
-      description: "Gere estampas únicas com inteligência artificial de ponta"
+      title: "Criação",
+      description: "Crie com IA ou envie sua própria arte, sempre com controle autoral"
     },
     {
       icon: Users,
       title: "Comunidade",
-      description: "Conecte-se com artistas e amantes de arte do mundo todo"
+      description: "Conecte-se, compartilhe processos e cresça junto com outros artistas"
     },
     {
       icon: TrendingUp,
-      title: "Comissões Justas",
-      description: "Ganhe até 30% de comissão em cada venda dos seus designs"
+      title: "Monetização",
+      description: "Venda sem estoque e receba com transparência por cada criação"
     },
     {
       icon: Shield,
-      title: "Qualidade Premium",
-      description: "Produtos de alta qualidade impressos sob demanda"
+      title: "Materialização",
+      description: "Produção sob demanda com qualidade, cuidado e menos desperdício"
     }
   ];
 
   return (
-    <div>
+    <div className="bg-ceu-cloud text-ceu-navy">
       <HeroCarousel />
-      
-      <ProductShowcase />
-      
-      <BentoShowcase />
+
+      <div className="bg-ceu-navy">
+        <ProductShowcase />
+        <BentoShowcase />
+      </div>
       
       <FeaturedDesigns 
         designs={designs} 
@@ -89,7 +90,7 @@ export default function Home() {
       <Testimonials />
 
       {/* Features Section */}
-      <section className="py-24 bg-white">
+      <section className="py-24 bg-ceu-cloud">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -97,11 +98,12 @@ export default function Home() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl lg:text-5xl font-bold text-gray-900 mb-4">
-              Por que escolher a <span className="ceu-text-gradient">Céu</span>?
+            <span className="inline-block rounded-full bg-ceu-sky/30 px-4 py-2 text-sm font-bold text-ceu-navy mb-5">Nosso ecossistema</span>
+            <h2 className="text-3xl lg:text-5xl font-black tracking-tight text-ceu-navy mb-4">
+              Tudo começa com você.
             </h2>
-            <p className="text-xl text-gray-500 max-w-2xl mx-auto">
-              Uma plataforma criada por artistas, para artistas
+            <p className="text-xl text-ceu-navy/65 max-w-2xl mx-auto">
+              Da primeira ideia ao produto na rua, a Céu conecta criação, comunidade, renda e produção.
             </p>
           </motion.div>
 
@@ -115,15 +117,15 @@ export default function Home() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.1 }}
-                  className="text-center group"
+                  className="text-left group rounded-[2rem] bg-white p-7 border border-ceu-sky/25 shadow-sm"
                 >
-                  <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-purple-100 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                    <Icon className="w-8 h-8 text-purple-600" />
+                  <div className="w-14 h-14 mb-6 rounded-2xl bg-ceu-navy flex items-center justify-center group-hover:bg-ceu-aqua transition-colors duration-300">
+                    <Icon className="w-7 h-7 text-white" />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">
+                  <h3 className="text-xl font-bold text-ceu-navy mb-2">
                     {feature.title}
                   </h3>
-                  <p className="text-gray-500">
+                  <p className="text-ceu-navy/60 leading-relaxed">
                     {feature.description}
                   </p>
                 </motion.div>
@@ -134,10 +136,10 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-24 bg-gradient-to-br from-purple-600 via-purple-700 to-indigo-800 relative overflow-hidden">
+      <section className="py-24 bg-ceu-aqua relative overflow-hidden">
         <div className="absolute inset-0">
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-white/10 rounded-full blur-3xl" />
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-pink-500/20 rounded-full blur-3xl" />
+          <div className="absolute -top-24 left-1/4 w-96 h-96 bg-ceu-sky/40 rounded-full blur-3xl" />
+          <div className="absolute -bottom-32 right-1/4 w-96 h-96 bg-ceu-sun/35 rounded-full blur-3xl" />
         </div>
         
         <div className="relative max-w-4xl mx-auto px-4 text-center">
@@ -146,17 +148,17 @@ export default function Home() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-4xl lg:text-6xl font-bold text-white mb-6">
-              Pronto para criar?
+            <h2 className="text-4xl lg:text-6xl font-black tracking-tight text-ceu-navy mb-6">
+              O próximo produto autoral pode ser seu.
             </h2>
-            <p className="text-xl text-purple-100 mb-10 max-w-2xl mx-auto">
-              Junte-se a milhares de artistas que já estão ganhando dinheiro com suas criações
+            <p className="text-xl text-ceu-navy/70 mb-10 max-w-2xl mx-auto">
+              Crie, visualize e publique sua arte em poucos cliques. A Céu cuida do caminho até a entrega.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Link to={createPageUrl('Create')}>
                 <Button 
                   size="lg"
-                  className="bg-white text-purple-700 hover:bg-gray-100 rounded-2xl px-10 h-14 text-lg font-semibold"
+                  className="bg-ceu-navy text-white hover:bg-ceu-navy/90 rounded-full px-10 h-14 text-lg font-semibold"
                 >
                   Começar Agora
                 </Button>
@@ -165,7 +167,7 @@ export default function Home() {
                 <Button 
                   size="lg"
                   variant="outline"
-                  className="border-2 border-white text-white hover:bg-white/10 rounded-2xl px-10 h-14 text-lg font-semibold"
+                  className="border-2 border-ceu-navy text-ceu-navy hover:bg-white/20 rounded-full px-10 h-14 text-lg font-semibold"
                 >
                   Explorar Estampas
                 </Button>

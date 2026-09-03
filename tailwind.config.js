@@ -41,6 +41,12 @@ module.exports = {
   				foreground: 'hsl(var(--destructive-foreground))'
   			},
   			border: 'hsl(var(--border))',
+			'ceu-sky': 'hsl(var(--ceu-sky))',
+			'ceu-aqua': 'hsl(var(--ceu-aqua))',
+			'ceu-navy': 'hsl(var(--ceu-navy))',
+			'ceu-sun': 'hsl(var(--ceu-sun))',
+			'ceu-coral': 'hsl(var(--ceu-coral))',
+			'ceu-cloud': 'hsl(var(--ceu-cloud))',
   			input: 'hsl(var(--input))',
   			ring: 'hsl(var(--ring))',
   			chart: {
