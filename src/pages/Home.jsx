@@ -14,6 +14,7 @@ import CompetitionBanner from '@/components/home/CompetitionBanner';
 import ReferralProgram from '@/components/home/ReferralProgram';
 import Testimonials from '@/components/home/Testimonials';
 import ArtistSpotlight from '@/components/home/ArtistSpotlight';
+import EcoPackaging from '@/components/home/EcoPackaging';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -134,6 +135,8 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <EcoPackaging />
 
       {/* CTA Section */}
       <section className="py-24 bg-ceu-navy relative overflow-hidden">
