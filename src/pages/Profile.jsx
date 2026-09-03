@@ -20,6 +20,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import FinancialDashboard from '@/components/financial/FinancialDashboard';
 import StoreBrandingFields from '@/components/profile/StoreBrandingFields';
 import StoreContactFields from '@/components/profile/StoreContactFields';
+import ProfileTabs from '@/components/profile/ProfileTabs';
+import CatalogTab from '@/components/profile/CatalogTab';
+import BatchUploadTab from '@/components/profile/BatchUploadTab';
+import PriceEditorTab from '@/components/profile/PriceEditorTab';
+import StorePreviewTab from '@/components/profile/StorePreviewTab';
 
 export default function Profile() {
   const queryClient = useQueryClient();
@@ -29,11 +34,20 @@ export default function Profile() {
     artist_commission_rate: 25
   });
   const [isUploading, setIsUploading] = useState(false);
+  const [activeTab, setActiveTab] = useState('profile');
 
   const { data: user, isLoading } = useQuery({
     queryKey: ['currentUser'],
     queryFn: () => base44.auth.me(),
   });
+
+  const { data: artistDesigns = [], isLoading: isLoadingDesigns } = useQuery({
+    queryKey: ['profile-designs', user?.id],
+    queryFn: () => base44.entities.Design.filter({ artist_id: user.id }, '-created_date', 100),
+    enabled: !!user?.id,
+  });
+  const publishedDesigns = artistDesigns.filter((design) => design.status === 'aprovado');
+  const refreshDesigns = () => queryClient.invalidateQueries({ queryKey: ['profile-designs', user?.id] });
 
   useEffect(() => {
     if (user) {
@@ -89,7 +103,7 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-50/50 to-white py-12">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -103,9 +117,11 @@ export default function Profile() {
           </p>
         </motion.div>
 
-        <FinancialDashboard />
+        <ProfileTabs active={activeTab} onChange={setActiveTab} publishedCount={publishedDesigns.length} />
 
-        <div className="grid lg:grid-cols-3 gap-8">
+        {activeTab === 'sales' && <FinancialDashboard />}
+
+        {activeTab === 'profile' && <div className="grid lg:grid-cols-3 gap-8">
           {/* Stats Cards */}
           <div className="lg:col-span-1 space-y-4">
             <Card>
@@ -308,7 +324,11 @@ export default function Profile() {
               </CardContent>
             </Card>
           </div>
-        </div>
+        </div>}
+        {activeTab === 'catalog' && <CatalogTab designs={publishedDesigns} isLoading={isLoadingDesigns} />}
+        {activeTab === 'upload' && <BatchUploadTab user={user} onComplete={refreshDesigns} />}
+        {activeTab === 'prices' && <PriceEditorTab designs={publishedDesigns} onComplete={refreshDesigns} />}
+        {activeTab === 'preview' && <StorePreviewTab user={user} designs={publishedDesigns} />}
       </div>
     </div>
   );
