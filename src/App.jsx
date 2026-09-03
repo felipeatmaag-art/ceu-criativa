@@ -53,7 +53,6 @@ const AuthenticatedApp = () => {
           <MainPage />
         </LayoutWrapper>
       } />
-      <Route path="/oauth/consent" element={<OAuthConsent />} />
       <Route path="/CheckoutSuccess" element={
         <LayoutWrapper currentPageName="CheckoutSuccess">
           <CheckoutSuccess />
@@ -93,7 +92,10 @@ function App() {
       <QueryClientProvider client={queryClientInstance}>
         <Router>
           <NavigationTracker />
-          <AuthenticatedApp />
+          <Routes>
+            <Route path="/oauth/consent" element={<OAuthConsent />} />
+            <Route path="/*" element={<AuthenticatedApp />} />
+          </Routes>
         </Router>
         <Toaster />
         <VisualEditAgent />
