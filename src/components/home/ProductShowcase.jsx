@@ -7,32 +7,32 @@ export default function ProductShowcase() {
 
   const mockups = [
     {
-      image: "https://media.base44.com/images/public/69431e0c00397efc6e14e9df/3622ebebb_AI_creation_studio_mockups_2K_20260814131222.jpeg",
+      image: "https://media.base44.com/images/public/69431e0c00397efc6e14e9df/6c96fe84d_generated_image.png",
       person: "Pedro Martins",
       design: "Ilustrador digital"
     },
     {
-      image: "https://media.base44.com/images/public/69431e0c00397efc6e14e9df/bbbd59412_Seamstress_sewing_tag_on_shirt_202608132018.jpeg",
+      image: "https://media.base44.com/images/public/69431e0c00397efc6e14e9df/c06b9e096_generated_image.png",
       person: "Helena Costa",
       design: "Artista têxtil"
     },
     {
-      image: "https://media.base44.com/images/public/69431e0c00397efc6e14e9df/864130525_Man_smiling_at_smartphone_screen_202608171950jpeg_202608172008-Copia.jpeg",
+      image: "https://media.base44.com/images/public/69431e0c00397efc6e14e9df/8cf1d4a39_generated_image.png",
       person: "José Andrade",
       design: "Tatuador e desenhista"
     },
     {
-      image: "https://media.base44.com/images/public/69431e0c00397efc6e14e9df/029ad947b_Artisans_personalizing_customize_202608181036.jpeg",
+      image: "https://media.base44.com/images/public/69431e0c00397efc6e14e9df/36e125828_generated_image.png",
       person: "Marina Alves",
       design: "Designer de estampas"
     },
     {
-      image: "https://media.base44.com/images/public/69431e0c00397efc6e14e9df/72e5f4157_Customers_browsing_in_clothing_s_202608181052.jpeg",
+      image: "https://media.base44.com/images/public/69431e0c00397efc6e14e9df/a727149e8_generated_image.png",
       person: "Camila Rocha",
       design: "Artista visual"
     },
     {
-      image: "https://media.base44.com/images/public/69431e0c00397efc6e14e9df/24c9709df_Merchandise_displayed_in_clothin_202608181036.jpeg",
+      image: "https://media.base44.com/images/public/69431e0c00397efc6e14e9df/7a5d3a418_generated_image.png",
       person: "Rafael Nunes",
       design: "Serigrafista"
     }
