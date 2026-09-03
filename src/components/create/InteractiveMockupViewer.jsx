@@ -44,7 +44,8 @@ function SliderControl({ label, value, min, max, step, unit, onChange }) {
         min={min} max={max} step={step}
         value={value}
         onChange={(e) => onChange(parseFloat(e.target.value))}
-        className="w-full h-1.5 appearance-none rounded-full cursor-pointer
+        className="w-full h-2 sm:h-1.5 appearance-none rounded-full cursor-pointer touch-pan-x
+                   [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 sm:[&::-webkit-slider-thumb]:w-4 sm:[&::-webkit-slider-thumb]:h-4
                    bg-neutral-800
                    [&::-webkit-slider-thumb]:appearance-none
                    [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4
@@ -80,6 +81,11 @@ export default function InteractiveMockupViewer({
   const [showPresets, setShowPresets] = useState(false);
   const [presetName, setPresetName] = useState('');
   const fileInputRef = useRef(null);
+  const designRef = useRef(null);
+  const pointersRef = useRef(new Map());
+  const gestureRef = useRef(null);
+  const frameRef = useRef(null);
+  const liveTransformRef = useRef(transform);
 
   useEffect(() => {
     setPresets(loadPresets());
@@ -105,6 +111,71 @@ export default function InteractiveMockupViewer({
   const setRotation = (v) => onTransformChange({ ...transform, rotation: v });
   const setOffsetX = (v) => onTransformChange({ ...transform, x: v });
   const setOffsetY = (v) => onTransformChange({ ...transform, y: v });
+
+  const paintTransform = useCallback((next) => {
+    liveTransformRef.current = next;
+    if (frameRef.current) return;
+    frameRef.current = requestAnimationFrame(() => {
+      frameRef.current = null;
+      if (!designRef.current) return;
+      designRef.current.style.transform = `translate(-50%, -50%) translate3d(${next.x}px, ${next.y}px, 0) scale(${next.scale}) rotate(${next.rotation}deg)`;
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!gestureRef.current) paintTransform(transform);
+  }, [transform, paintTransform]);
+
+  useEffect(() => () => frameRef.current && cancelAnimationFrame(frameRef.current), []);
+
+  const rebaseGesture = useCallback(() => {
+    const points = [...pointersRef.current.values()];
+    if (!points.length) {
+      gestureRef.current = null;
+      return;
+    }
+    const center = points.reduce((acc, point) => ({ x: acc.x + point.x / points.length, y: acc.y + point.y / points.length }), { x: 0, y: 0 });
+    const distance = points.length > 1 ? Math.hypot(points[0].x - points[1].x, points[0].y - points[1].y) : 0;
+    gestureRef.current = { center, distance, transform: { ...liveTransformRef.current } };
+  }, []);
+
+  const handlePointerDown = useCallback((event) => {
+    event.preventDefault();
+    event.currentTarget.setPointerCapture(event.pointerId);
+    pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    rebaseGesture();
+  }, [rebaseGesture]);
+
+  const handlePointerMove = useCallback((event) => {
+    if (!pointersRef.current.has(event.pointerId) || !gestureRef.current) return;
+    event.preventDefault();
+    pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    const points = [...pointersRef.current.values()];
+    const center = points.reduce((acc, point) => ({ x: acc.x + point.x / points.length, y: acc.y + point.y / points.length }), { x: 0, y: 0 });
+    const start = gestureRef.current;
+    let scale = start.transform.scale;
+    if (points.length > 1 && start.distance > 0) {
+      const distance = Math.hypot(points[0].x - points[1].x, points[0].y - points[1].y);
+      scale = Math.min(2.5, Math.max(0.1, start.transform.scale * distance / start.distance));
+    }
+    paintTransform({
+      ...start.transform,
+      x: start.transform.x + center.x - start.center.x,
+      y: start.transform.y + center.y - start.center.y,
+      scale,
+    });
+  }, [paintTransform]);
+
+  const handlePointerEnd = useCallback((event) => {
+    if (!pointersRef.current.has(event.pointerId)) return;
+    pointersRef.current.delete(event.pointerId);
+    if (pointersRef.current.size) {
+      rebaseGesture();
+      return;
+    }
+    gestureRef.current = null;
+    onTransformChange({ ...liveTransformRef.current });
+  }, [onTransformChange, rebaseGesture]);
 
   const scalePct = Math.round(transform.scale * 100);
   const rotDeg = Math.round(transform.rotation);
@@ -235,12 +306,20 @@ export default function InteractiveMockupViewer({
             {/* Estampa sobreposta */}
             {designImage && (
               <div
-                className="absolute z-10 touch-none"
+                ref={designRef}
+                className="absolute z-10 touch-none cursor-grab active:cursor-grabbing select-none"
+                onPointerDown={handlePointerDown}
+                onPointerMove={handlePointerMove}
+                onPointerUp={handlePointerEnd}
+                onPointerCancel={handlePointerEnd}
                 style={{
                   left: '50%',
                   top: '50%',
-                  transform: `translate(-50%, -50%) translate(${offsetX}px, ${offsetY}px) scale(${transform.scale}) rotate(${rotDeg}deg)`,
-                  transition: 'transform 0.15s ease-out',
+                  transform: `translate(-50%, -50%) translate3d(${offsetX}px, ${offsetY}px, 0) scale(${transform.scale}) rotate(${rotDeg}deg)`,
+                  transformOrigin: 'center',
+                  willChange: 'transform',
+                  WebkitUserSelect: 'none',
+                  WebkitTouchCallout: 'none',
                 }}
               >
                 <img
