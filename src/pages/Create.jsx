@@ -38,6 +38,7 @@ import CatalogProductMockup from '@/components/create/CatalogProductMockup';
 import ProductColorSelector from '@/components/create/ProductColorSelector';
 import ProductSizeSelector from '@/components/create/ProductSizeSelector';
 import { prepareGeneratedArtwork, prepareUploadedArtwork } from '@/components/create/preparePrintArtwork';
+import BackArtworkGenerator from '@/components/create/BackArtworkGenerator';
 
 const PRODUCTS = [
   { value: 'camiseta', label: 'Camiseta' },
@@ -310,7 +311,7 @@ export default function Create() {
 
   return (
     <div className="min-h-screen bg-ceu-cloud py-12">
-      <div className="max-w-7xl mx-auto px-4">
+      <div className={`${step === 2 && selectedImage ? 'max-w-screen-2xl' : 'max-w-7xl'} mx-auto px-4`}>
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -455,13 +456,13 @@ export default function Create() {
               </Button>
             </div>
 
-            <div className="grid lg:grid-cols-2 gap-8">
+            <div className={`grid gap-8 ${selectedImage ? 'xl:grid-cols-[minmax(0,2fr)_minmax(24rem,1fr)]' : 'lg:grid-cols-2'}`}>
               {/* Mockup with applied design */}
               <div>
                 <Label className="text-base font-semibold mb-3 block text-gray-900">
                   Pré-visualização
                 </Label>
-                <div className="relative aspect-square rounded-3xl overflow-hidden bg-[#F5F5F7] shadow-sm">
+                <div className={`relative rounded-3xl bg-[#F5F5F7] shadow-sm ${selectedImage ? '' : 'aspect-square overflow-hidden'}`}>
                   <AnimatePresence mode="wait">
                     <motion.div
                       key={selectedProduct + productColor}
@@ -673,11 +674,19 @@ export default function Create() {
                 }
 
                 {selectedImage && (selectedProduct === 'camiseta' || selectedProduct === 'baby_look') && (
-                  <ArtworkSidesPanel
-                    frontImage={selectedImage}
-                    backImage={backDesignImage}
-                    onBackChange={setBackDesignImage}
-                  />
+                  <>
+                    <ArtworkSidesPanel
+                      frontImage={selectedImage}
+                      backImage={backDesignImage}
+                      onBackChange={setBackDesignImage}
+                    />
+                    <BackArtworkGenerator
+                      frontImage={selectedImage}
+                      description={aiPrompt}
+                      backImage={backDesignImage}
+                      onGenerated={setBackDesignImage}
+                    />
+                  </>
                 )}
 
                 {/* Continue */}

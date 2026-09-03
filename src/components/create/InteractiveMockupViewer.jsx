@@ -35,8 +35,8 @@ function SliderControl({ label, value, min, max, step, unit, onChange }) {
   return (
     <div>
       <div className="flex items-center justify-between mb-1.5">
-        <span className="text-[10px] font-bold tracking-widest text-gray-500 uppercase">{label}</span>
-        <span className="text-xs font-semibold text-white tabular-nums">
+        <span className="text-xs font-bold tracking-widest text-ceu-navy/55 uppercase">{label}</span>
+        <span className="text-sm font-semibold text-ceu-navy tabular-nums">
           {Math.round(value)}{unit}
         </span>
       </div>
@@ -45,20 +45,19 @@ function SliderControl({ label, value, min, max, step, unit, onChange }) {
         min={min} max={max} step={step}
         value={value}
         onChange={(e) => onChange(parseFloat(e.target.value))}
-        className="w-full h-2 sm:h-1.5 appearance-none rounded-full cursor-pointer touch-pan-x
-                   [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 sm:[&::-webkit-slider-thumb]:w-4 sm:[&::-webkit-slider-thumb]:h-4
-                   bg-neutral-800
+        className="w-full h-2.5 appearance-none rounded-full cursor-pointer touch-pan-x
+                   bg-ceu-navy/15
                    [&::-webkit-slider-thumb]:appearance-none
-                   [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4
+                   [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6
                    [&::-webkit-slider-thumb]:rounded-full
-                   [&::-webkit-slider-thumb]:bg-[#ff6600]
+                   [&::-webkit-slider-thumb]:bg-ceu-aqua
                    [&::-webkit-slider-thumb]:cursor-pointer
-                   [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:shadow-orange-500/30
-                   [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-orange-400
-                   [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4
+                   [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:shadow-ceu-aqua/30
+                   [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-ceu-cloud
+                   [&::-moz-range-thumb]:w-6 [&::-moz-range-thumb]:h-6
                    [&::-moz-range-thumb]:rounded-full
-                   [&::-moz-range-thumb]:bg-[#ff6600]
-                   [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-orange-400
+                   [&::-moz-range-thumb]:bg-ceu-aqua
+                   [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-ceu-cloud
                    [&::-moz-range-thumb]:cursor-pointer"
         style={{ accentColor: ACCENT }}
       />
@@ -236,24 +235,24 @@ export default function InteractiveMockupViewer({
   const currentPresets = presets[`${productType}_${side}`] || [];
 
   return (
-    <div className="w-full h-full bg-[#0f0f0f] rounded-2xl overflow-hidden flex flex-col">
-      <div className="flex items-center justify-between gap-3 border-b border-neutral-800/60 px-4 py-3">
+    <div className="w-full h-full bg-card rounded-2xl border border-ceu-navy/10 shadow-sm overflow-hidden flex flex-col">
+      <div className="flex items-center justify-between gap-3 border-b border-ceu-navy/10 px-5 py-4">
         {isApparel ? (
-          <div className="flex gap-1 rounded-full bg-neutral-900 p-1">
-            <button onClick={() => setSide('front')} className={`rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wider ${side === 'front' ? 'bg-neutral-100 text-neutral-950' : 'text-gray-500'}`}>Frente</button>
-            <button onClick={() => setSide('back')} className={`rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wider ${side === 'back' ? 'bg-neutral-100 text-neutral-950' : 'text-gray-500'}`}>Costas</button>
+          <div className="flex gap-1 rounded-full bg-ceu-navy/5 p-1">
+            <button onClick={() => setSide('front')} className={`rounded-full px-5 py-2.5 text-xs font-bold uppercase tracking-wider ${side === 'front' ? 'bg-ceu-navy text-ceu-cloud' : 'text-ceu-navy/50'}`}>Frente</button>
+            <button onClick={() => setSide('back')} className={`rounded-full px-5 py-2.5 text-xs font-bold uppercase tracking-wider ${side === 'back' ? 'bg-ceu-navy text-ceu-cloud' : 'text-ceu-navy/50'}`}>Costas</button>
           </div>
         ) : (
           <span className="rounded-full border border-neutral-700 px-4 py-2 text-xs font-bold uppercase tracking-wider text-gray-300">{isMug ? 'Visualização 360°' : 'Vista frontal'}</span>
         )}
-        <div className="ml-auto flex items-center gap-2 text-[10px] uppercase tracking-widest text-gray-500">
+        <div className="ml-auto flex items-center gap-2 text-[10px] uppercase tracking-widest text-ceu-navy/50">
           {isMug ? <MoveHorizontal className="h-4 w-4" /> : <GalleryHorizontalEnd className="h-4 w-4" />}
           {isMug ? 'Arraste para girar' : PRODUCT_LABELS[productType]}
         </div>
       </div>
 
       {/* Área de preview */}
-      <div className="flex-1 relative min-h-[280px] flex items-center justify-center p-4">
+      <div className="flex-1 relative min-h-[420px] lg:min-h-[640px] flex items-center justify-center p-6">
         {/* Modo 3D — rotação 360° por arraste */}
         {viewMode === '3d' ? (
           <div className="absolute inset-0">
@@ -317,7 +316,7 @@ export default function InteractiveMockupViewer({
                 <img src={designImage} alt="Estampa" draggable={false} className="max-h-[60%] max-w-[60%] select-none object-contain pointer-events-none" />
               </div>
             )}
-            <button onClick={() => fileInputRef.current?.click()} disabled={isUploadingBase} className="absolute right-3 top-3 z-20 flex items-center gap-2 rounded-full border border-neutral-700 bg-neutral-950/80 px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-gray-400" title="Usar foto própria do produto">
+            <button onClick={() => fileInputRef.current?.click()} disabled={isUploadingBase} className="absolute right-3 top-3 z-20 flex items-center gap-2 rounded-full border border-ceu-navy/15 bg-card/90 px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-ceu-navy/60 shadow-sm" title="Usar foto própria do produto">
               <Upload className="h-3.5 w-3.5" /> Base própria
             </button>
           </>
@@ -327,7 +326,7 @@ export default function InteractiveMockupViewer({
         {baseImage && (
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="absolute top-2 right-2 z-20 w-8 h-8 rounded-lg bg-neutral-900/80 hover:bg-[#ff6600] flex items-center justify-center transition-colors"
+            className="absolute top-2 right-2 z-20 w-9 h-9 rounded-xl bg-card/90 hover:bg-ceu-aqua flex items-center justify-center border border-ceu-navy/10 shadow-sm transition-colors"
             title="Trocar peça base"
           >
             <Upload className="w-4 h-4 text-gray-400" />
@@ -344,8 +343,8 @@ export default function InteractiveMockupViewer({
 
       {/* Painel de controles — 4 sliders (apenas 2D) */}
       {viewMode === '2d' && designImage && (
-        <div className="px-4 py-3 border-t border-neutral-800/60 space-y-3">
-          <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+        <div className="px-6 py-5 border-t border-ceu-navy/10 space-y-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5">
             <SliderControl
               label="Escala da estampa"
               value={scalePct}
@@ -377,17 +376,17 @@ export default function InteractiveMockupViewer({
           </div>
 
           {/* Presets */}
-          <div className="pt-2 border-t border-neutral-800/60">
+          <div className="pt-4 border-t border-ceu-navy/10">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-1.5">
-                <History className="w-3.5 h-3.5 text-gray-500" />
-                <span className="text-[10px] font-bold tracking-widest text-gray-500 uppercase">
+                <History className="w-3.5 h-3.5 text-ceu-navy/50" />
+                <span className="text-[10px] font-bold tracking-widest text-ceu-navy/50 uppercase">
                   Presets de posição
                 </span>
               </div>
               <button
                 onClick={() => setShowPresets(!showPresets)}
-                className="text-[10px] text-gray-500 hover:text-[#ff6600] uppercase tracking-wider font-semibold"
+                className="text-[10px] text-ceu-navy/50 hover:text-ceu-aqua uppercase tracking-wider font-semibold"
               >
                 {showPresets ? 'Ocultar' : 'Ver'} ({currentPresets.length})
               </button>
@@ -401,12 +400,12 @@ export default function InteractiveMockupViewer({
                 value={presetName}
                 onChange={(e) => setPresetName(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSavePreset()}
-                className="flex-1 h-8 px-3 rounded-lg bg-neutral-900 border border-neutral-800 text-xs text-white placeholder:text-gray-600 focus:outline-none focus:border-[#ff6600]/50"
+                className="flex-1 h-10 px-3 rounded-xl bg-card border border-ceu-navy/15 text-sm text-ceu-navy placeholder:text-ceu-navy/35 focus:outline-none focus:border-ceu-aqua"
               />
               <button
                 onClick={handleSavePreset}
                 disabled={!presetName.trim()}
-                className="h-8 px-3 rounded-lg border border-neutral-700 hover:border-[#ff6600] hover:text-[#ff6600] text-gray-400 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                className="h-10 px-4 rounded-xl border border-ceu-navy/15 hover:border-ceu-aqua hover:text-ceu-aqua text-ceu-navy/60 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 <Save className="w-3 h-3" />
                 Salvar
