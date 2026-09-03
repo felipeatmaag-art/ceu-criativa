@@ -10,6 +10,7 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import CheckoutSuccess from '@/pages/CheckoutSuccess';
+import OAuthConsent from '@/pages/OAuthConsent';
 import ProductAdmin from '@/pages/ProductAdmin';
 import Storefront from '@/pages/Storefront';
 
@@ -52,6 +53,7 @@ const AuthenticatedApp = () => {
           <MainPage />
         </LayoutWrapper>
       } />
+      <Route path="/oauth/consent" element={<OAuthConsent />} />
       <Route path="/CheckoutSuccess" element={
         <LayoutWrapper currentPageName="CheckoutSuccess">
           <CheckoutSuccess />
