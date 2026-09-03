@@ -7,7 +7,7 @@ import { Sparkles, Cpu, Layers, Boxes, Zap, ArrowRight } from 'lucide-react';
 
 const STUDIO_IMAGES = [
   {
-    url: 'https://media.base44.com/images/public/69431e0c00397efc6e14e9df/81a7eef58_AI_creation_studio_mockups_202608141301.jpeg',
+    url: 'https://media.base44.com/images/public/69431e0c00397efc6e14e9df/3622ebebb_AI_creation_studio_mockups_2K_20260814131222.jpeg',
     label: 'Plataforma Genesis Studios',
     caption: 'IA & 3D Mockups em tempo real',
   },

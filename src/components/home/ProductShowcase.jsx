@@ -7,34 +7,34 @@ export default function ProductShowcase() {
 
   const mockups = [
     {
-      image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800",
-      person: "Jovem Criativa",
-      design: "Arte Urbana"
+      image: "https://media.base44.com/images/public/69431e0c00397efc6e14e9df/24c9709df_Merchandise_displayed_in_clothin_202608181036.jpeg",
+      person: "Céu Criativa",
+      design: "Marca que ganha espaço"
     },
     {
-      image: "https://media.base44.com/images/public/69431e0c00397efc6e14e9df/81a7eef58_AI_creation_studio_mockups_202608141301.jpeg",
-      person: "Artista Digital",
-      design: "Geometria Moderna"
+      image: "https://media.base44.com/images/public/69431e0c00397efc6e14e9df/029ad947b_Artisans_personalizing_customize_202608181036.jpeg",
+      person: "Rede de Produtores",
+      design: "Produção com propósito"
     },
     {
-      image: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800",
-      person: "Designer de Moda",
-      design: "Natureza Abstrata"
+      image: "https://media.base44.com/images/public/69431e0c00397efc6e14e9df/72e5f4157_Customers_browsing_in_clothing_s_202608181052.jpeg",
+      person: "Comunidade Céu",
+      design: "Arte no mundo real"
     },
     {
-      image: "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=800",
-      person: "Ilustrador",
-      design: "Força Feminina"
+      image: "https://media.base44.com/images/public/69431e0c00397efc6e14e9df/3e0a97ac8_WhatsAppImage2026-08-17at214509.jpeg",
+      person: "Experiência Céu",
+      design: "Da criação à entrega"
     },
     {
-      image: "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=800",
-      person: "Street Artist",
-      design: "Cultura Pop"
+      image: "https://media.base44.com/images/public/69431e0c00397efc6e14e9df/bbbd59412_Seamstress_sewing_tag_on_shirt_202608132018.jpeg",
+      person: "Feito por pessoas",
+      design: "Cuidado em cada detalhe"
     },
     {
-      image: "https://images.unsplash.com/photo-1562157873-818bc0726f68?w=800",
-      person: "Artista Visual",
-      design: "Minimalismo"
+      image: "https://media.base44.com/images/public/69431e0c00397efc6e14e9df/4791d6c1f_Dashboard_app_showing_earnings_g_202608161225-Copia.jpeg",
+      person: "Painel do Artista",
+      design: "Controle e monetização"
     }
   ];
 
@@ -64,10 +64,10 @@ export default function ProductShowcase() {
             Vista a Arte
           </span>
           <h2 className="text-3xl lg:text-5xl font-bold text-white mb-4">
-            Suas Estampas em Pessoas Reais
+            Da Ideia ao Mundo Real
           </h2>
           <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-            Cada camiseta conta uma história. Veja como suas artes ganham vida
+            Criação, produção, venda e entrega conectadas em uma única jornada
           </p>
         </motion.div>
 

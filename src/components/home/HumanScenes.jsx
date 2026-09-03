@@ -4,19 +4,19 @@ import { Scissors, Smartphone, Store } from 'lucide-react';
 
 const scenes = [
   {
-    image: 'https://media.base44.com/images/public/69431e0c00397efc6e14e9df/67a1035e2_Seamstress_sewing_tag_on_shirt_202608132018.jpeg',
+    image: 'https://media.base44.com/images/public/69431e0c00397efc6e14e9df/bbbd59412_Seamstress_sewing_tag_on_shirt_202608132018.jpeg',
     icon: Scissors,
     title: 'Feito à mão, com cuidado',
     text: 'Cada peça carrega o toque de quem a produziu — do ateliê até a sua porta.',
   },
   {
-    image: 'https://media.base44.com/images/public/69431e0c00397efc6e14e9df/46723f304_Man_looking_at_smartphone_screen_202608131924.jpeg',
+    image: 'https://media.base44.com/images/public/69431e0c00397efc6e14e9df/864130525_Man_smiling_at_smartphone_screen_202608171950jpeg_202608172008-Copia.jpeg',
     icon: Smartphone,
     title: 'Seu estúdio no bolso',
     text: 'Acompanhe vendas, saldo e pontos de fidelidade de onde estiver.',
   },
   {
-    image: 'https://media.base44.com/images/public/69431e0c00397efc6e14e9df/f34d3a16d_Man_watching_t-shirt_printing_202608131923.jpeg',
+    image: 'https://media.base44.com/images/public/69431e0c00397efc6e14e9df/029ad947b_Artisans_personalizing_customize_202608181036.jpeg',
     icon: Store,
     title: 'A Céu no mundo real',
     text: 'Pop-ups e experiências que levam a sua arte para além da tela.',

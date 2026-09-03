@@ -13,7 +13,7 @@ const SLIDES = [
     cta: 'Criar minha estampa',
     ctaLink: 'Create',
     icon: Palette,
-    image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=1200',
+    image: 'https://media.base44.com/images/public/69431e0c00397efc6e14e9df/d745a5f29_Clothing_warehouse_and_modern_fa_2026081520441-Copia.jpeg',
     accent: 'bg-ceu-sun',
   },
   {
@@ -23,7 +23,7 @@ const SLIDES = [
     cta: 'Criar com IA',
     ctaLink: 'Create',
     icon: Sparkles,
-    image: 'https://media.base44.com/images/public/69431e0c00397efc6e14e9df/81a7eef58_AI_creation_studio_mockups_202608141301.jpeg',
+    image: 'https://media.base44.com/images/public/69431e0c00397efc6e14e9df/3622ebebb_AI_creation_studio_mockups_2K_20260814131222.jpeg',
     accent: 'bg-ceu-aqua',
   },
   {
@@ -33,7 +33,7 @@ const SLIDES = [
     cta: 'Ver competições',
     ctaLink: 'Competitions',
     icon: Trophy,
-    image: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=1200',
+    image: 'https://media.base44.com/images/public/69431e0c00397efc6e14e9df/029ad947b_Artisans_personalizing_customize_202608181036.jpeg',
     accent: 'bg-ceu-coral',
   },
   {
@@ -43,7 +43,7 @@ const SLIDES = [
     cta: 'Começar agora',
     ctaLink: 'Create',
     icon: Gift,
-    image: 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=1200',
+    image: 'https://media.base44.com/images/public/69431e0c00397efc6e14e9df/864130525_Man_smiling_at_smartphone_screen_202608171950jpeg_202608172008-Copia.jpeg',
     accent: 'bg-ceu-sun',
   },
 ];

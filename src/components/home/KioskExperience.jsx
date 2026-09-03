@@ -26,7 +26,7 @@ export default function KioskExperience() {
             className="relative rounded-3xl overflow-hidden glass-card"
           >
             <img
-              src="https://media.base44.com/images/public/69431e0c00397efc6e14e9df/f34d3a16d_Man_watching_t-shirt_printing_202608131923.jpeg"
+              src="https://media.base44.com/images/public/69431e0c00397efc6e14e9df/72e5f4157_Customers_browsing_in_clothing_s_202608181052.jpeg"
               alt="Quiosque Céu em shopping"
               className="w-full aspect-[4/3] object-cover"
             />
