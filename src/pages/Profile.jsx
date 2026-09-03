@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import FinancialDashboard from '@/components/financial/FinancialDashboard';
 
 export default function Profile() {
   const queryClient = useQueryClient();
@@ -103,6 +104,8 @@ export default function Profile() {
             Personalize seu perfil de artista
           </p>
         </motion.div>
+
+        <FinancialDashboard />
 
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Stats Cards */}
