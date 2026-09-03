@@ -35,6 +35,7 @@ import InteractiveMockupViewer from '@/components/create/InteractiveMockupViewer
 import ArtworkSidesPanel from '@/components/create/ArtworkSidesPanel';
 import MockupStyleGenerator from '@/components/create/MockupStyleGenerator';
 import CatalogProductMockup from '@/components/create/CatalogProductMockup';
+import ProductColorSelector from '@/components/create/ProductColorSelector';
 
 const PRODUCTS = [
   { value: 'camiseta', label: 'Camiseta' },
@@ -87,6 +88,7 @@ export default function Create() {
         const chosen = items.find((item) => item.type === requestedProduct) || items[0];
         setSelectedCatalogId(chosen.id);
         setSelectedProduct(chosen.type);
+        setProductColor(chosen.product_color_variants?.[0]?.name || 'white');
       }
     });
   }, [requestedProduct]);
@@ -257,6 +259,7 @@ export default function Create() {
 
 
   const selectedCatalogProduct = catalogProducts.find((product) => product.id === selectedCatalogId);
+  const availableColors = selectedCatalogProduct?.product_color_variants?.length ? selectedCatalogProduct.product_color_variants : colors;
   const studioProducts = catalogProducts.length ? catalogProducts.map((product) => ({ value: product.id, type: product.type, label: product.name, price: product.base_price, image: product.front_model_url })) : PRODUCTS.map((product) => ({ ...product, type: product.value, price: productPrices[product.value] }));
   const currentPrice = Number(selectedCatalogProduct?.base_price ?? productPrices[selectedProduct]);
   const currentSizes = selectedCatalogProduct?.sizes_available?.length ? selectedCatalogProduct.sizes_available : productSizes[selectedProduct];
@@ -264,6 +267,7 @@ export default function Create() {
     const catalogProduct = catalogProducts.find((product) => product.id === value);
     setSelectedCatalogId(catalogProduct?.id || null);
     setSelectedProduct(catalogProduct?.type || value);
+    setProductColor(catalogProduct?.product_color_variants?.[0]?.name || 'white');
   };
 
   const stepLabels = ['Produto', 'Sua Arte', 'Finalizar'];
@@ -276,7 +280,7 @@ export default function Create() {
   };
 
   const renderMockup = (designImage, side = 'front') => {
-    if (selectedCatalogProduct?.front_model_url) return <CatalogProductMockup product={selectedCatalogProduct} side={side} />;
+    if (selectedCatalogProduct?.front_model_url) return <CatalogProductMockup product={selectedCatalogProduct} side={side} color={productColor} />;
     return (
       <>
         {(selectedProduct === 'camiseta' || selectedProduct === 'baby_look') && (
@@ -379,29 +383,8 @@ export default function Create() {
 
               {/* Color + Info */}
               <div className="space-y-6">
-                {!selectedCatalogProduct && (selectedProduct === 'camiseta' || selectedProduct === 'baby_look') &&
-                <div>
-                  <Label className="text-sm font-semibold mb-3 block text-gray-900 tracking-tight">Cor do produto</Label>
-                  <div className="flex gap-3">
-                    {colors.map((color) =>
-                    <button
-                      key={color.name}
-                      onClick={() => setProductColor(color.name)}
-                      className={`relative w-12 h-12 rounded-full transition-all duration-300 hover:scale-110 ${
-                      productColor === color.name ? 'ring-2 ring-offset-2 ring-gray-900 scale-110' : 'ring-1 ring-gray-200 hover:ring-gray-300'}`
-                      }
-                      style={{ backgroundColor: color.hex }}
-                      title={color.label}>
-                      {productColor === color.name && (
-                        <span className="absolute inset-0 flex items-center justify-center">
-                          <span className={`w-2 h-2 rounded-full ${color.name === 'white' ? 'bg-gray-900' : 'bg-white'}`} />
-                        </span>
-                      )}
-                    </button>
-
-                    )}
-                  </div>
-                </div>
+                {(selectedCatalogProduct?.product_color_variants?.length || (!selectedCatalogProduct && (selectedProduct === 'camiseta' || selectedProduct === 'baby_look'))) &&
+                <ProductColorSelector options={availableColors} value={productColor} onChange={setProductColor} />
                 }
 
                 <div className="bg-purple-50 rounded-2xl p-5">
@@ -724,30 +707,9 @@ export default function Create() {
                   </div>
 
                   {/* Color Selector */}
-                  {!selectedCatalogProduct && (selectedProduct === 'camiseta' || selectedProduct === 'baby_look') &&
-                <div className="mb-6">
-                      <Label className="text-sm font-semibold mb-3 block text-gray-900 tracking-tight">Cor</Label>
-                      <div className="flex gap-3">
-                        {colors.map((color) =>
-                    <button
-                      key={color.name}
-                      onClick={() => setProductColor(color.name)}
-                      className={`relative w-11 h-11 rounded-full transition-all duration-300 hover:scale-110 ${
-                    productColor === color.name ? 'ring-2 ring-offset-2 ring-gray-900 scale-110' : 'ring-1 ring-gray-200 hover:ring-gray-300'}`
-                    }
-                      style={{ backgroundColor: color.hex }}
-                      title={color.label}>
-                      {productColor === color.name && (
-                        <span className="absolute inset-0 flex items-center justify-center">
-                          <span className={`w-2 h-2 rounded-full ${color.name === 'white' ? 'bg-gray-900' : 'bg-white'}`} />
-                        </span>
-                      )}
-                    </button>
-
-                    )}
-                      </div>
-                    </div>
-                }
+                  {(selectedCatalogProduct?.product_color_variants?.length || (!selectedCatalogProduct && (selectedProduct === 'camiseta' || selectedProduct === 'baby_look'))) &&
+                  <div className="mb-6"><ProductColorSelector options={availableColors} value={productColor} onChange={setProductColor} label="Cor" /></div>
+                  }
 
                   {/* Mockup Display */}
                   <div className="relative aspect-square rounded-3xl overflow-hidden bg-[#F5F5F7] shadow-sm">

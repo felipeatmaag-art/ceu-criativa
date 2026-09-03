@@ -43,7 +43,34 @@
     },
     "back_model_url": {
       "type": "string",
-      "description": "Imagem real do modelo visto de costas"
+      "description": "Imagem real ou gerada do modelo visto de costas"
+    },
+    "product_color_variants": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "hex": {
+            "type": "string"
+          },
+          "front_url": {
+            "type": "string"
+          },
+          "back_url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "hex",
+          "front_url",
+          "back_url"
+        ]
+      },
+      "description": "Imagens do produto geradas pela IA para cada cor"
     },
     "design_id": {
       "type": "string",
