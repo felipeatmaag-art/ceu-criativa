@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { WalletCards } from 'lucide-react';
 import FinancialMetrics from '@/components/financial/FinancialMetrics';
+import FinancialCharts from '@/components/financial/FinancialCharts';
 import RecentCommissions from '@/components/financial/RecentCommissions';
 
 export default function FinancialDashboard() {
@@ -20,7 +21,7 @@ export default function FinancialDashboard() {
       </div>
       {isLoading && <div className="h-32 rounded-2xl bg-muted animate-pulse" />}
       {isError && <div className="rounded-2xl border border-destructive/20 bg-destructive/5 p-5 text-sm text-destructive">Não foi possível carregar seu resumo financeiro.</div>}
-      {data && <><FinancialMetrics summary={data} /><RecentCommissions transactions={data.pendingTransactions || []} /></>}
+      {data && <><FinancialMetrics summary={data} /><FinancialCharts history={data.monthlyHistory || []} /><RecentCommissions transactions={data.pendingTransactions || []} /></>}
     </section>
   );
 }

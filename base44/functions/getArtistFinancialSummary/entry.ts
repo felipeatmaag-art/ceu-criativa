@@ -40,8 +40,20 @@ export default async function(req: Request): Promise<Response> {
     const grossSales = transactions.reduce((sum, item) => sum + item.gross, 0);
 
     const pendingTransactions = transactions.filter((item) => item.status !== 'delivered').slice(0, 20);
+    const monthlyHistory = Array.from({ length: 12 }, (_, index) => {
+      const date = new Date();
+      date.setDate(1);
+      date.setMonth(date.getMonth() - (11 - index));
+      const month = date.toISOString().slice(0, 7);
+      const monthTransactions = transactions.filter((item) => item.date?.slice(0, 7) === month);
+      return {
+        month,
+        earnings: monthTransactions.reduce((sum, item) => sum + item.commission, 0),
+        sales: monthTransactions.length
+      };
+    });
 
-    return Response.json({ available, processing, totalCommissions, grossSales, salesCount: transactions.length, pendingTransactions });
+    return Response.json({ available, processing, totalCommissions, grossSales, salesCount: transactions.length, pendingTransactions, monthlyHistory });
   } catch (error) {
     console.error('Financial summary error:', error);
     return Response.json({ error: error.message }, { status: 500 });
