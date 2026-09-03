@@ -9,12 +9,13 @@ import React from 'react';
  */
 export default function TshirtMockup({ designImage, color = 'white', side = 'front' }) {
   const tshirtImage = 'https://media.base44.com/images/public/69431e0c00397efc6e14e9df/5c58a6c71_generated_a3b8e9d6.png';
-  const shirtFilters = {
-    white: 'grayscale(1) brightness(3.7) contrast(0.72)',
-    black: 'grayscale(1) brightness(0.42) contrast(1.18)',
-    navy: 'brightness(0) saturate(100%) invert(20%) sepia(39%) saturate(1818%) hue-rotate(190deg) brightness(86%) contrast(95%)',
-    gray: 'grayscale(1) brightness(1.45) contrast(0.82)'
+  const shirtTints = {
+    white: { backgroundColor: '#ffffff', mixBlendMode: 'screen', opacity: 0.9 },
+    black: { backgroundColor: '#050505', mixBlendMode: 'multiply', opacity: 0.75 },
+    navy: { backgroundColor: '#1e3a8a', mixBlendMode: 'screen', opacity: 0.72 },
+    gray: { backgroundColor: '#6b7280', mixBlendMode: 'screen', opacity: 0.55 }
   };
+  const shirtShape = 'polygon(29% 11%, 40% 7%, 44% 13%, 56% 13%, 60% 7%, 71% 11%, 87% 19%, 96% 30%, 86% 43%, 72% 37%, 72% 92%, 28% 92%, 28% 37%, 14% 43%, 4% 30%, 13% 19%)';
   const colorLabels = { white: 'branca', black: 'preta', navy: 'azul-marinho', gray: 'cinza' };
   const isBack = side === 'back';
   const designBlend = color === 'black' || color === 'navy' ? 'screen' : 'multiply';
@@ -35,8 +36,12 @@ export default function TshirtMockup({ designImage, color = 'white', side = 'fro
         <img
           src={tshirtImage}
           alt={`Camiseta ${colorLabels[color] || colorLabels.white} premium ${isBack ? 'vista de costas' : 'vista de frente'}`}
-          className="h-full w-full object-contain transition-[filter] duration-300"
-          style={{ filter: shirtFilters[color] || shirtFilters.white }}
+          className="h-full w-full object-contain"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 transition-colors duration-300"
+          style={{ ...shirtTints[color], clipPath: shirtShape }}
         />
         {designImage && (
           <img
