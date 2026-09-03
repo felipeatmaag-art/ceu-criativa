@@ -16,8 +16,9 @@ import MockupViewer3D from '@/components/design/MockupViewer3D';
  * - Tema dark com acento laranja
  */
 
-const ACCENT = '#ff6600';
+const ACCENT = '#d4d4d4';
 const PRESETS_KEY = 'ceu_mockup_presets';
+const PRODUCT_LABELS = { camiseta: 'Camiseta', baby_look: 'Baby Look', caneca: 'Caneca', quadro: 'Quadro' };
 
 function loadPresets() {
   try {
@@ -81,9 +82,16 @@ export default function InteractiveMockupViewer({
     setLocalSide(nextSide);
     onSideChange?.(nextSide);
   };
-  const [viewMode, setViewMode] = useState('2d'); // '2d' | '3d'
+  const isApparel = productType === 'camiseta' || productType === 'baby_look';
+  const isMug = productType === 'caneca';
+  const [viewMode, setViewMode] = useState(isMug ? '3d' : '2d');
   const [baseImages, setBaseImages] = useState({ front: null, back: null });
   const baseImage = baseImages[side];
+
+  useEffect(() => {
+    setViewMode(isMug ? '3d' : '2d');
+    setSide('front');
+  }, [productType, isMug]);
   const [isUploadingBase, setIsUploadingBase] = useState(false);
   const [presets, setPresets] = useState({});
   const [showPresets, setShowPresets] = useState(false);
@@ -229,72 +237,25 @@ export default function InteractiveMockupViewer({
 
   return (
     <div className="w-full h-full bg-[#0f0f0f] rounded-2xl overflow-hidden flex flex-col">
-      {/* Toggle 2D/3D + FRENTE/COSTAS */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-800/60 gap-2 flex-wrap">
-        {/* Modo de visualização 2D/3D */}
-        <div className="flex gap-1 bg-neutral-900 rounded-full p-1">
-          <button
-            onClick={() => setViewMode('2d')}
-            className={`px-3 py-1.5 rounded-full text-xs font-bold tracking-wider uppercase transition-all flex items-center gap-1 ${
-              viewMode === '2d' ? 'bg-[#ff6600] text-white' : 'text-gray-500 hover:text-gray-300'
-            }`}
-          >
-            <ImageIcon className="w-3 h-3" />
-            2D
-          </button>
-          <button
-            onClick={() => setViewMode('3d')}
-            className={`px-3 py-1.5 rounded-full text-xs font-bold tracking-wider uppercase transition-all flex items-center gap-1 ${
-              viewMode === '3d' ? 'bg-[#ff6600] text-white' : 'text-gray-500 hover:text-gray-300'
-            }`}
-          >
-            <Box className="w-3 h-3" />
-            3D
-          </button>
-        </div>
-
-        {/* Frente/Costas (só em 2D) */}
-        {viewMode === '2d' && (
-          <div className="flex gap-1 bg-neutral-900 rounded-full p-1">
-            <button
-              onClick={() => setSide('front')}
-              className={`px-3 py-1.5 rounded-full text-xs font-bold tracking-wider uppercase transition-all ${
-                side === 'front' ? 'bg-[#ff6600] text-white' : 'text-gray-500 hover:text-gray-300'
-              }`}
-            >
-              Frente
-            </button>
-            <button
-              onClick={() => setSide('back')}
-              className={`px-3 py-1.5 rounded-full text-xs font-bold tracking-wider uppercase transition-all flex items-center gap-1 ${
-                side === 'back' ? 'bg-[#ff6600] text-white' : 'text-gray-500 hover:text-gray-300'
-              }`}
-            >
-              <FlipHorizontal2 className="w-3 h-3" />
-              Costas
-            </button>
+      <div className="flex items-center justify-between gap-3 border-b border-neutral-800/60 px-4 py-3">
+        {isApparel ? (
+          <div className="flex gap-1 rounded-full bg-neutral-900 p-1">
+            <button onClick={() => setSide('front')} className={`rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wider ${side === 'front' ? 'bg-neutral-100 text-neutral-950' : 'text-gray-500'}`}>Frente</button>
+            <button onClick={() => setSide('back')} className={`rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wider ${side === 'back' ? 'bg-neutral-100 text-neutral-950' : 'text-gray-500'}`}>Costas</button>
           </div>
+        ) : (
+          <span className="rounded-full border border-neutral-700 px-4 py-2 text-xs font-bold uppercase tracking-wider text-gray-300">{isMug ? 'Visualização 360°' : 'Vista frontal'}</span>
         )}
-
-        <div className="flex items-center gap-1.5 text-[10px] text-gray-600 uppercase tracking-wider ml-auto">
-          {viewMode === '3d' ? (
-            <>
-              <MoveHorizontal className="w-3.5 h-3.5" />
-              Arraste p/ girar
-            </>
-          ) : (
-            <>
-              <GalleryHorizontalEnd className="w-3.5 h-3.5" />
-              {baseImage ? 'Peça carregada' : 'Sem peça base'}
-            </>
-          )}
+        <div className="ml-auto flex items-center gap-2 text-[10px] uppercase tracking-widest text-gray-500">
+          {isMug ? <MoveHorizontal className="h-4 w-4" /> : <GalleryHorizontalEnd className="h-4 w-4" />}
+          {isMug ? 'Arraste para girar' : PRODUCT_LABELS[productType]}
         </div>
       </div>
 
       {/* Área de preview */}
       <div className="flex-1 relative min-h-[280px] flex items-center justify-center p-4">
         {/* Modo 3D — rotação 360° por arraste */}
-        {viewMode === '3d' && designImage ? (
+        {viewMode === '3d' ? (
           <div className="absolute inset-0">
             <MockupViewer3D
               productType={productType}
@@ -341,37 +302,25 @@ export default function InteractiveMockupViewer({
             )}
           </>
         ) : (
-          /* Upload prompt — AGUARDANDO PEÇA BASE */
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            disabled={isUploadingBase}
-            className="w-full h-full min-h-[240px] rounded-xl border border-dashed border-neutral-700 hover:border-[#ff6600]/50 hover:bg-orange-500/5 transition-all flex flex-col items-center justify-center gap-3 group"
-          >
-            {isUploadingBase ? (
-              <div className="flex flex-col items-center gap-2">
-                <div className="w-8 h-8 border-2 border-[#ff6600] border-t-transparent rounded-full animate-spin" />
-                <span className="text-xs text-gray-500 uppercase tracking-wider">Carregando...</span>
+          <>
+            <div className="absolute inset-0">{renderMockup?.(null)}</div>
+            {designImage && (
+              <div
+                ref={designRef}
+                className="absolute z-10 touch-none cursor-grab select-none active:cursor-grabbing"
+                onPointerDown={handlePointerDown}
+                onPointerMove={handlePointerMove}
+                onPointerUp={handlePointerEnd}
+                onPointerCancel={handlePointerEnd}
+                style={{ left: '50%', top: '50%', transform: `translate(-50%, -50%) translate3d(${offsetX}px, ${offsetY}px, 0) scale(${transform.scale}) rotate(${rotDeg}deg)`, transformOrigin: 'center', willChange: 'transform' }}
+              >
+                <img src={designImage} alt="Estampa" draggable={false} className="max-h-[60%] max-w-[60%] select-none object-contain pointer-events-none" />
               </div>
-            ) : (
-              <>
-                <div className="w-14 h-14 rounded-2xl bg-neutral-800 group-hover:bg-orange-500/10 flex items-center justify-center transition-colors">
-                  <GalleryHorizontalEnd className="w-7 h-7 text-gray-500 group-hover:text-[#ff6600] transition-colors" />
-                </div>
-                <div className="text-center">
-                  <p className="text-sm font-bold text-white uppercase tracking-wider mb-1">
-                    Aguardando peça base
-                  </p>
-                  <p className="text-xs text-gray-600 max-w-xs">
-                    Faça upload de uma foto do produto em branco para posicionar a estampa
-                  </p>
-                </div>
-                <div className="flex items-center gap-1.5 mt-1 text-[10px] text-[#ff6600] uppercase tracking-wider font-semibold">
-                  <Upload className="w-3 h-3" />
-                  Enviar foto
-                </div>
-              </>
             )}
-          </button>
+            <button onClick={() => fileInputRef.current?.click()} disabled={isUploadingBase} className="absolute right-3 top-3 z-20 flex items-center gap-2 rounded-full border border-neutral-700 bg-neutral-950/80 px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-gray-400" title="Usar foto própria do produto">
+              <Upload className="h-3.5 w-3.5" /> Base própria
+            </button>
+          </>
         )}
 
         {/* Trocar peça base */}
@@ -394,7 +343,7 @@ export default function InteractiveMockupViewer({
       </div>
 
       {/* Painel de controles — 4 sliders (apenas 2D) */}
-      {viewMode === '2d' && baseImage && designImage && (
+      {viewMode === '2d' && designImage && (
         <div className="px-4 py-3 border-t border-neutral-800/60 space-y-3">
           <div className="grid grid-cols-2 gap-x-4 gap-y-3">
             <SliderControl

@@ -27,7 +27,7 @@ import {
 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import ProductOptionButton from '@/components/create/ProductOptionButton';
+import ProductSelector from '@/components/create/ProductSelector';
 import TshirtMockup from '@/components/create/TshirtMockup';
 import MugMockup from '@/components/create/MugMockup';
 import FrameMockup from '@/components/create/FrameMockup';
@@ -36,18 +36,21 @@ import ArtworkSidesPanel from '@/components/create/ArtworkSidesPanel';
 import MockupStyleGenerator from '@/components/create/MockupStyleGenerator';
 
 const PRODUCTS = [
-  { value: 'camiseta', label: 'Camiseta', icon: '👕' },
-  { value: 'baby_look', label: 'Baby Look', icon: '👚' },
-  { value: 'caneca', label: 'Caneca', icon: '☕' },
-  { value: 'quadro', label: 'Quadro', icon: '🖼️' }
+  { value: 'camiseta', label: 'Camiseta' },
+  { value: 'baby_look', label: 'Baby Look' },
+  { value: 'caneca', label: 'Caneca' },
+  { value: 'quadro', label: 'Quadro' }
 ];
 
 export default function Create() {
   const navigate = useNavigate();
-  const [mode, setMode] = useState('ai'); // 'ai' or 'upload'
-  const [step, setStep] = useState(1);
+  const requestedProduct = new URLSearchParams(window.location.search).get('product');
+  const hasRequestedProduct = PRODUCTS.some((product) => product.value === requestedProduct);
+  const [mode, setMode] = useState('ai');
+  const [step, setStep] = useState(hasRequestedProduct ? 2 : 1);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
   const [aiPrompt, setAiPrompt] = useState('');
@@ -62,7 +65,7 @@ export default function Create() {
     price_base: 49.90
   });
 
-  const [selectedProduct, setSelectedProduct] = useState('camiseta');
+  const [selectedProduct, setSelectedProduct] = useState(hasRequestedProduct ? requestedProduct : 'camiseta');
   const [productColor, setProductColor] = useState('white');
   const [cart, setCart] = useState([]);
   const [backDesignImage, setBackDesignImage] = useState(null);
@@ -106,7 +109,7 @@ export default function Create() {
 
     try {
       const result = await base44.integrations.Core.GenerateImage({
-        prompt: `Design de estampa para camiseta, arte digital de alta qualidade: ${aiPrompt}. Estilo moderno, cores vibrantes, fundo transparente ou sólido.`
+        prompt: `Arte digital de alta qualidade pronta para impressão em ${selectedProduct}: ${aiPrompt}. Composição centralizada em formato quadrado, alta definição, fundo transparente ou sólido.`
       });
 
       if (result?.url) {
@@ -123,18 +126,23 @@ export default function Create() {
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
-    setIsUploading(true);
-
-    try {
-      const result = await base44.integrations.Core.UploadFile({ file });
-      if (result?.file_url) {
-        setSelectedImage(result.file_url);
-      }
-    } catch (error) {
-      console.error('Erro ao fazer upload:', error);
+    setUploadError('');
+    if (file.size > 10 * 1024 * 1024) {
+      setUploadError('O arquivo deve ter no máximo 10 MB.');
+      return;
     }
-
+    const dimensions = await new Promise((resolve) => {
+      const image = new Image();
+      image.onload = () => resolve({ width: image.width, height: image.height });
+      image.src = URL.createObjectURL(file);
+    });
+    if (dimensions.width < 2000 || dimensions.height < 2000) {
+      setUploadError('Envie uma arte com pelo menos 2000 × 2000 px.');
+      return;
+    }
+    setIsUploading(true);
+    const result = await base44.integrations.Core.UploadFile({ file });
+    if (result?.file_url) setSelectedImage(result.file_url);
     setIsUploading(false);
   };
 
@@ -256,15 +264,15 @@ export default function Create() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-50/50 to-white py-12">
-      <div className="max-w-5xl mx-auto px-4">
+    <div className="min-h-screen bg-ceu-cloud py-12">
+      <div className="max-w-7xl mx-auto px-4">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-12">
 
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-100 text-purple-700 text-sm font-medium mb-4">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-ceu-navy/10 text-ceu-navy text-sm font-medium mb-4">
             <Sparkles className="w-4 h-4" />
             Estúdio de Criação
           </div>
@@ -282,7 +290,7 @@ export default function Create() {
           <div key={s} className="flex items-center gap-2">
               <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold transition-all ${
             step >= s ?
-            'ceu-gradient text-white' :
+            'bg-ceu-navy text-ceu-cloud' :
             'bg-gray-100 text-gray-400'}`
             }>
                 {step > s ? <Check className="w-5 h-5" /> : s}
@@ -304,7 +312,7 @@ export default function Create() {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
-            className="bg-white rounded-3xl shadow-xl p-8">
+            className="bg-card rounded-3xl border border-ceu-navy/10 shadow-xl p-8">
 
             <div className="text-center mb-8">
               <Label className="text-lg font-semibold mb-1 block text-gray-900">
@@ -315,25 +323,8 @@ export default function Create() {
               </p>
             </div>
 
-            {/* Product Type Selector */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-8">
-              {PRODUCTS.map((prod) =>
-              <button
-                key={prod.value}
-                onClick={() => setSelectedProduct(prod.value)}
-                className={`flex flex-col items-center gap-2 p-5 rounded-2xl font-medium transition-all ${
-                selectedProduct === prod.value ?
-                'ceu-gradient text-white shadow-lg scale-105' :
-                'bg-gray-100 text-gray-600 hover:bg-gray-200'}`
-                }>
-
-                  <span className="text-3xl">{prod.icon}</span>
-                  <span className="text-sm">{prod.label}</span>
-                  <span className={`text-xs ${selectedProduct === prod.value ? 'text-white/80' : 'text-gray-400'}`}>
-                    R$ {productPrices[prod.value].toFixed(2)}
-                  </span>
-                </button>
-              )}
+            <div className="mb-8">
+              <ProductSelector products={PRODUCTS} prices={productPrices} value={selectedProduct} onChange={setSelectedProduct} />
             </div>
 
             <div className="grid lg:grid-cols-2 gap-8">
@@ -408,7 +399,7 @@ export default function Create() {
 
                 <Button
                   onClick={() => setStep(2)}
-                  className="w-full h-14 rounded-xl ceu-gradient text-white text-lg">
+                  className="w-full h-14 rounded-xl bg-ceu-navy text-ceu-cloud text-lg hover:bg-ceu-navy/90">
                   Continuar
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
@@ -423,7 +414,7 @@ export default function Create() {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
-            className="bg-white rounded-3xl shadow-xl p-8">
+            className="bg-card rounded-3xl border border-ceu-navy/10 shadow-xl p-8">
 
             <div className="flex items-center justify-between mb-6">
               <div>
@@ -460,7 +451,7 @@ export default function Create() {
                         productType={selectedProduct}
                         designImage={activeDesignImage}
                         color={productColor}
-                        renderMockup={() => renderMockup(null)}
+                        renderMockup={(art) => renderMockup(art, editorSide)}
                         transform={activeTransform}
                         onTransformChange={handleTransformChange}
                         side={editorSide}
@@ -513,7 +504,7 @@ export default function Create() {
                         <button
                           key={i}
                           onClick={() => setAiPrompt(suggestion)}
-                          className="px-3 py-1.5 rounded-full bg-purple-50 text-purple-700 text-xs hover:bg-purple-100 transition-colors">
+                          className="px-3 py-1.5 rounded-full border border-ceu-navy/15 bg-card text-ceu-navy text-xs hover:bg-ceu-navy/5 transition-colors">
 
                             {suggestion.substring(0, 30)}...
                           </button>
@@ -524,7 +515,7 @@ export default function Create() {
                       <Button
                       onClick={handleGenerateAI}
                       disabled={isGenerating || !aiPrompt.trim()}
-                      className="w-full h-12 rounded-xl ceu-gradient text-white">
+                      className="w-full h-12 rounded-xl bg-ceu-navy text-ceu-cloud hover:bg-ceu-navy/90">
 
                         {isGenerating ?
                       <>
@@ -591,8 +582,8 @@ export default function Create() {
                       <div
                       className={`relative border-2 border-dashed rounded-3xl p-10 text-center transition-all ${
                       isUploading ?
-                      'border-purple-500 bg-purple-50' :
-                      'border-gray-200 hover:border-purple-300 hover:bg-purple-50/50'}`
+                      'border-ceu-navy bg-ceu-navy/5' :
+                      'border-ceu-navy/20 hover:border-ceu-navy/50 hover:bg-ceu-navy/5'}`
                       }>
 
                         <input
@@ -610,8 +601,8 @@ export default function Create() {
                         </div> :
 
                       <>
-                          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-purple-100 flex items-center justify-center">
-                            <ImageIcon className="w-8 h-8 text-purple-500" />
+                          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-ceu-navy/10 flex items-center justify-center">
+                            <ImageIcon className="w-8 h-8 text-ceu-navy" />
                           </div>
                           <p className="text-lg font-medium text-gray-900 mb-1">
                             Arraste sua imagem aqui
@@ -620,8 +611,9 @@ export default function Create() {
                             ou clique para selecionar
                           </p>
                           <p className="text-xs text-gray-400">
-                            PNG, JPG ou WEBP • Máx 10MB
+                            PNG, JPG ou WEBP • mínimo 2000 × 2000 px • máximo 10 MB
                           </p>
+                          {uploadError && <p className="mt-3 text-sm font-medium text-destructive">{uploadError}</p>}
                         </>
                     }
                       </div>
@@ -656,7 +648,7 @@ export default function Create() {
                 </motion.div>
                 }
 
-                {selectedImage && (
+                {selectedImage && (selectedProduct === 'camiseta' || selectedProduct === 'baby_look') && (
                   <ArtworkSidesPanel
                     frontImage={selectedImage}
                     backImage={backDesignImage}
@@ -704,22 +696,9 @@ export default function Create() {
                     </Button>
                   </div>
 
-                  {/* Product Type Selector */}
-                  <div className="grid grid-cols-3 gap-2 mb-6">
-                    {PRODUCTS.map((prod) =>
-                    <button
-                      key={prod.value}
-                      onClick={() => setSelectedProduct(prod.value)}
-                      className={`flex flex-col items-center gap-1 p-3 rounded-xl font-medium transition-all ${
-                    selectedProduct === prod.value ?
-                    'ceu-gradient text-white shadow-lg scale-105' :
-                    'bg-gray-100 text-gray-600 hover:bg-gray-200'}`
-                    }>
-
-                        <span className="text-2xl">{prod.icon}</span>
-                        <span className="text-xs">{prod.label}</span>
-                      </button>
-                  )}
+                  <div className="mb-6 rounded-2xl border border-ceu-navy/15 bg-card p-4">
+                    <p className="text-xs font-bold uppercase tracking-widest text-ceu-navy/45">Produto selecionado</p>
+                    <p className="mt-1 font-bold text-ceu-navy">{PRODUCTS.find((product) => product.value === selectedProduct)?.label}</p>
                   </div>
 
                   {/* Color Selector */}
@@ -763,7 +742,7 @@ export default function Create() {
                           productType={selectedProduct}
                           designImage={activeDesignImage}
                           color={productColor}
-                          renderMockup={() => renderMockup(null)}
+                          renderMockup={(art) => renderMockup(art, editorSide)}
                           transform={activeTransform}
                           onTransformChange={handleTransformChange}
                           side={editorSide}
@@ -866,7 +845,7 @@ export default function Create() {
                   <Button
                   onClick={handleSaveDesign}
                   disabled={isSaving || !designData.title || !designData.category}
-                  className="w-full h-14 rounded-xl ceu-gradient text-white text-lg">
+                  className="w-full h-14 rounded-xl bg-ceu-navy text-ceu-cloud text-lg hover:bg-ceu-navy/90">
 
                     {isSaving ?
                   <>
