@@ -27,120 +27,100 @@ export default function TshirtMockup({ designImage, color = 'white', side = 'fro
       />
 
       <svg
-        viewBox="0 0 400 480"
+        viewBox="0 0 500 500"
         preserveAspectRatio="xMidYMid meet"
-        className="relative z-10 h-full w-auto max-w-full drop-shadow-[0_20px_40px_rgba(0,0,0,0.18)]"
+        className="relative z-10 h-[94%] w-[94%] drop-shadow-[0_22px_34px_rgba(15,23,42,0.22)]"
+        role="img"
+        aria-label={`Camiseta ${isBack ? 'vista de costas' : 'vista de frente'}`}
       >
         <defs>
-          <linearGradient id={`tshirt-body-${side}`} x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor={c.body} />
-            <stop offset="55%" stopColor={c.body} />
+          <linearGradient id={`tshirt-body-${side}`} x1="0%" y1="15%" x2="100%" y2="85%">
+            <stop offset="0%" stopColor={c.shadow} />
+            <stop offset="18%" stopColor={c.body} />
+            <stop offset="52%" stopColor={c.body} />
+            <stop offset="84%" stopColor={c.body} />
             <stop offset="100%" stopColor={c.shadow} />
           </linearGradient>
-          <linearGradient id={`tshirt-sleeve-l-${side}`} x1="100%" y1="0%" x2="0%" y2="100%">
+          <linearGradient id={`tshirt-sleeve-l-${side}`} x1="100%" y1="20%" x2="0%" y2="90%">
             <stop offset="0%" stopColor={c.body} />
             <stop offset="100%" stopColor={c.shadow} />
           </linearGradient>
-          <linearGradient id={`tshirt-sleeve-r-${side}`} x1="0%" y1="0%" x2="100%" y2="100%">
+          <linearGradient id={`tshirt-sleeve-r-${side}`} x1="0%" y1="20%" x2="100%" y2="90%">
             <stop offset="0%" stopColor={c.body} />
             <stop offset="100%" stopColor={c.shadow} />
+          </linearGradient>
+          <linearGradient id={`tshirt-center-light-${side}`} x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="rgba(255,255,255,0)" />
+            <stop offset="50%" stopColor="rgba(255,255,255,0.16)" />
+            <stop offset="100%" stopColor="rgba(255,255,255,0)" />
           </linearGradient>
           <clipPath id={`design-clip-${side}`}>
-            <rect x="145" y="170" width="110" height="140" rx="6" />
+            <rect x="180" y="175" width="140" height="165" rx="4" />
+          </clipPath>
+          <clipPath id={`body-clip-${side}`}>
+            <path d="M170 92 C188 72 207 61 226 56 C233 76 241 84 250 84 C259 84 267 76 274 56 C293 61 312 72 330 92 L350 188 L345 438 C315 451 285 456 250 456 C215 456 185 451 155 438 L150 188 Z" />
           </clipPath>
         </defs>
 
         {/* Manga esquerda */}
         <path
-          d="M 145 95 L 95 105 C 80 112, 76 135, 82 155 L 118 162 C 126 145, 136 125, 145 108 Z"
+          d="M171 91 C145 94 116 104 78 124 C69 129 66 139 70 149 L99 220 C103 230 113 234 123 230 L157 216 L171 165 Z"
           fill={`url(#tshirt-sleeve-l-${side})`}
+          stroke={c.seam}
+          strokeWidth="1.5"
         />
         {/* Manga direita */}
         <path
-          d="M 255 95 L 305 105 C 320 112, 324 135, 318 155 L 282 162 C 274 145, 264 125, 255 108 Z"
+          d="M329 91 C355 94 384 104 422 124 C431 129 434 139 430 149 L401 220 C397 230 387 234 377 230 L343 216 L329 165 Z"
           fill={`url(#tshirt-sleeve-r-${side})`}
+          stroke={c.seam}
+          strokeWidth="1.5"
         />
 
-        {/* Corpo */}
+        {/* Corpo com proporção real de camiseta */}
         <path
-          d="M 145 95
-             C 145 80, 165 65, 180 60
-             L 192 55
-             C 198 52, 202 52, 208 55
-             L 220 60
-             C 235 65, 255 80, 255 95
-             L 278 165
-             L 275 180
-             L 270 450
-             C 270 460, 263 465, 252 465
-             L 148 465
-             C 137 465, 130 460, 130 450
-             L 125 180
-             L 122 165
-             Z"
+          d="M170 92 C188 72 207 61 226 56 C233 76 241 84 250 84 C259 84 267 76 274 56 C293 61 312 72 330 92 C337 112 343 143 350 188 L345 438 C315 451 285 456 250 456 C215 456 185 451 155 438 L150 188 C157 143 163 112 170 92 Z"
           fill={`url(#tshirt-body-${side})`}
+          stroke={c.seam}
+          strokeWidth="1.5"
         />
 
-        {/* Gola - frente tem V, verso é reta */}
+        {/* Gola */}
         {isBack ? (
           <>
-            {/* Gola vista de trás - curva simples */}
-            <path
-              d="M 180 60 C 190 54, 210 54, 220 60 C 218 56, 210 51, 200 51 C 190 51, 182 56, 180 60 Z"
-              fill={c.collar}
-            />
-            <path
-              d="M 178 62 C 190 56, 210 56, 222 62"
-              stroke={c.seam}
-              strokeWidth="1.5"
-              fill="none"
-            />
+            <path d="M224 56 C232 63 240 66 250 66 C260 66 268 63 276 56 C272 78 263 88 250 88 C237 88 228 78 224 56 Z" fill={c.collar} />
+            <path d="M226 59 C234 69 242 73 250 73 C258 73 266 69 274 59" stroke={c.seam} strokeWidth="2" fill="none" />
           </>
         ) : (
           <>
-            {/* Gola V da frente */}
-            <path
-              d="M 180 60 C 188 73, 196 79, 200 79 C 204 79, 212 73, 220 60 C 216 55, 208 51, 200 51 C 192 51, 184 55, 180 60 Z"
-              fill={c.collar}
-            />
-            <path
-              d="M 178 62 C 188 75, 196 81, 200 81 C 204 81, 212 75, 222 62"
-              stroke={c.seam}
-              strokeWidth="1.5"
-              fill="none"
-            />
+            <path d="M224 56 C232 63 240 66 250 66 C260 66 268 63 276 56 C272 84 263 98 250 98 C237 98 228 84 224 56 Z" fill={c.collar} />
+            <path d="M226 59 C233 77 241 88 250 88 C259 88 267 77 274 59" stroke={c.seam} strokeWidth="2" fill="none" />
           </>
         )}
 
-        {/* Costuras laterais */}
-        <line x1="136" y1="180" x2="133" y2="450" stroke={c.seam} strokeWidth="1" strokeDasharray="3 3" />
-        <line x1="264" y1="180" x2="267" y2="450" stroke={c.seam} strokeWidth="1" strokeDasharray="3 3" />
+        {/* Volume e caimento do tecido */}
+        <rect x="155" y="95" width="190" height="355" fill={`url(#tshirt-center-light-${side})`} clipPath={`url(#body-clip-${side})`} />
+        <path d="M165 205 C177 225 179 260 173 306" stroke={c.seam} strokeWidth="2" fill="none" opacity="0.55" />
+        <path d="M335 205 C323 225 321 260 327 306" stroke={c.seam} strokeWidth="2" fill="none" opacity="0.55" />
+        <path d="M158 432 C218 444 282 444 342 432" stroke={c.seam} strokeWidth="2" fill="none" />
+        <path d="M92 207 C109 211 127 207 145 198" stroke={c.seam} strokeWidth="2" fill="none" />
+        <path d="M408 207 C391 211 373 207 355 198" stroke={c.seam} strokeWidth="2" fill="none" />
 
-        {/* Highlight de luz */}
-        <path d="M 155 105 C 168 135, 175 175, 170 250 L 160 250 C 156 175, 148 135, 140 105 Z" fill="rgba(255,255,255,0.10)" />
-
-        {/* Sombra suave da estampa no tecido */}
         {designImage && (
-          <rect x="145" y="170" width="110" height="140" rx="6" fill="rgba(0,0,0,0.03)" />
-        )}
-
-        {/* Design aplicado (dentro do SVG) */}
-        {designImage && (
-          <image
-            href={designImage}
-            x="145"
-            y="170"
-            width="110"
-            height="140"
-            preserveAspectRatio="xMidYMid meet"
-            clipPath={`url(#design-clip-${side})`}
-            style={{ filter: color === 'black' || color === 'navy' ? 'brightness(1.08) contrast(1.05)' : 'none' }}
-          />
-        )}
-
-        {/* Textura sutil do tecido sobre a estampa */}
-        {designImage && (
-          <rect x="145" y="170" width="110" height="140" rx="6" fill="rgba(255,255,255,0.04)" clipPath={`url(#design-clip-${side})`} />
+          <>
+            <rect x="180" y="175" width="140" height="165" rx="4" fill="rgba(0,0,0,0.035)" />
+            <image
+              href={designImage}
+              x="180"
+              y="175"
+              width="140"
+              height="165"
+              preserveAspectRatio="xMidYMid meet"
+              clipPath={`url(#design-clip-${side})`}
+              style={{ filter: color === 'black' || color === 'navy' ? 'brightness(1.08) contrast(1.05)' : 'none' }}
+            />
+            <rect x="180" y="175" width="140" height="165" rx="4" fill="rgba(255,255,255,0.035)" clipPath={`url(#design-clip-${side})`} />
+          </>
         )}
       </svg>
 
