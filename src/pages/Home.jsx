@@ -136,10 +136,14 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-24 bg-ceu-aqua relative overflow-hidden">
+      <section className="py-24 bg-ceu-navy relative overflow-hidden">
         <div className="absolute inset-0">
-          <div className="absolute -top-24 left-1/4 w-96 h-96 bg-ceu-sky/40 rounded-full blur-3xl" />
-          <div className="absolute -bottom-32 right-1/4 w-96 h-96 bg-ceu-sun/35 rounded-full blur-3xl" />
+          <img
+            src="https://media.base44.com/images/public/69431e0c00397efc6e14e9df/9e5688f28_Metallic_logo_floating_in_sunset_2026081722471.jpeg"
+            alt=""
+            className="h-full w-full object-cover"
+          />
+          <div className="absolute inset-0 bg-ceu-cloud/25" />
         </div>
         
         <div className="relative max-w-4xl mx-auto px-4 text-center">
