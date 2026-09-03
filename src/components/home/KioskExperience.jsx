@@ -1,5 +1,5 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useRef } from 'react';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { MapPin, Sparkles, Clock, Shirt } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
@@ -14,9 +14,28 @@ const steps = [
 ];
 
 export default function KioskExperience() {
+  const sectionRef = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ['start end', 'end start'],
+  });
+  const backgroundY = useTransform(scrollYProgress, [0, 1], ['-8%', '8%']);
+
   return (
-    <section className="py-24 relative overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section ref={sectionRef} className="py-24 relative overflow-hidden">
+      <motion.div
+        aria-hidden="true"
+        className="absolute -inset-y-[12%] inset-x-0"
+        style={{ y: backgroundY }}
+      >
+        <img
+          src="https://media.base44.com/images/public/69431e0c00397efc6e14e9df/de84d5fb0_generated_e5033faa.png"
+          alt=""
+          className="w-full h-full object-cover"
+        />
+      </motion.div>
+      <div aria-hidden="true" className="absolute inset-0 bg-ceu-navy/65" />
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Image */}
           <motion.div
