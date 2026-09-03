@@ -8,9 +8,6 @@ import { Label } from '@/components/ui/label';
 import { 
   User, 
   Camera, 
-  Instagram, 
-  Twitter, 
-  Globe,
   Save,
   Loader2,
   BadgeCheck,
@@ -21,15 +18,14 @@ import {
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import FinancialDashboard from '@/components/financial/FinancialDashboard';
+import StoreBrandingFields from '@/components/profile/StoreBrandingFields';
+import StoreContactFields from '@/components/profile/StoreContactFields';
 
 export default function Profile() {
   const queryClient = useQueryClient();
   const [formData, setFormData] = useState({
-    artist_name: '',
-    bio: '',
-    social_instagram: '',
-    social_twitter: '',
-    social_portfolio: '',
+    artist_name: '', bio: '', cover_image: '', store_name: '', store_slug: '',
+    pix_key: '', whatsapp: '', linkedin: '', instagram: '', twitter: '', website: '',
     artist_commission_rate: 25
   });
   const [isUploading, setIsUploading] = useState(false);
@@ -42,18 +38,20 @@ export default function Profile() {
   useEffect(() => {
     if (user) {
       setFormData({
-        artist_name: user.artist_name || '',
-        bio: user.bio || '',
-        social_instagram: user.social_instagram || '',
-        social_twitter: user.social_twitter || '',
-        social_portfolio: user.social_portfolio || '',
-        artist_commission_rate: user.artist_commission_rate || 25
+        artist_name: user.artist_name || '', bio: user.bio || '', cover_image: user.cover_image || '',
+        store_name: user.store_name || '', store_slug: user.store_slug || '', pix_key: user.pix_key || '',
+        whatsapp: user.whatsapp || '', linkedin: user.linkedin || '', instagram: user.instagram || '',
+        twitter: user.twitter || '', website: user.website || '', artist_commission_rate: user.artist_commission_rate || 25
       });
     }
   }, [user]);
 
   const updateMutation = useMutation({
-    mutationFn: (data) => base44.auth.updateMe(data),
+    mutationFn: async (data) => {
+      const matches = await base44.entities.User.filter({ store_slug: data.store_slug });
+      if (matches.some((match) => match.id !== user.id)) throw new Error('Este endereço já está em uso. Escolha outro nome.');
+      return base44.auth.updateMe(data);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['currentUser'] });
     },
@@ -213,6 +211,8 @@ export default function Profile() {
                     </div>
                   </div>
 
+                  <StoreBrandingFields data={formData} onChange={(field, value) => setFormData({...formData, [field]: value})} />
+
                   {/* Artist Name */}
                   <div>
                     <Label className="text-base font-medium">Nome Artístico</Label>
@@ -235,40 +235,7 @@ export default function Profile() {
                     />
                   </div>
 
-                  {/* Social Links */}
-                  <div className="space-y-4">
-                    <Label className="text-base font-medium">Redes Sociais</Label>
-                    
-                    <div className="relative">
-                      <Instagram className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                      <Input
-                        placeholder="Link do Instagram"
-                        value={formData.social_instagram}
-                        onChange={(e) => setFormData({...formData, social_instagram: e.target.value})}
-                        className="pl-12 h-12 rounded-xl"
-                      />
-                    </div>
-
-                    <div className="relative">
-                      <Twitter className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                      <Input
-                        placeholder="Link do Twitter/X"
-                        value={formData.social_twitter}
-                        onChange={(e) => setFormData({...formData, social_twitter: e.target.value})}
-                        className="pl-12 h-12 rounded-xl"
-                      />
-                    </div>
-
-                    <div className="relative">
-                      <Globe className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                      <Input
-                        placeholder="Link do seu portfólio"
-                        value={formData.social_portfolio}
-                        onChange={(e) => setFormData({...formData, social_portfolio: e.target.value})}
-                        className="pl-12 h-12 rounded-xl"
-                      />
-                    </div>
-                  </div>
+                  <StoreContactFields data={formData} onChange={(field, value) => setFormData({...formData, [field]: value})} />
 
                   {/* Commission Rate */}
                   <div className="bg-purple-50 rounded-2xl p-6 border border-purple-200">
@@ -332,9 +299,10 @@ export default function Profile() {
                   </Button>
 
                   {updateMutation.isSuccess && (
-                    <p className="text-center text-green-600 font-medium">
-                      ✓ Perfil atualizado com sucesso!
-                    </p>
+                    <p className="text-center text-green-600 font-medium">Perfil e loja atualizados com sucesso!</p>
+                  )}
+                  {updateMutation.isError && (
+                    <p className="text-center text-destructive font-medium">{updateMutation.error.message}</p>
                   )}
                 </form>
               </CardContent>

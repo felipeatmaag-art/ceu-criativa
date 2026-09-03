@@ -11,6 +11,7 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import CheckoutSuccess from '@/pages/CheckoutSuccess';
 import ProductAdmin from '@/pages/ProductAdmin';
+import Storefront from '@/pages/Storefront';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -59,6 +60,11 @@ const AuthenticatedApp = () => {
       <Route path="/ProductAdmin" element={
         <LayoutWrapper currentPageName="ProductAdmin">
           <ProductAdmin />
+        </LayoutWrapper>
+      } />
+      <Route path="/:storeSlug" element={
+        <LayoutWrapper currentPageName="Storefront">
+          <Storefront />
         </LayoutWrapper>
       } />
       {Object.entries(Pages).map(([path, Page]) => (

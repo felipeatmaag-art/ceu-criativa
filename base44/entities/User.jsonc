@@ -16,7 +16,28 @@
     },
     "cover_image": {
       "type": "string",
-      "description": "Imagem de capa do perfil"
+      "description": "Imagem de capa do perfil e da loja"
+    },
+    "store_name": {
+      "type": "string",
+      "description": "Nome p\u00fablico do estabelecimento ou loja"
+    },
+    "store_slug": {
+      "type": "string",
+      "pattern": "^(?:[a-z0-9]+(?:-[a-z0-9]+)*)?$",
+      "description": "Endere\u00e7o \u00fanico da vitrine p\u00fablica"
+    },
+    "pix_key": {
+      "type": "string",
+      "description": "Chave PIX para recebimentos"
+    },
+    "whatsapp": {
+      "type": "string",
+      "description": "WhatsApp comercial"
+    },
+    "linkedin": {
+      "type": "string",
+      "description": "Link do perfil no LinkedIn"
     },
     "instagram": {
       "type": "string",
@@ -48,13 +69,5 @@
       "description": "Total ganho em comiss\u00f5es"
     }
   },
-  "required": [
-    "artist_name",
-    "bio",
-    "avatar_url",
-    "cover_image",
-    "instagram",
-    "twitter",
-    "website"
-  ]
+  "required": []
 }
