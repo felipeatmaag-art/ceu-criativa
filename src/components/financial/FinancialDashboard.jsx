@@ -20,7 +20,7 @@ export default function FinancialDashboard() {
       </div>
       {isLoading && <div className="h-32 rounded-2xl bg-muted animate-pulse" />}
       {isError && <div className="rounded-2xl border border-destructive/20 bg-destructive/5 p-5 text-sm text-destructive">Não foi possível carregar seu resumo financeiro.</div>}
-      {data && <><FinancialMetrics summary={data} /><RecentCommissions transactions={data.transactions || []} /></>}
+      {data && <><FinancialMetrics summary={data} /><RecentCommissions transactions={data.pendingTransactions || []} /></>}
     </section>
   );
 }

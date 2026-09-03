@@ -5,11 +5,11 @@ const money = (value) => new Intl.NumberFormat('pt-BR', { style: 'currency', cur
 const statusLabel = { paid: 'Pago', producing: 'Em produção', shipped: 'Enviado', delivered: 'Disponível' };
 
 export default function RecentCommissions({ transactions }) {
-  if (!transactions.length) return <div className="rounded-2xl border bg-card p-8 text-center text-sm text-muted-foreground">Suas comissões aparecerão aqui após a primeira venda paga.</div>;
+  if (!transactions.length) return <div className="rounded-2xl border bg-card p-8 text-center text-sm text-muted-foreground">Você não possui repasses pendentes no momento.</div>;
 
   return (
     <div className="rounded-2xl border bg-card overflow-hidden">
-      <div className="px-5 py-4 border-b"><h3 className="font-semibold text-foreground">Comissões recentes</h3></div>
+      <div className="px-5 py-4 border-b"><h3 className="font-semibold text-foreground">Histórico de repasses pendentes</h3><p className="mt-1 text-xs text-muted-foreground">Valores aguardando a conclusão dos pedidos.</p></div>
       <div className="divide-y">
         {transactions.map((item) => (
           <div key={item.id} className="flex items-center justify-between gap-4 px-5 py-4">

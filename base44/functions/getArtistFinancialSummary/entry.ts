@@ -39,7 +39,9 @@ export default async function(req: Request): Promise<Response> {
     const totalCommissions = available + processing;
     const grossSales = transactions.reduce((sum, item) => sum + item.gross, 0);
 
-    return Response.json({ available, processing, totalCommissions, grossSales, salesCount: transactions.length, transactions: transactions.slice(0, 8) });
+    const pendingTransactions = transactions.filter((item) => item.status !== 'delivered').slice(0, 20);
+
+    return Response.json({ available, processing, totalCommissions, grossSales, salesCount: transactions.length, pendingTransactions });
   } catch (error) {
     console.error('Financial summary error:', error);
     return Response.json({ error: error.message }, { status: 500 });

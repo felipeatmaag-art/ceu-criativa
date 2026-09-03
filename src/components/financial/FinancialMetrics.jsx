@@ -7,8 +7,8 @@ export default function FinancialMetrics({ summary }) {
   const metrics = [
     { label: 'Saldo disponível', value: money(summary.available), note: 'Pedidos entregues', icon: Banknote, style: 'bg-ceu-aqua/15 text-ceu-navy' },
     { label: 'Em processamento', value: money(summary.processing), note: 'Pedidos em andamento', icon: Clock3, style: 'bg-ceu-sun/20 text-ceu-navy' },
-    { label: 'Comissões recebidas', value: money(summary.totalCommissions), note: 'Total acumulado', icon: CircleDollarSign, style: 'bg-ceu-sky/20 text-ceu-navy' },
-    { label: 'Vendas com comissão', value: summary.salesCount || 0, note: money(summary.grossSales), icon: ShoppingBag, style: 'bg-ceu-coral/15 text-ceu-navy' }
+    { label: 'Ganhos totais', value: money(summary.totalCommissions), note: 'Total acumulado', icon: CircleDollarSign, style: 'bg-ceu-sky/20 text-ceu-navy' },
+    { label: 'Vendas realizadas', value: summary.salesCount || 0, note: money(summary.grossSales), icon: ShoppingBag, style: 'bg-ceu-coral/15 text-ceu-navy' }
   ];
 
   return (
