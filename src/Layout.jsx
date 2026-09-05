@@ -15,7 +15,7 @@ import {
   Palette,
   Trophy,
   Home,
-  Info } from
+  Cloud } from
 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -56,7 +56,7 @@ export default function Layout({ children, currentPageName }) {
   { name: 'Explorar', page: 'Explore', icon: Home },
   { name: 'Criar', page: 'Create', icon: Sparkles },
   { name: 'Concursos', page: 'Competitions', icon: Trophy },
-  { name: 'A Céu', page: 'Brindes', icon: Info },
+  { name: 'A Céu', page: 'Brindes', icon: Cloud },
   { name: 'Artistas', page: 'Artists', icon: Palette }];
 
 
