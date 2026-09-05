@@ -68,14 +68,14 @@ export default function Explore() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-50/50 to-white">
+    <div className="min-h-screen bg-gradient-to-b from-ceu-cloud to-background text-foreground">
       {/* Header */}
-      <div className="bg-white border-b sticky top-20 z-40">
+      <div className="sticky top-20 z-40 border-b bg-card text-card-foreground">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col lg:flex-row lg:items-center gap-4">
             {/* Search */}
             <div className="relative flex-1 max-w-xl">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-700" />
               <Input
                 placeholder="Buscar estampas, artistas, tags..."
                 value={search}
@@ -87,7 +87,7 @@ export default function Explore() {
                   onClick={() => setSearch('')}
                   className="absolute right-4 top-1/2 -translate-y-1/2"
                 >
-                  <X className="w-4 h-4 text-gray-400" />
+                  <X className="h-4 w-4 text-slate-700" />
                 </button>
               )}
             </div>
@@ -138,7 +138,7 @@ export default function Explore() {
                     <SheetTitle>Filtros</SheetTitle>
                   </SheetHeader>
                   <div className="py-6 space-y-4">
-                    <p className="text-sm font-medium text-gray-500">Categorias</p>
+                    <p className="text-sm font-semibold text-slate-800">Categorias</p>
                     <div className="flex flex-wrap gap-2">
                       {categories.map((cat) => (
                         <Button
@@ -148,8 +148,8 @@ export default function Explore() {
                           onClick={() => setSelectedCategory(cat.value)}
                           className={`rounded-full ${
                             selectedCategory === cat.value 
-                              ? 'ceu-gradient text-white' 
-                              : ''
+                              ? 'bg-ceu-navy text-ceu-cloud hover:bg-ceu-navy/90' 
+                              : 'border-slate-300 text-slate-900 hover:bg-slate-100'
                           }`}
                         >
                           <span className="mr-1">{cat.emoji}</span>
@@ -173,8 +173,8 @@ export default function Explore() {
                 onClick={() => setSelectedCategory(cat.value)}
                 className={`rounded-full shrink-0 ${
                   selectedCategory === cat.value 
-                    ? 'ceu-gradient text-white' 
-                    : 'hover:bg-gray-100'
+                    ? 'bg-ceu-navy text-ceu-cloud hover:bg-ceu-navy/90' 
+                    : 'text-slate-900 hover:bg-slate-100'
                 }`}
               >
                 <span className="mr-1">{cat.emoji}</span>
@@ -189,7 +189,7 @@ export default function Explore() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Results Count */}
         <div className="flex items-center justify-between mb-6">
-          <p className="text-gray-500">
+          <p className="font-medium text-slate-700">
             {filteredDesigns.length} estampas encontradas
           </p>
           {selectedCategory !== 'all' && (
@@ -227,7 +227,7 @@ export default function Explore() {
               ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' 
               : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4'
           }`}>
-            <AnimatePresence mode="popLayout">
+            <AnimatePresence>
               {filteredDesigns.map((design, index) => (
                 <DesignCard key={design.id} design={design} index={index} />
               ))}
@@ -245,7 +245,7 @@ export default function Explore() {
             <h3 className="text-xl font-semibold text-gray-900 mb-2">
               Nenhuma estampa encontrada
             </h3>
-            <p className="text-gray-500">
+            <p className="text-slate-700">
               Tente ajustar seus filtros ou buscar por outros termos
             </p>
           </motion.div>

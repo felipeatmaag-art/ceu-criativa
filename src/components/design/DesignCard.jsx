@@ -40,7 +40,7 @@ export default function DesignCard({ design, onLike, index = 0 }) {
       onMouseLeave={() => setIsHovered(false)}
     >
       <Link to={createPageUrl(`DesignDetail?id=${design.id}`)}>
-        <div className="relative glass-card rounded-3xl overflow-hidden hover-glow transition-all duration-500 transform hover:-translate-y-2">
+        <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-card text-card-foreground shadow-sm transition-all duration-500 hover:-translate-y-2 hover:shadow-xl">
           {/* Image Container */}
           <div className="relative aspect-square overflow-hidden">
             <img
@@ -79,7 +79,7 @@ export default function DesignCard({ design, onLike, index = 0 }) {
             >
               <Button
                 size="sm"
-                className="flex-1 ceu-gradient text-white rounded-xl hover-glow"
+                className="flex-1 rounded-xl bg-ceu-navy text-ceu-cloud hover:bg-ceu-navy/90"
               >
                 <ShoppingBag className="w-4 h-4 mr-2" />
                 Comprar
@@ -87,7 +87,7 @@ export default function DesignCard({ design, onLike, index = 0 }) {
               <Button
                 size="icon"
                 variant="secondary"
-                className="glass-card text-emerald-400 hover-glow rounded-xl"
+                className="rounded-xl border border-slate-200 bg-white text-slate-900 hover:bg-slate-100"
               >
                 <Eye className="w-4 h-4" />
               </Button>
@@ -96,11 +96,11 @@ export default function DesignCard({ design, onLike, index = 0 }) {
             {/* Like Button */}
             <button
               onClick={handleLike}
-              className="absolute top-4 right-4 w-10 h-10 rounded-full glass-card hover-glow flex items-center justify-center transition-all duration-300 hover:scale-110"
+              className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white/95 shadow-sm transition-all duration-300 hover:scale-110 hover:bg-white"
             >
               <Heart
                 className={`w-5 h-5 transition-colors ${
-                  isLiked ? 'fill-red-500 text-red-500' : 'text-gray-600'
+                  isLiked ? 'fill-red-600 text-red-600' : 'text-slate-800'
                 }`}
               />
             </button>
@@ -110,20 +110,20 @@ export default function DesignCard({ design, onLike, index = 0 }) {
           <div className="p-5">
             <div className="flex items-start justify-between gap-2 mb-3">
               <div>
-                <h3 className="font-semibold text-white text-lg leading-tight line-clamp-1">
+                <h3 className="line-clamp-1 text-lg font-semibold leading-tight text-slate-950">
                   {design.title}
                 </h3>
-                <p className="text-sm text-gray-400 mt-1">
-                  por <span className="text-emerald-400 font-medium">{design.artist_name || 'Artista'}</span>
+                <p className="mt-1 text-sm text-slate-700">
+                  por <span className="font-semibold text-slate-900">{design.artist_name || 'Artista'}</span>
                 </p>
               </div>
-              <Badge variant="outline" className="shrink-0 rounded-lg">
+              <Badge variant="outline" className="shrink-0 rounded-lg border-slate-300 bg-white text-slate-800">
                 {categoryLabels[design.category] || design.category}
               </Badge>
             </div>
 
-            <div className="flex items-center justify-between pt-3 border-t border-white/10">
-              <div className="flex items-center gap-4 text-sm text-gray-400">
+            <div className="flex items-center justify-between border-t border-slate-200 pt-3">
+              <div className="flex items-center gap-4 text-sm font-medium text-slate-700">
                 <span className="flex items-center gap-1">
                   <Heart className="w-4 h-4" />
                   {design.likes_count || 0}
@@ -133,7 +133,7 @@ export default function DesignCard({ design, onLike, index = 0 }) {
                   {design.sales_count || 0}
                 </span>
               </div>
-              <p className="text-lg font-bold ceu-text-gradient">
+              <p className="text-lg font-bold text-slate-950">
                 R$ {(design.price_base || 49.90).toFixed(2)}
               </p>
             </div>

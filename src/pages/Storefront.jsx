@@ -17,7 +17,7 @@ export default function Storefront() {
   });
 
   if (isLoading) return <div className="mx-auto min-h-screen max-w-7xl space-y-8 px-4 py-10"><Skeleton className="h-96 rounded-3xl" /><Skeleton className="h-64 rounded-3xl" /></div>;
-  if (!artist) return <div className="flex min-h-[70vh] items-center justify-center text-center"><div><h1 className="text-3xl font-bold text-ceu-navy">Loja não encontrada</h1><p className="mt-2 text-ceu-navy/60">Confira o endereço e tente novamente.</p></div></div>;
+  if (!artist) return <div className="flex min-h-[70vh] items-center justify-center text-center"><div><h1 className="text-3xl font-bold text-ceu-navy">Loja não encontrada</h1><p className="mt-2 text-muted-foreground">Confira o endereço e tente novamente.</p></div></div>;
 
-  return <div className="min-h-screen bg-ceu-cloud py-10"><div className="mx-auto max-w-7xl space-y-10 px-4 sm:px-6 lg:px-8"><StorefrontHeader artist={artist} /><section><h2 className="mb-6 text-2xl font-bold text-ceu-navy">Estampas da loja</h2>{designs.length ? <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">{designs.map((design, index) => <DesignCard key={design.id} design={design} index={index} />)}</div> : <div className="rounded-3xl bg-card py-16 text-center text-ceu-navy/55">Esta loja ainda não publicou estampas.</div>}</section></div></div>;
+  return <div className="min-h-screen bg-ceu-cloud py-10"><div className="mx-auto max-w-7xl space-y-10 px-4 sm:px-6 lg:px-8"><StorefrontHeader artist={artist} /><section><h2 className="mb-6 text-2xl font-bold text-ceu-navy">Estampas da loja</h2>{designs.length ? <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">{designs.map((design, index) => <DesignCard key={design.id} design={design} index={index} />)}</div> : <div className="rounded-3xl bg-card py-16 text-center font-medium text-muted-foreground">Esta loja ainda não publicou estampas.</div>}</section></div></div>;
 }

@@ -391,7 +391,7 @@ export default function Layout({ children, currentPageName }) {
                     key={item.page}
                     to={createPageUrl(item.page)}
                     onClick={() => setIsMenuOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-gray-100 transition-colors">
+                    className="flex items-center gap-3 rounded-xl px-4 py-3 font-medium text-gray-100 transition-colors hover:bg-white/10 hover:text-white">
                     
                       <Icon className="w-5 h-5" />
                       {item.name}

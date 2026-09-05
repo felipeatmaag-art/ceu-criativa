@@ -21,7 +21,7 @@ export default function FeaturedDesigns({ designs, title = "Estampas em Destaque
             <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
               {title}
             </h2>
-            <p className="text-gray-500 text-lg">{subtitle}</p>
+            <p className="text-lg text-muted-foreground">{subtitle}</p>
           </div>
           <Link to={createPageUrl('Explore')}>
             <Button variant="ghost" className="text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-xl">
@@ -51,7 +51,7 @@ export default function FeaturedDesigns({ designs, title = "Estampas em Destaque
             <h3 className="text-xl font-semibold text-gray-900 mb-2">
               Nenhuma estampa ainda
             </h3>
-            <p className="text-gray-500 mb-6">
+            <p className="mb-6 text-muted-foreground">
               Seja o primeiro a criar uma estampa incrível!
             </p>
             <Link to={createPageUrl('Create')}>
