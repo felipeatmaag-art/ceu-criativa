@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { base44 } from '@/api/base44Client';
+import productRepository from '@/services/products/productRepository';
 import { Button } from '@/components/ui/button';
 import ProductFormFields from '@/components/products/ProductFormFields';
 
@@ -13,7 +13,7 @@ export default function ProductCatalogForm({ onCreated, onCancel }) {
   const submit = async (event) => {
     event.preventDefault(); setSaving(true); setError('');
     try {
-      const product = await base44.entities.Product.create({ name: form.name.trim(), type: form.type, material: form.material.trim(), fit: form.fit.trim(), description: form.description.trim(), base_price: Number(form.base_price), sizes_available: list(form.sizes), colors_available: list(form.colors), catalog_product: true, is_active: false });
+      const product = await productRepository.create({ name: form.name.trim(), type: form.type, material: form.material.trim(), fit: form.fit.trim(), description: form.description.trim(), base_price: Number(form.base_price), sizes_available: list(form.sizes), colors_available: list(form.colors), catalog_product: true, is_active: false });
       setForm(initial); onCreated(product);
     } catch (cause) { setError(cause.message || 'Não foi possível cadastrar o produto.'); setSaving(false); }
   };

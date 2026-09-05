@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { base44 } from '@/api/base44Client';
+import productRepository from '@/services/products/productRepository';
 import { Button } from '@/components/ui/button';
 import ProductFormFields from '@/components/products/ProductFormFields';
 
@@ -18,7 +18,7 @@ export default function ProductEditForm({ product, onUpdated, onCancel }) {
   const submit = async (event) => {
     event.preventDefault(); setSaving(true); setError('');
     try {
-      const updated = await base44.entities.Product.update(product.id, { name: form.name.trim(), type: form.type, material: form.material.trim(), fit: form.fit.trim(), description: form.description.trim(), base_price: Number(form.base_price), sizes_available: list(form.sizes), colors_available: list(form.colors) });
+      const updated = await productRepository.update(product.id, { name: form.name.trim(), type: form.type, material: form.material.trim(), fit: form.fit.trim(), description: form.description.trim(), base_price: Number(form.base_price), sizes_available: list(form.sizes), colors_available: list(form.colors) });
       onUpdated(updated);
     } catch (cause) { setError(cause.message || 'Não foi possível salvar as alterações.'); setSaving(false); }
   };

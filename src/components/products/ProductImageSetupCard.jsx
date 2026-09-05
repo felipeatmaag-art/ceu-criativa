@@ -5,6 +5,7 @@ import { Upload } from 'lucide-react';
 import ProductColorPicker from '@/components/products/ProductColorPicker';
 import ProductInfoFields from '@/components/products/ProductInfoFields';
 import ProductActionsMenu from '@/components/products/ProductActionsMenu';
+import productRepository from '@/services/products/productRepository';
 
 export default function ProductImageSetupCard({ product, onUpdated, onDeleted }) {
   const savedColors = product.product_color_variants?.map(({ name, hex }) => ({ name, hex })) || [];
@@ -31,7 +32,7 @@ export default function ProductImageSetupCard({ product, onUpdated, onDeleted })
         const variants = await Promise.all(colors.map(async (color) => { const front_url = await generate(frontSource, color, 'frente'); const back_url = await generate(backSource || front_url, color, 'costas', !backSource); return { ...color, front_url, back_url }; }));
         Object.assign(payload, { front_model_url: variants[0].front_url, back_model_url: variants[0].back_url, product_color_variants: variants, colors_available: variants.map(({ name }) => name), is_active: true });
       }
-      const updated = await base44.entities.Product.update(product.id, payload);
+      const updated = await productRepository.update(product.id, payload);
       setFiles({ front: null, back: null }); onUpdated(updated);
     } catch (cause) { setError(cause.message || 'Não foi possível salvar o produto.'); }
     setSaving(false);

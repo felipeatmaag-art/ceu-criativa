@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { base44 } from '@/api/base44Client';
+import productRepository from '@/services/products/productRepository';
 import ProductCatalogList from '@/components/products/ProductCatalogList';
 import ProductCatalogDialog from '@/components/products/ProductCatalogDialog';
 import { Button } from '@/components/ui/button';
@@ -10,7 +10,7 @@ export default function ProductAdmin() {
   const [error, setError] = useState('');
   const loadProducts = () => {
     setLoading(true); setError('');
-    base44.entities.Product.filter({ catalog_product: true }, '-created_date', 100)
+    productRepository.listCatalog()
       .then(setProducts).catch(() => setError('Não foi possível carregar o catálogo.'))
       .finally(() => setLoading(false));
   };
