@@ -1,7 +1,7 @@
 import React from 'react';
 import { Label } from '@/components/ui/label';
 
-export default function ProductSizeSelector({ options, value, onChange }) {
+export default function ProductSizeSelector({ options = [], value, onChange }) {
   return (
     <div>
       <Label className="mb-3 block text-sm font-semibold text-gray-900">Tamanho</Label>

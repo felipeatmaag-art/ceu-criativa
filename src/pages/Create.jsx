@@ -102,7 +102,7 @@ export default function Create() {
     base44.entities.Product.filter({ catalog_product: true, is_active: true }, '-created_date', 100).then((items) => {
       setCatalogProducts(items);
       if (items.length) {
-        const chosen = items.find((item) => item.type === requestedProduct) || items[0];
+        const chosen = items.find((item) => item.type === requestedProduct) || items.find((item) => item.type === 'camiseta') || items[0];
         setSelectedCatalogId(chosen.id);
         setSelectedProduct(chosen.type);
         setProductColor(chosen.product_color_variants?.[0]?.name || 'white');
@@ -215,7 +215,7 @@ export default function Create() {
   const missingProducts = PRODUCTS.filter((option) => !catalogProducts.some((product) => product.type === option.value)).map((option) => ({ ...option, type: option.value, price: productPrices[option.value] }));
   const studioProducts = [...catalogStudioProducts, ...missingProducts];
   const currentPrice = Number(selectedCatalogProduct?.base_price ?? productPrices[selectedProduct]);
-  const currentSizes = selectedCatalogProduct?.sizes_available?.length ? selectedCatalogProduct.sizes_available : productSizes[selectedProduct];
+  const currentSizes = selectedCatalogProduct?.sizes_available?.length ? selectedCatalogProduct.sizes_available : (productSizes[selectedProduct] || []);
   const busy = isGenerating || isUploading || backBusy;
   const views = { ...productViews(selectedCatalogProduct, productColor) };
   if (customBaseImages.front) views.front = customBaseImages.front;
