@@ -43,11 +43,16 @@ import { validateArtworkFile, getArtworkMetadata, rememberArtwork } from '@/comp
 import productViews from '@/components/create/productViews';
 import useStudioSubmission from '@/components/create/useStudioSubmission';
 import PrintApproval from '@/components/create/PrintApproval';
+import PrintStandardCard from '@/components/create/PrintStandardCard';
+import EcobagMockup from '@/components/create/EcobagMockup';
+import { getPrintPrompt, getPrintStandard } from '@/components/production/printStandards';
 
 const PRODUCTS = [
   { value: 'camiseta', label: 'Camiseta' },
   { value: 'baby_look', label: 'Baby Look' },
-  { value: 'caneca', label: 'Caneca' },
+  { value: 'caneca', label: 'Caneca 11oz' },
+  { value: 'ecobag', label: 'Ecobag' },
+  { value: 'logo_uniforme', label: 'Logo / Uniforme' },
   { value: 'quadro', label: 'Quadro' }
 ];
 
@@ -151,7 +156,7 @@ export default function Create() {
 
     try {
       const result = await base44.integrations.Core.GenerateImage({
-        prompt: `Você é Iara, uma designer especializada exclusivamente em criar estampas. Crie SOMENTE a arte gráfica plana solicitada pelo usuário: "${aiPrompt}". Mostre apenas os desenhos, símbolos e textos que compõem a estampa, isolados e centralizados em formato quadrado, com alta definição e canal alfa realmente transparente. Nunca desenhe grade, tabuleiro, quadriculado ou padrão visual para representar transparência. Se o canal alfa nativo não estiver disponível, use somente um fundo técnico verde puro #00FF00, plano e uniforme, sem usar essa cor na arte. Se o pedido contiver uma frase, reproduza o texto exatamente como foi escrito, sem corrigir, trocar ou acrescentar palavras. É terminantemente proibido desenhar ou mostrar camiseta, roupa, caneca, quadro, produto, manequim, pessoa vestindo, embalagem, etiqueta, mockup, ambiente, cenário ou a estampa aplicada em qualquer superfície. Não inclua bordas de fotografia ou sombras externas. Mantenha uma margem vazia nas quatro bordas, sem tocar nos limites. A saída deve ser exclusivamente o arquivo gráfico plano da estampa.`
+        prompt: `Você é Iara, uma designer especializada exclusivamente em criar estampas. Crie SOMENTE a arte gráfica plana solicitada pelo usuário: "${aiPrompt}". ${getPrintPrompt(selectedProduct)} Mostre apenas os desenhos, símbolos e textos que compõem a estampa, isolados e centralizados, com alta definição e canal alfa realmente transparente. Nunca desenhe grade, tabuleiro, quadriculado ou padrão visual para representar transparência. Se o canal alfa nativo não estiver disponível, use somente um fundo técnico verde puro #00FF00, plano e uniforme, sem usar essa cor na arte. Se o pedido contiver uma frase, reproduza o texto exatamente como foi escrito, sem corrigir, trocar ou acrescentar palavras. É terminantemente proibido desenhar ou mostrar camiseta, roupa, caneca, quadro, produto, manequim, pessoa vestindo, embalagem, etiqueta, mockup, ambiente, cenário ou a estampa aplicada em qualquer superfície. Não inclua bordas de fotografia ou sombras externas. Mantenha uma margem vazia nas quatro bordas, sem tocar nos limites. A saída deve ser exclusivamente o arquivo gráfico plano da estampa.`
       });
 
       if (!result?.url) throw new Error('A geração não retornou uma imagem. Tente novamente.');
@@ -182,14 +187,18 @@ export default function Create() {
     camiseta: 49.90,
     baby_look: 49.90,
     quadro: 89.90,
-    caneca: 39.90
+    caneca: 39.90,
+    ecobag: 44.90,
+    logo_uniforme: 39.90
   };
 
   const productSizes = {
     camiseta: ['P', 'M', 'G', 'GG'],
     baby_look: ['P', 'M', 'G', 'GG'],
     quadro: ['30x40cm', '50x70cm', '70x100cm'],
-    caneca: ['Padrão']
+    caneca: ['11oz'],
+    ecobag: ['28x35cm'],
+    logo_uniforme: ['10x10cm']
   };
 
   const colors = [
@@ -200,8 +209,11 @@ export default function Create() {
 
 
   const selectedCatalogProduct = catalogProducts.find((product) => product.id === selectedCatalogId);
+  const printStandard = getPrintStandard(selectedProduct);
   const availableColors = selectedCatalogProduct?.product_color_variants?.length ? selectedCatalogProduct.product_color_variants : colors;
-  const studioProducts = catalogProducts.length ? catalogProducts.map((product) => ({ value: product.id, type: product.type, label: product.name, price: product.base_price, image: product.front_model_url })) : PRODUCTS.map((product) => ({ ...product, type: product.value, price: productPrices[product.value] }));
+  const catalogStudioProducts = catalogProducts.map((product) => ({ value: product.id, type: product.type, label: product.name, price: product.base_price, image: product.front_model_url }));
+  const missingProducts = PRODUCTS.filter((option) => !catalogProducts.some((product) => product.type === option.value)).map((option) => ({ ...option, type: option.value, price: productPrices[option.value] }));
+  const studioProducts = [...catalogStudioProducts, ...missingProducts];
   const currentPrice = Number(selectedCatalogProduct?.base_price ?? productPrices[selectedProduct]);
   const currentSizes = selectedCatalogProduct?.sizes_available?.length ? selectedCatalogProduct.sizes_available : productSizes[selectedProduct];
   const busy = isGenerating || isUploading || backBusy;
@@ -237,6 +249,8 @@ export default function Create() {
         )}
         {selectedProduct === 'quadro' && <FrameMockup designImage={designImage} />}
         {selectedProduct === 'caneca' && <MugMockup designImage={designImage} />}
+        {selectedProduct === 'ecobag' && <EcobagMockup designImage={designImage} />}
+        {selectedProduct === 'logo_uniforme' && <TshirtMockup designImage={designImage} color={productColor} side={side} />}
       </>
     );
   };
@@ -304,6 +318,8 @@ export default function Create() {
             <div className="mb-8">
               <ProductSelector products={studioProducts} value={selectedCatalogId || selectedProduct} onChange={handleProductChange} />
             </div>
+
+            <div className="mb-8"><PrintStandardCard productType={selectedProduct} /></div>
 
             <div className="grid lg:grid-cols-2 gap-8">
               {/* Outline Preview */}
@@ -514,7 +530,7 @@ export default function Create() {
                     <div
                       key={i}
                       onClick={() => setSelectedImage(img)}
-                      className={`relative aspect-square rounded-2xl overflow-hidden cursor-pointer border-4 transition-all ${
+                      className={`relative ${printStandard.previewClass} rounded-2xl overflow-hidden cursor-pointer border-4 transition-all ${
                     selectedImage === img ?
                     'border-purple-500 shadow-lg' :
                     'border-transparent hover:border-gray-200'}`
@@ -523,7 +539,7 @@ export default function Create() {
                               <img
                         src={img}
                         alt="Design gerado"
-                        className="w-full h-full object-cover" />
+                        className="w-full h-full object-contain" />
 
                               {selectedImage === img &&
                     <div className="absolute top-2 right-2 w-7 h-7 rounded-full bg-purple-500 flex items-center justify-center">
@@ -625,6 +641,7 @@ export default function Create() {
                       onGenerated={setBackDesignImage}
                       onBusyChange={setBackBusy}
                       disabled={busy}
+                      productType={selectedProduct}
                     />
                   </>
                 )}

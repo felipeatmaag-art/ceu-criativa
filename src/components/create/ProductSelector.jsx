@@ -1,11 +1,11 @@
 import React from 'react';
-import { Shirt, Coffee, Frame } from 'lucide-react';
+import { Shirt, Coffee, Frame, ShoppingBag, Badge } from 'lucide-react';
 
-const icons = { camiseta: Shirt, baby_look: Shirt, caneca: Coffee, quadro: Frame };
+const icons = { camiseta: Shirt, baby_look: Shirt, caneca: Coffee, quadro: Frame, ecobag: ShoppingBag, logo_uniforme: Badge };
 
 export default function ProductSelector({ products, value, onChange }) {
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
       {products.map((product) => {
         const Icon = icons[product.type || product.value] || Shirt;
         const selected = value === product.value;

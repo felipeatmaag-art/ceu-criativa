@@ -3,8 +3,9 @@ import { Loader2, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { base44 } from '@/api/base44Client';
 import { prepareGeneratedArtwork } from '@/components/create/preparePrintArtwork';
+import { getPrintPrompt } from '@/components/production/printStandards';
 
-export default function BackArtworkGenerator({ frontImage, description, backImage, onGenerated, onBusyChange, disabled }) {
+export default function BackArtworkGenerator({ frontImage, description, backImage, onGenerated, onBusyChange, disabled, productType }) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState('');
 
@@ -13,7 +14,7 @@ export default function BackArtworkGenerator({ frontImage, description, backImag
     setError('');
     try {
       const result = await base44.integrations.Core.GenerateImage({
-        prompt: `Crie somente uma estampa traseira complementar à arte de referência. Mantenha exatamente a mesma linguagem visual, paleta de cores, traços e tema da frente descrita como: "${description}". Faça uma composição nova e mais simples para as costas, isolada, centralizada e com fundo totalmente transparente. Não mostre camiseta, roupa, produto, pessoa, manequim, mockup, cenário, etiqueta ou superfície. Entregue apenas o arquivo gráfico da estampa. Se não houver suporte a canal alfa nativo, use fundo branco puro uniforme, sem quadradinhos, sombras ou gradiente, e mantenha uma margem vazia em todas as bordas.`,
+        prompt: `Crie somente uma estampa traseira complementar à arte de referência. ${getPrintPrompt(productType)} Mantenha exatamente a mesma linguagem visual, paleta de cores, traços e tema da frente descrita como: "${description}". Faça uma composição nova e mais simples para as costas, isolada, centralizada e com fundo totalmente transparente. Não mostre camiseta, roupa, produto, pessoa, manequim, mockup, cenário, etiqueta ou superfície. Entregue apenas o arquivo gráfico da estampa. Se não houver suporte a canal alfa nativo, use fundo branco puro uniforme, sem quadradinhos, sombras ou gradiente, e mantenha uma margem vazia em todas as bordas.`,
         existing_image_urls: [frontImage]
       });
       if (!result?.url) throw new Error('Não foi possível gerar a estampa das costas.');

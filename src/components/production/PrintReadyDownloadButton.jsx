@@ -3,14 +3,14 @@ import { Download, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { downloadPrintReadyPng } from '@/components/production/exportPrintReadyPng';
 
-export default function PrintReadyDownloadButton({ sourceUrl, fileName, sideLabel }) {
+export default function PrintReadyDownloadButton({ sourceUrl, fileName, sideLabel, productType }) {
   const [downloading, setDownloading] = useState(false);
   const [error, setError] = useState('');
   const download = async () => {
     setDownloading(true);
     setError('');
     try {
-      await downloadPrintReadyPng(sourceUrl, fileName);
+      await downloadPrintReadyPng(sourceUrl, fileName, productType);
     } catch (reason) {
       setError(reason.message || 'Não foi possível baixar o arquivo.');
     } finally {
