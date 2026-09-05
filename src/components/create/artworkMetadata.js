@@ -11,6 +11,6 @@ export async function validateArtworkFile(file) {
   const bitmap = await createImageBitmap(file);
   const { width, height } = bitmap;
   bitmap.close();
-  if (width < 2000 || height < 2000) throw new Error('Envie uma arte com pelo menos 2000 × 2000 px.');
+  if (width < 256 || height < 256) throw new Error('A imagem precisa ter pelo menos 256 px de largura e altura.');
   if (width * height > 16000000) throw new Error('Use uma imagem de até 16 megapixels.');
 }

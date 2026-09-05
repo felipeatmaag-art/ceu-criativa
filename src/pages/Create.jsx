@@ -172,7 +172,7 @@ export default function Create() {
       setUploadStage('Enviando imagem...');
       const result = await base44.integrations.Core.UploadFile({ file });
       if (!result?.file_url) throw new Error('O envio da imagem não foi concluído.');
-      setUploadStage('Limpando e validando transparência...');
+      setUploadStage('Reconstruindo e preparando sua imagem...');
       setSelectedImage(await prepareUploadedArtwork(file, result.file_url));
     } catch (error) { setUploadError(error.message || 'Não foi possível preparar a imagem.'); }
     finally { setIsUploading(false); e.target.value = ''; }
@@ -572,7 +572,7 @@ export default function Create() {
                             ou clique para selecionar
                           </p>
                           <p className="text-xs text-gray-400">
-                            PNG, JPG ou WEBP • mínimo 2000 × 2000 px • máximo 10 MB<br />Todos os formatos passam pela validação de transparência • saída em PNG
+                            PNG, JPG ou WEBP • a partir de 256 px • máximo 10 MB<br />Imagens menores são reconstruídas e preparadas automaticamente para impressão
                           </p>
                           {uploadError && <p className="mt-3 text-sm font-medium text-destructive">{uploadError}</p>}
                         </>
@@ -593,7 +593,7 @@ export default function Create() {
                   <img src={selectedImage} alt="Arte selecionada" className="w-14 h-14 rounded-xl object-cover" />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-emerald-700 flex items-center gap-1">
-                      <Check className="w-4 h-4" /> PNG limpo e validado
+                      <Check className="w-4 h-4" /> Imagem reconstruída e validada
                     </p>
                     <p className="text-xs text-emerald-600 truncate">
                       {mode === 'ai' ? 'Gerada com IA' : 'Enviada por upload'}
