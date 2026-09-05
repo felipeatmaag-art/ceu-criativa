@@ -14,8 +14,12 @@
       "type": "string",
       "description": "Nome do cliente"
     },
+    "customer_id": {
+      "type": "string"
+    },
     "items": {
       "type": "array",
+      "description": "Itens do pedido",
       "items": {
         "type": "object",
         "properties": {
@@ -42,10 +46,22 @@
           },
           "price": {
             "type": "number"
+          },
+          "cart_item_id": {
+            "type": "string"
+          },
+          "design_image": {
+            "type": "string"
+          },
+          "mockup_url": {
+            "type": "string"
+          },
+          "production": {
+            "type": "object",
+            "description": "C\u00f3pia dos arquivos e posi\u00e7\u00f5es aprovados no momento do pedido"
           }
         }
-      },
-      "description": "Itens do pedido"
+      }
     },
     "subtotal": {
       "type": "number"

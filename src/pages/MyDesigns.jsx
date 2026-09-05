@@ -28,6 +28,7 @@ import {
 import { motion } from 'framer-motion';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import ProductionFiles from '@/components/create/ProductionFiles';
 
 export default function MyDesigns() {
   const { data: user } = useQuery({
@@ -37,7 +38,7 @@ export default function MyDesigns() {
 
   const { data: designs = [], isLoading } = useQuery({
     queryKey: ['my-designs', user?.id],
-    queryFn: () => base44.entities.Design.filter({ created_by: user?.email }, '-created_date', 50),
+    queryFn: () => base44.entities.Design.filter({ artist_id: user?.id }, '-created_date', 50),
     enabled: !!user,
   });
 
@@ -123,6 +124,7 @@ export default function MyDesigns() {
             </DropdownMenu>
           </div>
 
+          <ProductionFiles production={design.production} />
           {/* Stats */}
           <div className="flex items-center gap-4 mt-4 pt-4 border-t text-sm text-gray-500">
             <span className="flex items-center gap-1">

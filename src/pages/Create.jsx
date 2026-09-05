@@ -39,6 +39,10 @@ import ProductColorSelector from '@/components/create/ProductColorSelector';
 import ProductSizeSelector from '@/components/create/ProductSizeSelector';
 import { prepareGeneratedArtwork, prepareUploadedArtwork } from '@/components/create/preparePrintArtwork';
 import BackArtworkGenerator from '@/components/create/BackArtworkGenerator';
+import { validateArtworkFile, getArtworkMetadata, rememberArtwork } from '@/components/create/artworkMetadata';
+import productViews from '@/components/create/productViews';
+import useStudioSubmission from '@/components/create/useStudioSubmission';
+import PrintApproval from '@/components/create/PrintApproval';
 
 const PRODUCTS = [
   { value: 'camiseta', label: 'Camiseta' },
@@ -52,12 +56,15 @@ export default function Create() {
   const requestedProduct = new URLSearchParams(window.location.search).get('product');
   const hasRequestedProduct = PRODUCTS.some((product) => product.value === requestedProduct);
   const [mode, setMode] = useState('ai');
-  const [step, setStep] = useState(hasRequestedProduct ? 2 : 1);
+  const [step, setStep] = useState(1);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadStage, setUploadStage] = useState('Enviando...');
   const [uploadError, setUploadError] = useState('');
-  const [isSaving, setIsSaving] = useState(false);
+  const [generationError, setGenerationError] = useState('');
+  const [backBusy, setBackBusy] = useState(false);
+  const [approved, setApproved] = useState(false);
+  const [customBaseImages, setCustomBaseImages] = useState({ front: null, back: null });
 
   const [aiPrompt, setAiPrompt] = useState('');
   const [generatedImages, setGeneratedImages] = useState([]);
@@ -76,7 +83,7 @@ export default function Create() {
   const [selectedCatalogId, setSelectedCatalogId] = useState(null);
   const [productColor, setProductColor] = useState('white');
   const [selectedSize, setSelectedSize] = useState('');
-  const [cart, setCart] = useState([]);
+
   const [backDesignImage, setBackDesignImage] = useState(null);
   const [editorSide, setEditorSide] = useState('front');
   const [designTransforms, setDesignTransforms] = useState({
@@ -95,6 +102,18 @@ export default function Create() {
         setSelectedProduct(chosen.type);
         setProductColor(chosen.product_color_variants?.[0]?.name || 'white');
         setSelectedSize('');
+      }
+      if (new URLSearchParams(window.location.search).get('resume') === '1') {
+        const draft = JSON.parse(sessionStorage.getItem('ceu-studio-resume') || 'null');
+        if (draft) {
+          Object.entries(draft.artwork || {}).forEach(([url, metadata]) => rememberArtwork(url, metadata));
+          setSelectedImage(draft.frontImage); setBackDesignImage(draft.backImage);
+          setDesignTransforms(draft.transforms); setDesignData(draft.designData);
+          setSelectedProduct(draft.productType); setSelectedCatalogId(draft.product?.id || null);
+          setProductColor(draft.color); setSelectedSize(draft.size); setMode(draft.mode);
+          setCustomBaseImages(draft.customBaseImages || { front: null, back: null });
+          setGeneratedMockups(draft.generatedMockups || []); setStep(3);
+        }
       }
     });
   }, [requestedProduct]);
@@ -127,130 +146,36 @@ export default function Create() {
     if (!aiPrompt.trim()) return;
 
     setIsGenerating(true);
+    setGenerationError('');
     setGeneratedImages([]);
 
     try {
       const result = await base44.integrations.Core.GenerateImage({
-        prompt: `Você é Iara, uma designer especializada exclusivamente em criar estampas. Crie SOMENTE a arte gráfica plana solicitada pelo usuário: "${aiPrompt}". Mostre apenas os desenhos, símbolos e textos que compõem a estampa, isolados e centralizados em formato quadrado, com alta definição e fundo totalmente transparente. Se o pedido contiver uma frase, reproduza o texto exatamente como foi escrito, sem corrigir, trocar ou acrescentar palavras. É terminantemente proibido desenhar ou mostrar camiseta, roupa, caneca, quadro, produto, manequim, pessoa vestindo, embalagem, etiqueta, mockup, ambiente, cenário ou a estampa aplicada em qualquer superfície. Não inclua bordas de fotografia, sombras externas ou margens. A saída deve ser exclusivamente o arquivo da estampa, pronto para impressão.`
+        prompt: `Você é Iara, uma designer especializada exclusivamente em criar estampas. Crie SOMENTE a arte gráfica plana solicitada pelo usuário: "${aiPrompt}". Mostre apenas os desenhos, símbolos e textos que compõem a estampa, isolados e centralizados em formato quadrado, com alta definição e fundo totalmente transparente. Se o pedido contiver uma frase, reproduza o texto exatamente como foi escrito, sem corrigir, trocar ou acrescentar palavras. É terminantemente proibido desenhar ou mostrar camiseta, roupa, caneca, quadro, produto, manequim, pessoa vestindo, embalagem, etiqueta, mockup, ambiente, cenário ou a estampa aplicada em qualquer superfície. Não inclua bordas de fotografia, sombras externas ou margens. Se o canal alfa não for suportado, use fundo branco puro uniforme sem sombras, gradientes ou quadradinhos. Mantenha uma margem vazia nas quatro bordas, sem tocar nos limites. A saída deve ser exclusivamente o arquivo gráfico plano da estampa.`
       });
 
-      if (result?.url) {
-        const pngUrl = await prepareGeneratedArtwork(result.url);
-        setGeneratedImages([pngUrl]);
-        setSelectedImage(pngUrl);
-      }
+      if (!result?.url) throw new Error('A geração não retornou uma imagem. Tente novamente.');
+      const pngUrl = await prepareGeneratedArtwork(result.url);
+      setGeneratedImages([pngUrl]);
+      setSelectedImage(pngUrl);
     } catch (error) {
-      console.error('Erro ao gerar imagem:', error);
-    }
-
-    setIsGenerating(false);
+      setGenerationError(error.message || 'Não foi possível gerar e validar a arte. Tente novamente.');
+    } finally { setIsGenerating(false); }
   };
 
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    setUploadError('');
-    if (file.size > 10 * 1024 * 1024) {
-      setUploadError('O arquivo deve ter no máximo 10 MB.');
-      return;
-    }
-    const dimensions = await new Promise((resolve) => {
-      const image = new Image();
-      image.onload = () => resolve({ width: image.width, height: image.height });
-      image.src = URL.createObjectURL(file);
-    });
-    if (dimensions.width < 2000 || dimensions.height < 2000) {
-      setUploadError('Envie uma arte com pelo menos 2000 × 2000 px.');
-      return;
-    }
-    setIsUploading(true);
-    setUploadStage('Enviando imagem...');
+    setUploadError(''); setIsUploading(true); setUploadStage('Validando imagem...');
     try {
+      await validateArtworkFile(file);
+      setUploadStage('Enviando imagem...');
       const result = await base44.integrations.Core.UploadFile({ file });
-      if (result?.file_url) {
-        setUploadStage(file.type === 'image/jpeg' || /\.jpe?g$/i.test(file.name) ? 'Removendo fundo e preparando PNG...' : 'Preparando PNG...');
-        const pngUrl = await prepareUploadedArtwork(file, result.file_url);
-        setSelectedImage(pngUrl);
-      }
-    } catch (error) {
-      setUploadError(error.message || 'Não foi possível preparar a imagem.');
-    }
-    setIsUploading(false);
-  };
-
-  const handleSaveDesign = async () => {
-    if (!selectedImage || !designData.title || !designData.category) return;
-
-    setIsSaving(true);
-
-    try {
-      const user = await base44.auth.me();
-
-      const design = await base44.entities.Design.create({
-        ...designData,
-        image_url: selectedImage,
-        artist_id: user.id,
-        artist_name: user.artist_name || user.full_name,
-        tags: designData.tags.split(',').map((t) => t.trim()).filter((t) => t),
-        is_ai_generated: mode === 'ai',
-        status: 'pendente',
-        commission_rate: 30
-      });
-
-      if (generatedMockups.length) {
-        await base44.entities.Product.create({
-          name: designData.title,
-          type: selectedProduct,
-          design_id: design.id,
-          design_image: selectedImage,
-          ...(backDesignImage ? { back_design_image: backDesignImage } : {}),
-          base_price: currentPrice,
-          final_price: currentPrice,
-          mockup_url: generatedMockups[0].url,
-          mockup_gallery: generatedMockups.map((item) => item.url),
-          mockup_style: mockupStyle,
-          mockup_angles: generatedMockups.map((item) => item.angle),
-          colors_available: [productColor],
-          sizes_available: currentSizes,
-          is_active: true
-        });
-      }
-
-      navigate(createPageUrl('MyDesigns'));
-    } catch (error) {
-      console.error('Erro ao salvar:', error);
-    }
-
-    setIsSaving(false);
-  };
-
-  const handleAddToCart = (productType, size = null, quantity = 1) => {
-    const product = {
-      id: Date.now(),
-      design_image: selectedImage,
-      design_title: designData.title,
-      product_type: productType,
-      price: productPrices[productType],
-      color: productColor,
-      size: size,
-      quantity: quantity
-    };
-    setCart([...cart, product]);
-  };
-
-  const handlePublishOnly = async () => {
-    setIsSaving(true);
-    try {
-      navigate(createPageUrl('MyDesigns'));
-    } catch (error) {
-      console.error('Erro:', error);
-    }
-    setIsSaving(false);
-  };
-
-  const handleGoToCart = () => {
-    localStorage.setItem('cart', JSON.stringify(cart));
-    navigate(createPageUrl('Cart'));
+      if (!result?.file_url) throw new Error('O envio da imagem não foi concluído.');
+      setUploadStage('Limpando e validando transparência...');
+      setSelectedImage(await prepareUploadedArtwork(file, result.file_url));
+    } catch (error) { setUploadError(error.message || 'Não foi possível preparar a imagem.'); }
+    finally { setIsUploading(false); e.target.value = ''; }
   };
 
   const productPrices = {
@@ -279,7 +204,14 @@ export default function Create() {
   const studioProducts = catalogProducts.length ? catalogProducts.map((product) => ({ value: product.id, type: product.type, label: product.name, price: product.base_price, image: product.front_model_url })) : PRODUCTS.map((product) => ({ ...product, type: product.value, price: productPrices[product.value] }));
   const currentPrice = Number(selectedCatalogProduct?.base_price ?? productPrices[selectedProduct]);
   const currentSizes = selectedCatalogProduct?.sizes_available?.length ? selectedCatalogProduct.sizes_available : productSizes[selectedProduct];
+  const busy = isGenerating || isUploading || backBusy;
+  const views = { ...productViews(selectedCatalogProduct, productColor) };
+  if (customBaseImages.front) views.front = customBaseImages.front;
+  if (customBaseImages.back) views.back = customBaseImages.back;
+  const { submit, saving: isSaving, error: saveError } = useStudioSubmission({ frontImage: selectedImage, backImage: backDesignImage, transforms: designTransforms, views, product: selectedCatalogProduct, color: productColor, size: selectedSize, productType: selectedProduct, price: currentPrice, designData, mode, approved, generatedMockups, mockupStyle, customBaseImages });
+  useEffect(() => { setApproved(false); }, [selectedImage, backDesignImage, designTransforms, selectedCatalogId, productColor, selectedSize, customBaseImages]);
   const handleProductChange = (value) => {
+    setCustomBaseImages({ front: null, back: null });
     const catalogProduct = catalogProducts.find((product) => product.id === value);
     setSelectedCatalogId(catalogProduct?.id || null);
     setSelectedProduct(catalogProduct?.type || value);
@@ -481,6 +413,9 @@ export default function Create() {
                         onTransformChange={handleTransformChange}
                         side={editorSide}
                         onSideChange={setEditorSide}
+                        productViews={views}
+                        customBaseImages={customBaseImages}
+                        onBaseImagesChange={setCustomBaseImages}
                       />
                     </motion.div>
                   </AnimatePresence>
@@ -539,7 +474,7 @@ export default function Create() {
 
                       <Button
                       onClick={handleGenerateAI}
-                      disabled={isGenerating || !aiPrompt.trim()}
+                      disabled={busy || !aiPrompt.trim()}
                       className="w-full h-12 rounded-xl bg-ceu-navy text-ceu-cloud hover:bg-ceu-navy/90">
 
                         {isGenerating ?
@@ -555,6 +490,7 @@ export default function Create() {
                     }
                       </Button>
 
+                      {generationError && <p role="alert" className="text-sm text-destructive">{generationError}</p>}
                       {generatedImages.length > 0 &&
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
@@ -567,7 +503,7 @@ export default function Create() {
                         variant="ghost"
                         size="sm"
                         onClick={handleGenerateAI}
-                        disabled={isGenerating}>
+                        disabled={busy}>
 
                             <RefreshCw className="w-4 h-4 mr-2" />
                             Gerar outra
@@ -616,7 +552,7 @@ export default function Create() {
                       accept="image/*"
                       onChange={handleFileUpload}
                       className="absolute inset-0 opacity-0 cursor-pointer"
-                      disabled={isUploading} />
+                      disabled={busy} />
 
                         
                         {isUploading ?
@@ -636,7 +572,7 @@ export default function Create() {
                             ou clique para selecionar
                           </p>
                           <p className="text-xs text-gray-400">
-                            PNG, JPG ou WEBP • mínimo 2000 × 2000 px • máximo 10 MB<br />JPEG terá o fundo removido automaticamente • saída em PNG
+                            PNG, JPG ou WEBP • mínimo 2000 × 2000 px • máximo 10 MB<br />Todos os formatos passam pela validação de transparência • saída em PNG
                           </p>
                           {uploadError && <p className="mt-3 text-sm font-medium text-destructive">{uploadError}</p>}
                         </>
@@ -679,12 +615,16 @@ export default function Create() {
                       frontImage={selectedImage}
                       backImage={backDesignImage}
                       onBackChange={setBackDesignImage}
+                      onBusyChange={setBackBusy}
+                      disabled={busy}
                     />
                     <BackArtworkGenerator
                       frontImage={selectedImage}
                       description={aiPrompt}
                       backImage={backDesignImage}
                       onGenerated={setBackDesignImage}
+                      onBusyChange={setBackBusy}
+                      disabled={busy}
                     />
                   </>
                 )}
@@ -698,6 +638,7 @@ export default function Create() {
 
                   <Button
                 onClick={() => setStep(3)}
+                disabled={busy || !selectedSize}
                 className="w-full h-14 rounded-xl ceu-gradient text-white text-lg">
 
                     Continuar
@@ -740,7 +681,7 @@ export default function Create() {
                   }
 
                   {/* Mockup Display */}
-                  <div className="relative aspect-square rounded-3xl overflow-hidden bg-[#F5F5F7] shadow-sm">
+                  <div className="relative rounded-3xl bg-muted shadow-sm">
                     <AnimatePresence mode="wait">
                       <motion.div
                         key={selectedProduct + productColor}
@@ -759,6 +700,9 @@ export default function Create() {
                           onTransformChange={handleTransformChange}
                           side={editorSide}
                           onSideChange={setEditorSide}
+                        productViews={views}
+                        customBaseImages={customBaseImages}
+                        onBaseImagesChange={setCustomBaseImages}
                         />
                       </motion.div>
                     </AnimatePresence>
@@ -854,9 +798,14 @@ export default function Create() {
                     </div>
                   </div>
 
+                  <PrintApproval front={selectedImage} back={backDesignImage} transforms={designTransforms} approved={approved} onChange={setApproved} disabled={busy || isSaving} />
+                  {saveError && <p role="alert" className="text-sm text-destructive">{saveError}</p>}
+                  <Button onClick={() => submit('cart')} disabled={busy || isSaving || !approved || !designData.title.trim() || !designData.category || !selectedSize} className="w-full h-14 rounded-xl bg-primary text-primary-foreground">
+                    {isSaving ? <><Loader2 className="animate-spin" /> Salvando arquivos...</> : <><ShoppingBag /> Aprovar e ir para o carrinho</>}
+                  </Button>
                   <Button
-                  onClick={handleSaveDesign}
-                  disabled={isSaving || !designData.title || !designData.category}
+                  onClick={() => submit('publish')}
+                  disabled={busy || isSaving || !approved || !designData.title.trim() || !designData.category || !selectedSize}
                   className="w-full h-14 rounded-xl bg-ceu-navy text-ceu-cloud text-lg hover:bg-ceu-navy/90">
 
                     {isSaving ?
@@ -875,65 +824,6 @@ export default function Create() {
               </div>
             </div>
 
-            {/* Cart Summary */}
-            {cart.length > 0 &&
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-3xl shadow-xl p-6 mb-6">
-
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold text-gray-900">
-                  Itens no Carrinho ({cart.length})
-                </h3>
-                <Button variant="ghost" size="sm" onClick={() => setCart([])}>
-                  Limpar
-                </Button>
-              </div>
-              
-              <div className="space-y-3 mb-4">
-                {cart.map((item, idx) =>
-            <div key={idx} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-                    <img src={item.design_image} alt="" className="w-12 h-12 object-cover rounded" />
-                    <div className="flex-1">
-                      <p className="font-medium text-sm">{item.product_type} - {item.size}</p>
-                      <p className="text-xs text-gray-500">R$ {item.price.toFixed(2)}</p>
-                    </div>
-                    <button
-                onClick={() => setCart(cart.filter((_, i) => i !== idx))}
-                className="text-red-500 hover:text-red-700">
-
-                      ×
-                    </button>
-                  </div>
-            )}
-              </div>
-
-              <div className="flex items-center justify-between p-4 bg-purple-50 rounded-xl mb-4">
-                <span className="font-semibold text-gray-900">Total</span>
-                <span className="text-2xl font-bold ceu-text-gradient">
-                  R$ {cart.reduce((sum, item) => sum + item.price, 0).toFixed(2)}
-                </span>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <Button
-              variant="outline"
-              onClick={handlePublishOnly}
-              className="h-12 rounded-xl">
-
-                  Apenas Publicar
-                </Button>
-                <Button
-              onClick={handleGoToCart}
-              className="h-12 rounded-xl ceu-gradient text-white">
-
-                  <ShoppingBag className="w-4 h-4 mr-2" />
-                  Ir para Carrinho
-                </Button>
-              </div>
-            </motion.div>
-          }
           </motion.div>
           }
         </AnimatePresence>

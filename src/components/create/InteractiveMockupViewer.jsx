@@ -5,6 +5,9 @@ import {
   FlipHorizontal2, Check, X, Box, Image as ImageIcon, MoveHorizontal,
 } from 'lucide-react';
 import MockupViewer3D from '@/components/design/MockupViewer3D';
+import ApparelPrintStage from '@/components/create/ApparelPrintStage';
+import { printGeometry } from '@/components/create/printGeometry';
+import { getArtworkMetadata } from '@/components/create/artworkMetadata';
 
 /**
  * Editor de mockup inspirado no Marketgen 2026.
@@ -42,6 +45,7 @@ function SliderControl({ label, value, min, max, step, unit, onChange }) {
       </div>
       <input
         type="range"
+        aria-label={label}
         min={min} max={max} step={step}
         value={value}
         onChange={(e) => onChange(parseFloat(e.target.value))}
@@ -74,6 +78,9 @@ export default function InteractiveMockupViewer({
   onTransformChange,
   side: controlledSide,
   onSideChange,
+  productViews,
+  customBaseImages,
+  onBaseImagesChange,
 }) {
   const [localSide, setLocalSide] = useState('front');
   const side = controlledSide ?? localSide;
@@ -85,7 +92,13 @@ export default function InteractiveMockupViewer({
   const isMug = productType === 'caneca';
   const [viewMode, setViewMode] = useState(isMug ? '3d' : '2d');
   const [baseImages, setBaseImages] = useState({ front: null, back: null });
-  const baseImage = baseImages[side];
+  const baseImage = (customBaseImages || baseImages)[side];
+  const updateTransform = (next) => {
+    if (!isApparel || !designImage) return onTransformChange(next);
+    const bounds = getArtworkMetadata(designImage).bounds;
+    const g = printGeometry(next, bounds.width / bounds.height);
+    onTransformChange({ x: g.x, y: g.y, scale: g.scale, rotation: g.rotation });
+  };
 
   useEffect(() => {
     setViewMode(isMug ? '3d' : '2d');
@@ -114,7 +127,11 @@ export default function InteractiveMockupViewer({
     try {
       const { base44 } = await import('@/api/base44Client');
       const result = await base44.integrations.Core.UploadFile({ file });
-      if (result?.file_url) setBaseImages((images) => ({ ...images, [side]: result.file_url }));
+      if (result?.file_url) {
+        const next = { ...(customBaseImages || baseImages), [side]: result.file_url };
+        setBaseImages(next);
+        onBaseImagesChange?.(next);
+      }
     } catch (err) {
       console.error('Erro no upload da base:', err);
     }
@@ -122,10 +139,10 @@ export default function InteractiveMockupViewer({
   };
 
   // --- Transform helpers ---
-  const setScale = (v) => onTransformChange({ ...transform, scale: v / 100 });
-  const setRotation = (v) => onTransformChange({ ...transform, rotation: v });
-  const setOffsetX = (v) => onTransformChange({ ...transform, x: v });
-  const setOffsetY = (v) => onTransformChange({ ...transform, y: v });
+  const setScale = (v) => updateTransform({ ...transform, scale: v / 100 });
+  const setRotation = (v) => updateTransform({ ...transform, rotation: v });
+  const setOffsetX = (v) => updateTransform({ ...transform, x: v });
+  const setOffsetY = (v) => updateTransform({ ...transform, y: v });
 
   const paintTransform = useCallback((next) => {
     liveTransformRef.current = next;
@@ -218,7 +235,7 @@ export default function InteractiveMockupViewer({
   };
 
   const handleApplyPreset = (preset) => {
-    onTransformChange({ ...preset.transform });
+    updateTransform({ ...preset.transform });
     setShowPresets(false);
   };
 
@@ -254,7 +271,10 @@ export default function InteractiveMockupViewer({
       {/* Área de preview */}
       <div className="flex-1 relative min-h-[420px] lg:min-h-[640px] flex items-center justify-center p-6">
         {/* Modo 3D — rotação 360° por arraste */}
-        {viewMode === '3d' ? (
+        {isApparel ? (
+          <><ApparelPrintStage baseUrl={baseImage || productViews?.[side]} designImage={designImage} transform={transform} onChange={updateTransform} />
+          {!baseImage && <button onClick={() => fileInputRef.current?.click()} disabled={isUploadingBase} className="absolute right-3 top-3 z-20 rounded-full bg-card px-3 py-2 text-xs text-foreground border border-border">Base própria</button>}</>
+        ) : viewMode === '3d' ? (
           <div className="absolute inset-0">
             <MockupViewer3D
               productType={productType}
@@ -363,14 +383,14 @@ export default function InteractiveMockupViewer({
               label="Offset horizontal (X)"
               value={offsetX}
               min={-200} max={200} step={1}
-              unit="px"
+              unit={isApparel ? ' un.' : 'px'}
               onChange={setOffsetX}
             />
             <SliderControl
               label="Offset vertical (Y)"
               value={offsetY}
               min={-200} max={200} step={1}
-              unit="px"
+              unit={isApparel ? ' un.' : 'px'}
               onChange={setOffsetY}
             />
           </div>

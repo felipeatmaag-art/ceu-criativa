@@ -1,47 +1,36 @@
 import { base44 } from '@/api/base44Client';
-import clearImageBackground from '@/components/create/clearImageBackground';
+import { rememberArtwork } from '@/components/create/artworkMetadata';
 
-async function uploadPng(sourceUrl) {
-  const response = await fetch(sourceUrl);
-  if (!response.ok) throw new Error('Não foi possível preparar a imagem.');
-
-  const sourceBlob = await response.blob();
-  const bitmap = await window.createImageBitmap(sourceBlob);
+async function prepareArtwork(sourceUrl) {
+  const response = await fetch(sourceUrl, { signal: AbortSignal.timeout(30000) });
+  if (!response.ok) throw new Error('Não foi possível baixar a arte para preparar o PNG.');
+  const source = await response.blob();
+  if (source.size > 20 * 1024 * 1024) throw new Error('Imagem grande demais para preparar. Limite: 20 MB.');
+  const bitmap = await createImageBitmap(source);
+  const { width, height } = bitmap;
+  if (!width || !height || width * height > 16000000) { bitmap.close(); throw new Error('Use uma imagem de até 16 megapixels.'); }
   const canvas = document.createElement('canvas');
-  canvas.width = bitmap.width;
-  canvas.height = bitmap.height;
-  const context = canvas.getContext('2d');
-  context.drawImage(bitmap, 0, 0);
-  bitmap.close();
-  clearImageBackground(context, canvas.width, canvas.height);
-
-  const pngBlob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
-  if (!pngBlob) throw new Error('Não foi possível converter a imagem para PNG.');
-
-  const pngFile = new File([pngBlob], `estampa-${Date.now()}.png`, { type: 'image/png' });
-  const uploaded = await base44.integrations.Core.UploadFile({ file: pngFile });
-  return uploaded.file_url;
-}
-
-async function removeBackground(sourceUrl) {
-  const result = await base44.integrations.Core.GenerateImage({
-    prompt: 'Extraia exclusivamente a estampa desta imagem e deixe o fundo totalmente transparente. Preserve exatamente os desenhos, cores, contornos, proporções, textos e detalhes da arte. Se houver camiseta, roupa, caneca, quadro, produto, manequim, embalagem, etiqueta, mockup, ambiente ou superfície, elimine esses elementos por completo e mantenha somente a estampa isolada. Não adicione sombras, cenário, margem ou novos elementos. Entregue apenas o arquivo gráfico da estampa, centralizado e pronto para impressão.',
-    existing_image_urls: [sourceUrl]
+  canvas.width = width; canvas.height = height;
+  const context = canvas.getContext('2d', { willReadFrequently: true });
+  context.drawImage(bitmap, 0, 0); bitmap.close();
+  const image = context.getImageData(0, 0, width, height);
+  const processed = await new Promise((resolve, reject) => {
+    const worker = new Worker(new URL('./artwork.worker.js', import.meta.url), { type: 'module' });
+    const timer = setTimeout(() => { worker.terminate(); reject(new Error('A limpeza demorou demais. Tente uma imagem menor.')); }, 30000);
+    worker.onmessage = ({ data }) => { clearTimeout(timer); worker.terminate(); data.error ? reject(new Error(data.error)) : resolve(data); };
+    worker.onerror = () => { clearTimeout(timer); worker.terminate(); reject(new Error('Falha ao processar a transparência. Tente novamente.')); };
+    worker.postMessage({ buffer: image.data.buffer, width, height }, [image.data.buffer]);
   });
-  if (!result?.url) throw new Error('Não foi possível remover o fundo da imagem.');
-  return result.url;
+  context.putImageData(new ImageData(new Uint8ClampedArray(processed.buffer), width, height), 0, 0);
+  const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+  canvas.width = canvas.height = 0;
+  if (!blob) throw new Error('Não foi possível exportar o PNG transparente.');
+  const hash = await crypto.subtle.digest('SHA-256', await blob.arrayBuffer());
+  const sha256 = [...new Uint8Array(hash)].map(v => v.toString(16).padStart(2, '0')).join('');
+  const { file_url } = await base44.integrations.Core.UploadFile({ file: new File([blob], `estampa-${sha256.slice(0, 16)}.png`, { type: 'image/png' }) });
+  if (!file_url) throw new Error('Não foi possível salvar o arquivo de produção.');
+  rememberArtwork(file_url, { file_url, original_url: sourceUrl, width, height, mime_type: 'image/png', bytes: blob.size, sha256, alpha_validated: true, ...processed.metadata });
+  return file_url;
 }
-
-export async function prepareGeneratedArtwork(sourceUrl) {
-  const transparentUrl = await removeBackground(sourceUrl);
-  return uploadPng(transparentUrl);
-}
-
-export async function prepareUploadedArtwork(file, sourceUrl) {
-  if (file.type === 'image/jpeg' || /\.jpe?g$/i.test(file.name)) {
-    const transparentUrl = await removeBackground(sourceUrl);
-    return uploadPng(transparentUrl);
-  }
-
-  return uploadPng(sourceUrl);
-}
+export const prepareGeneratedArtwork = prepareArtwork;
+export const prepareUploadedArtwork = (file, sourceUrl) => prepareArtwork(sourceUrl);

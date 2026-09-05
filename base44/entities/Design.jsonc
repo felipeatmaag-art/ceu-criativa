@@ -82,6 +82,54 @@
         "rejeitado"
       ],
       "default": "rascunho"
+    },
+    "production": {
+      "type": "object",
+      "description": "Snapshot versionado: arquivos PNG originais e limpos, SHA256, dimens\u00f5es, alfa, dpi efetivo, posi\u00e7\u00f5es em coordenadas 1000, \u00e1rea estimada e mockups aprovados",
+      "properties": {
+        "version": {
+          "type": "integer"
+        },
+        "catalog_product_id": {
+          "type": "string"
+        },
+        "product_type": {
+          "type": "string"
+        },
+        "color": {
+          "type": "string"
+        },
+        "size": {
+          "type": "string"
+        },
+        "approved_at": {
+          "type": "string"
+        },
+        "front": {
+          "type": "object"
+        },
+        "back": {
+          "type": "object"
+        },
+        "print_area": {
+          "type": "object"
+        },
+        "mockup_front_url": {
+          "type": "string"
+        },
+        "mockup_back_url": {
+          "type": "string"
+        },
+        "base_front_url": {
+          "type": "string"
+        },
+        "base_back_url": {
+          "type": "string"
+        },
+        "technical_review": {
+          "type": "string"
+        }
+      }
     }
   },
   "required": [

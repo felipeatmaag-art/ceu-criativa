@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import PaymentMethodSelector, { PAYMENT_METHODS } from '@/components/checkout/PaymentMethodSelector';
 import FreeShippingBar, { FREE_SHIPPING_THRESHOLD } from '@/components/checkout/FreeShippingBar';
+import ProductionFiles from '@/components/create/ProductionFiles';
 
 export default function Cart() {
   const [cartItems, setCartItems] = useState([]);
@@ -55,7 +56,7 @@ export default function Cart() {
 
   const updateQty = (index, delta) => {
     const newCart = [...cartItems];
-    const newQty = Math.max(1, (newCart[index].quantity || 1) + delta);
+    const newQty = Math.min(10, Math.max(1, (newCart[index].quantity || 1) + delta));
     newCart[index] = { ...newCart[index], quantity: newQty };
     persist(newCart);
   };
@@ -136,7 +137,7 @@ export default function Cart() {
                 >
                   <div className="w-20 h-20 rounded-xl overflow-hidden bg-gray-100 shrink-0">
                     <img
-                      src={item.design_image}
+                      src={item.mockup_url || item.design_image}
                       alt={item.design_title}
                       className="w-full h-full object-cover"
                     />
@@ -150,8 +151,10 @@ export default function Cart() {
                     <p className="text-sm font-medium text-gray-900 mt-1">
                       R$ {item.price.toFixed(2)}
                     </p>
+                    <ProductionFiles production={item.production} />
                     <div className="flex items-center gap-2 mt-2">
                       <button
+                        aria-label={`Diminuer quantidade de ${item.design_title}`}
                         onClick={() => updateQty(index, -1)}
                         className="w-7 h-7 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-700"
                       >
@@ -159,6 +162,7 @@ export default function Cart() {
                       </button>
                       <span className="text-sm font-medium w-6 text-center">{item.quantity || 1}</span>
                       <button
+                        aria-label={`Aumentar quantidade de ${item.design_title}`}
                         onClick={() => updateQty(index, 1)}
                         className="w-7 h-7 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-700"
                       >
@@ -167,6 +171,7 @@ export default function Cart() {
                     </div>
                   </div>
                   <button
+                    aria-label={`Remover ${item.design_title}`}
                     onClick={() => removeItem(index)}
                     className="text-red-500 hover:text-red-600 self-start"
                   >

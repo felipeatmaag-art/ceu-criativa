@@ -17,6 +17,7 @@ import { motion } from 'framer-motion';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import ProductionFiles from '@/components/create/ProductionFiles';
 
 export default function MyOrders() {
   const { data: user } = useQuery({
@@ -94,14 +95,10 @@ export default function MyOrders() {
 
                   <div className="border-t pt-4">
                     <div className="flex flex-wrap gap-4">
-                      {order.items?.slice(0, 3).map((item, i) => (
+                      {order.items?.map((item, i) => (
                         <div key={i} className="flex items-center gap-3">
                           <div className="w-16 h-16 rounded-xl bg-gray-100 flex items-center justify-center">
-                            <span className="text-2xl">
-                              {item.product_type === 'camiseta' ? '👕' : 
-                               item.product_type === 'bone' ? '🧢' :
-                               item.product_type === 'caneca' ? '☕' : '🎨'}
-                            </span>
+                            {item.mockup_url || item.design_image ? <img src={item.mockup_url || item.design_image} alt={item.design_title} className="h-full w-full object-contain rounded-xl" /> : <Package className="h-6 w-6 text-muted-foreground" />}
                           </div>
                           <div>
                             <p className="font-medium text-sm">{item.design_title}</p>
@@ -109,14 +106,11 @@ export default function MyOrders() {
                               {item.size && `Tam: ${item.size}`} {item.color && `• ${item.color}`}
                             </p>
                             <p className="text-xs text-gray-500">Qtd: {item.quantity}</p>
+                            <ProductionFiles production={item.production} />
                           </div>
                         </div>
                       ))}
-                      {order.items?.length > 3 && (
-                        <div className="flex items-center text-sm text-gray-500">
-                          +{order.items.length - 3} itens
-                        </div>
-                      )}
+
                     </div>
 
                     <div className="flex items-center justify-between mt-4 pt-4 border-t">

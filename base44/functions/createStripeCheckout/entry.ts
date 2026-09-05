@@ -2,7 +2,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
 import { secrets } from 'base44:runtime';
 import { stripeRequest } from '../../shared/stripe.ts';
 
-const prices = { camiseta: 4990, baby_look: 4990, quadro: 8990, caneca: 3990 };
+import checkoutItems from '../../shared/checkoutItems.ts';
 
 export default async function(req: Request): Promise<Response> {
   let order = null;
@@ -17,21 +17,7 @@ export default async function(req: Request): Promise<Response> {
       return Response.json({ error: 'Informe o endereço de entrega' }, { status: 400 });
     }
 
-    const safeItems = items.map((item) => {
-      const unitPrice = prices[item.product_type];
-      if (!unitPrice) throw new Error('Produto inválido no carrinho');
-      const quantity = Math.max(1, Math.min(10, Number(item.quantity) || 1));
-      return {
-        product_type: item.product_type,
-        design_id: item.design_id || '',
-        design_title: String(item.design_title || 'Arte personalizada').slice(0, 100),
-        artist_id: item.artist_id || '',
-        quantity,
-        size: String(item.size || '').slice(0, 30),
-        color: String(item.color || '').slice(0, 30),
-        price: unitPrice / 100,
-      };
-    });
+    const safeItems = await checkoutItems(base44, items);
 
     const subtotalCents = safeItems.reduce((sum, item) => sum + Math.round(item.price * 100) * item.quantity, 0);
     const shippingCents = subtotalCents >= 15000 ? 0 : 1500;
