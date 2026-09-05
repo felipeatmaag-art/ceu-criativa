@@ -5,7 +5,7 @@ import BrandLogo from '@/components/BrandLogo';
 
 export default function AboutHero() {
   return (
-    <section className="relative overflow-hidden rounded-b-[3rem] bg-ceu-cloud text-ceu-navy">
+    <section className="relative overflow-hidden rounded-b-[3rem] text-ceu-navy bg-[#bfd5de]">
       <div className="absolute -right-24 -top-24 h-80 w-80 rounded-full bg-ceu-sun/80 blur-3xl" />
       <div className="mx-auto grid min-h-[38rem] max-w-7xl items-center gap-12 px-5 py-20 lg:grid-cols-[1.05fr_.95fr] lg:px-8">
         <div className="relative z-10">
@@ -36,6 +36,6 @@ export default function AboutHero() {
           </div>
         </div>
       </div>
-    </section>
-  );
+    </section>);
+
 }
