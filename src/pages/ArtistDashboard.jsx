@@ -9,7 +9,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import {
   TrendingUp, ShoppingBag, Heart, Palette, Plus,
-  LayoutGrid, FolderOpen, Lightbulb
+  LayoutGrid, FolderOpen, Lightbulb, PackageCheck
 } from 'lucide-react';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
@@ -23,6 +23,7 @@ import DesignPerformanceChart from '@/components/dashboard/DesignPerformanceChar
 import MonthlySalesChart from '@/components/dashboard/MonthlySalesChart';
 import NotificationsPanel from '@/components/dashboard/NotificationsPanel';
 import RealtimeToasts from '@/components/dashboard/RealtimeToasts';
+import ProductionQueue from '@/components/production/ProductionQueue';
 
 export default function ArtistDashboard() {
   const [tab, setTab] = useState('overview');
@@ -124,7 +125,7 @@ export default function ArtistDashboard() {
         </div>
 
         <Tabs value={tab} onValueChange={setTab}>
-          <TabsList className="mb-6 bg-white rounded-2xl p-1 shadow-sm border border-gray-100 gap-1">
+          <TabsList className="mb-6 max-w-full justify-start overflow-x-auto bg-white rounded-2xl p-1 shadow-sm border border-gray-100 gap-1">
             <TabsTrigger value="overview" className="rounded-xl gap-2 text-sm data-[state=active]:bg-gray-900 data-[state=active]:text-white">
               <TrendingUp className="w-4 h-4" /> Visão Geral
             </TabsTrigger>
@@ -136,6 +137,9 @@ export default function ArtistDashboard() {
             </TabsTrigger>
             <TabsTrigger value="collections" className="rounded-xl gap-2 text-sm data-[state=active]:bg-gray-900 data-[state=active]:text-white">
               <FolderOpen className="w-4 h-4" /> Coleções
+            </TabsTrigger>
+            <TabsTrigger value="production" className="rounded-xl gap-2 text-sm data-[state=active]:bg-gray-900 data-[state=active]:text-white">
+              <PackageCheck className="w-4 h-4" /> Produção
             </TabsTrigger>
             <TabsTrigger value="insights" className="rounded-xl gap-2 text-sm data-[state=active]:bg-gray-900 data-[state=active]:text-white">
               <Lightbulb className="w-4 h-4" /> Insights
@@ -256,6 +260,10 @@ export default function ArtistDashboard() {
           {/* Collections Tab */}
           <TabsContent value="collections">
             <CollectionsManager designs={designs} user={user} />
+          </TabsContent>
+
+          <TabsContent value="production">
+            <ProductionQueue orders={myOrders} userId={user.id} />
           </TabsContent>
 
           {/* Insights Tab */}

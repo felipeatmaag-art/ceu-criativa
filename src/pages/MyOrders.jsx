@@ -17,7 +17,7 @@ import { motion } from 'framer-motion';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import ProductionFiles from '@/components/create/ProductionFiles';
+import PrintDeliveryPanel from '@/components/production/PrintDeliveryPanel';
 
 export default function MyOrders() {
   const { data: user } = useQuery({
@@ -94,23 +94,17 @@ export default function MyOrders() {
                   </div>
 
                   <div className="border-t pt-4">
-                    <div className="flex flex-wrap gap-4">
-                      {order.items?.map((item, i) => (
+                    <div className="space-y-5">
+                      {order.items?.map((item, i) => item.production?.front ? (
+                        <PrintDeliveryPanel key={i} production={item.production} mockupUrl={item.production.mockup_front_url || item.mockup_url} designId={item.design_id} size={item.size} color={item.color} title={item.design_title} />
+                      ) : (
                         <div key={i} className="flex items-center gap-3">
                           <div className="w-16 h-16 rounded-xl bg-gray-100 flex items-center justify-center">
                             {item.mockup_url || item.design_image ? <img src={item.mockup_url || item.design_image} alt={item.design_title} className="h-full w-full object-contain rounded-xl" /> : <Package className="h-6 w-6 text-muted-foreground" />}
                           </div>
-                          <div>
-                            <p className="font-medium text-sm">{item.design_title}</p>
-                            <p className="text-xs text-gray-500">
-                              {item.size && `Tam: ${item.size}`} {item.color && `• ${item.color}`}
-                            </p>
-                            <p className="text-xs text-gray-500">Qtd: {item.quantity}</p>
-                            <ProductionFiles production={item.production} />
-                          </div>
+                          <div><p className="font-medium text-sm">{item.design_title}</p><p className="text-xs text-gray-500">{item.size && `Tam: ${item.size}`} {item.color && `• ${item.color}`}</p><p className="text-xs text-gray-500">Qtd: {item.quantity}</p></div>
                         </div>
                       ))}
-
                     </div>
 
                     <div className="flex items-center justify-between mt-4 pt-4 border-t">
