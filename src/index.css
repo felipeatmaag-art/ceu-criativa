@@ -168,3 +168,53 @@ button:focus-visible {
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  .scroll-scene-reveal {
+    opacity: 0;
+    transform: translate3d(0, 24px, 0) scale(0.992);
+    filter: blur(3px);
+    transition: opacity 700ms cubic-bezier(.22, 1, .36, 1) var(--scene-delay, 0ms),
+      transform 800ms cubic-bezier(.22, 1, .36, 1) var(--scene-delay, 0ms),
+      filter 650ms ease var(--scene-delay, 0ms);
+    will-change: opacity, transform, filter;
+  }
+
+  .scroll-scene-visible {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: blur(0);
+  }
+
+  .scene-float-slow,
+  .scene-float-soft {
+    will-change: translate;
+  }
+
+  .scene-float-slow { animation: sceneFloat 8s ease-in-out infinite; }
+  .scene-float-soft { animation: sceneFloatSoft 10s ease-in-out infinite 1.2s; }
+}
+
+@keyframes sceneFloat {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -7px; }
+}
+
+@keyframes sceneFloatSoft {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -5px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-scene-reveal,
+  .scroll-scene-visible,
+  .scene-float-slow,
+  .scene-float-soft {
+    opacity: 1;
+    transform: none;
+    translate: none;
+    filter: none;
+    animation: none;
+    transition: none;
+  }
+}
