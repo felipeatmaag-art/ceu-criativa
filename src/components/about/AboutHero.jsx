@@ -29,7 +29,7 @@ export default function AboutHero() {
           </div>
         </div>
         <div className="relative min-h-[30rem] overflow-hidden rounded-[2.5rem] bg-ceu-sky">
-          <img src="https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&w=1400&q=85" alt="Moda autoral em uma arara de estúdio" className="absolute inset-0 h-full w-full object-cover mix-blend-multiply" />
+          <img src="https://media.base44.com/images/public/69431e0c00397efc6e14e9df/59c6c8c95_Creator_using_smartphone_app_int__202608181237.jpeg" alt="Moda autoral em uma arara de estúdio" className="absolute inset-0 h-full w-full object-cover mix-blend-multiply" />
           <div className="absolute inset-x-5 bottom-5 rounded-[2rem] bg-ceu-navy/85 p-6 text-ceu-cloud backdrop-blur-md">
             <p className="text-xs font-bold uppercase tracking-[.2em] text-ceu-sky">Criar × Materializar</p>
             <p className="mt-2 text-2xl font-semibold">Você com sua peça autoral em poucos cliques.</p>
