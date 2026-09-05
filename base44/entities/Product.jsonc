@@ -17,7 +17,17 @@
         "poster",
         "ecobag",
         "almofada",
-        "logo_uniforme"
+        "logo_uniforme",
+        "vestido",
+        "saia",
+        "jaqueta",
+        "moletom",
+        "regata",
+        "calca",
+        "shorts",
+        "colete",
+        "cropped",
+        "touca"
       ],
       "description": "Tipo do produto"
     },
