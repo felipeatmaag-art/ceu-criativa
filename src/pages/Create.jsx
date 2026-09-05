@@ -151,7 +151,7 @@ export default function Create() {
 
     try {
       const result = await base44.integrations.Core.GenerateImage({
-        prompt: `Você é Iara, uma designer especializada exclusivamente em criar estampas. Crie SOMENTE a arte gráfica plana solicitada pelo usuário: "${aiPrompt}". Mostre apenas os desenhos, símbolos e textos que compõem a estampa, isolados e centralizados em formato quadrado, com alta definição e fundo totalmente transparente. Se o pedido contiver uma frase, reproduza o texto exatamente como foi escrito, sem corrigir, trocar ou acrescentar palavras. É terminantemente proibido desenhar ou mostrar camiseta, roupa, caneca, quadro, produto, manequim, pessoa vestindo, embalagem, etiqueta, mockup, ambiente, cenário ou a estampa aplicada em qualquer superfície. Não inclua bordas de fotografia, sombras externas ou margens. Se o canal alfa não for suportado, use fundo branco puro uniforme sem sombras, gradientes ou quadradinhos. Mantenha uma margem vazia nas quatro bordas, sem tocar nos limites. A saída deve ser exclusivamente o arquivo gráfico plano da estampa.`
+        prompt: `Você é Iara, uma designer especializada exclusivamente em criar estampas. Crie SOMENTE a arte gráfica plana solicitada pelo usuário: "${aiPrompt}". Mostre apenas os desenhos, símbolos e textos que compõem a estampa, isolados e centralizados em formato quadrado, com alta definição e canal alfa realmente transparente. Nunca desenhe grade, tabuleiro, quadriculado ou padrão visual para representar transparência. Se o canal alfa nativo não estiver disponível, use somente um fundo técnico verde puro #00FF00, plano e uniforme, sem usar essa cor na arte. Se o pedido contiver uma frase, reproduza o texto exatamente como foi escrito, sem corrigir, trocar ou acrescentar palavras. É terminantemente proibido desenhar ou mostrar camiseta, roupa, caneca, quadro, produto, manequim, pessoa vestindo, embalagem, etiqueta, mockup, ambiente, cenário ou a estampa aplicada em qualquer superfície. Não inclua bordas de fotografia ou sombras externas. Mantenha uma margem vazia nas quatro bordas, sem tocar nos limites. A saída deve ser exclusivamente o arquivo gráfico plano da estampa.`
       });
 
       if (!result?.url) throw new Error('A geração não retornou uma imagem. Tente novamente.');
@@ -593,7 +593,7 @@ export default function Create() {
                   <img src={selectedImage} alt="Arte selecionada" className="w-14 h-14 rounded-xl object-cover" />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-emerald-700 flex items-center gap-1">
-                      <Check className="w-4 h-4" /> Arte selecionada
+                      <Check className="w-4 h-4" /> PNG limpo e validado
                     </p>
                     <p className="text-xs text-emerald-600 truncate">
                       {mode === 'ai' ? 'Gerada com IA' : 'Enviada por upload'}

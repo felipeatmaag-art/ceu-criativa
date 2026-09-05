@@ -2,7 +2,7 @@ const records = new Map();
 export const rememberArtwork = (url, metadata) => records.set(url, metadata);
 export function getArtworkMetadata(url) {
   const metadata = records.get(url);
-  if (!metadata) throw new Error('Prepare novamente a arte antes de salvar; a transparência ainda não foi validada.');
+  if (!metadata || metadata.quality_version !== 2) throw new Error('Esta arte usa a validação anterior. Gere ou envie novamente para aplicar a limpeza avançada antes de salvar.');
   return metadata;
 }
 export async function validateArtworkFile(file) {
