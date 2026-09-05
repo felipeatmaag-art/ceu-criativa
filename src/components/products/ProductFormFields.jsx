@@ -9,7 +9,7 @@ export default function ProductFormFields({ form, onChange }) {
   return (
     <div className="grid min-w-0 gap-4 sm:grid-cols-2 [&>div]:min-w-0">
       <div><Label>Nome do produto</Label><Input {...field('name')} placeholder="Camiseta Algodão Oversized" required /></div>
-      <div><Label className="hidden">Tipo</Label><select {...field('type')} className="mt-1 h-10 w-full rounded-md border bg-background px-3 hidden">{types.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></div>
+      <div><select {...field('type')} className="mt-1 h-10 w-full rounded-md border bg-background px-3 hidden">{types.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></div>
       <div><Label>Material</Label><Input {...field('material')} placeholder="100% algodão" required /></div>
       <div><Label>Modelagem</Label><Input {...field('fit')} placeholder="Oversized" required /></div>
       <div><Label>Preço base</Label><Input {...field('base_price')} type="number" min="0" step="0.01" required /></div>
