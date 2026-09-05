@@ -2,7 +2,7 @@ import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-const types = [['camiseta', 'Camiseta'], ['baby_look', 'Baby Look'], ['caneca', 'Caneca'], ['bone', 'Boné'], ['ecobag', 'Ecobag'], ['almofada', 'Almofada'], ['quadro', 'Quadro'], ['poster', 'Pôster']];
+const types = [['camiseta', 'Camiseta'], ['baby_look', 'Baby Look'], ['caneca', 'Caneca'], ['bone', 'Boné'], ['ecobag', 'Ecobag'], ['almofada', 'Almofada'], ['quadro', 'Quadro'], ['poster', 'Pôster'], ['logo_uniforme', 'Logo para uniforme']];
 
 export default function ProductFormFields({ form, onChange }) {
   const field = (name) => ({ value: form[name], onChange: (event) => onChange(name, event.target.value) });
