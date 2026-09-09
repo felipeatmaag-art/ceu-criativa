@@ -1,5 +1,6 @@
 import { base44 } from '@/api/base44Client';
 import { rememberArtwork } from '@/components/create/artworkMetadata';
+import processArtworkImage from '@/components/create/processArtworkImage';
 
 async function prepareArtwork(sourceUrl) {
   const response = await fetch(sourceUrl, { signal: AbortSignal.timeout(30000) });
@@ -20,13 +21,7 @@ async function prepareArtwork(sourceUrl) {
   context.imageSmoothingQuality = 'high';
   context.drawImage(bitmap, 0, 0, width, height); bitmap.close();
   const image = context.getImageData(0, 0, width, height);
-  const processed = await new Promise((resolve, reject) => {
-    const worker = new Worker(new URL('./artwork.worker.js', import.meta.url), { type: 'module' });
-    const timer = setTimeout(() => { worker.terminate(); reject(new Error('A limpeza demorou demais. Tente uma imagem menor.')); }, 30000);
-    worker.onmessage = ({ data }) => { clearTimeout(timer); worker.terminate(); data.error ? reject(new Error(data.error)) : resolve(data); };
-    worker.onerror = () => { clearTimeout(timer); worker.terminate(); reject(new Error('Falha ao processar a transparência. Tente novamente.')); };
-    worker.postMessage({ buffer: image.data.buffer, width, height }, [image.data.buffer]);
-  });
+  const processed = await processArtworkImage(image);
   context.putImageData(new ImageData(new Uint8ClampedArray(processed.buffer), width, height), 0, 0);
   const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
   canvas.width = canvas.height = 0;

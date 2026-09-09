@@ -1,4 +1,3 @@
-import ArtworkWorker from '@/components/create/artwork.worker.js?worker';
 import processArtworkPixels from '@/components/create/processArtworkPixels';
 
 export default function processArtworkImage(image) {
@@ -19,7 +18,7 @@ export default function processArtworkImage(image) {
       } catch (failure) { reject(failure); }
     };
     try {
-      worker = new ArtworkWorker();
+      worker = new Worker(new URL('./artwork.worker.js', import.meta.url), { type: 'module' });
       timer = setTimeout(() => fallback(new Error('Tempo limite do processamento paralelo.')), 30000);
       worker.onmessage = ({ data }) => {
         if (finished) return;
