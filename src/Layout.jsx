@@ -28,11 +28,13 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import BrandLogo from '@/components/BrandLogo';
 import SaleRealtimeAlert from '@/components/notifications/SaleRealtimeAlert';
+import useCartStore from '@/services/cartStore';
 
 export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [cartItems] = useCartStore();
 
   useEffect(() => {
     const loadUser = async () => {
@@ -276,7 +278,7 @@ export default function Layout({ children, currentPageName }) {
                   
                   <ShoppingBag className="w-5 h-5 text-gray-300 hover:text-emerald-400 transition-colors" />
                   <span className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-br from-emerald-500 to-blue-500 text-white text-xs rounded-full flex items-center justify-center shadow-lg shadow-emerald-500/50">
-                    0
+                    {cartItems.reduce((sum, item) => sum + (item.quantity || 1), 0)}
                   </span>
                 </Button>
               </Link>

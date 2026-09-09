@@ -44,6 +44,7 @@ import productViews from '@/components/create/productViews';
 import useStudioSubmission from '@/components/create/useStudioSubmission';
 import PrintApproval from '@/components/create/PrintApproval';
 import PrintStandardCard from '@/components/create/PrintStandardCard';
+import PhysicalStockNotice from '@/components/create/PhysicalStockNotice';
 import EcobagMockup from '@/components/create/EcobagMockup';
 import { getPrintPrompt, getPrintStandard } from '@/components/production/printStandards';
 
@@ -353,6 +354,7 @@ export default function Create() {
                 }
 
                 <ProductSizeSelector options={currentSizes} value={selectedSize} onChange={setSelectedSize} />
+                <PhysicalStockNotice productId={selectedCatalogId} color={productColor} size={selectedSize} />
 
                 <div className="bg-purple-50 rounded-2xl p-5">
                   <h3 className="font-bold text-gray-900 mb-1">

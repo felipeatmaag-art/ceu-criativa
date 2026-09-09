@@ -1,0 +1,63 @@
+{
+  "name": "BaseProductVariant",
+  "type": "object",
+  "properties": {
+    "base_product_id": {
+      "type": "string",
+      "description": "Refer\u00eancia ao Product com catalog_product=true (produto base f\u00edsico)"
+    },
+    "color": {
+      "type": "string"
+    },
+    "size": {
+      "type": "string"
+    },
+    "stock_quantity": {
+      "type": "integer",
+      "minimum": 0,
+      "default": 0
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    },
+    "debited_order_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "released_order_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    }
+  },
+  "required": [
+    "base_product_id",
+    "color",
+    "size",
+    "stock_quantity"
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

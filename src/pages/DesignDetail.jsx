@@ -29,6 +29,8 @@ import { motion } from 'framer-motion';
 import { Skeleton } from '@/components/ui/skeleton';
 import MockupViewer from '@/components/design/MockupViewer';
 import CommentSection from '@/components/design/CommentSection';
+import PhysicalVariantPicker from '@/components/design/PhysicalVariantPicker';
+import { cartStore } from '@/services/cartStore';
 
 export default function DesignDetail() {
   const navigate = useNavigate();
@@ -42,6 +44,7 @@ export default function DesignDetail() {
   const [selectedSize, setSelectedSize] = useState('M');
   const [quantity, setQuantity] = useState(1);
   const [addedToCart, setAddedToCart] = useState(false);
+  const [physical, setPhysical] = useState(null);
 
   useEffect(() => {
     const loadUser = async () => {
@@ -137,44 +140,18 @@ export default function DesignDetail() {
     },
   });
 
-  const products = [
-    { type: 'camiseta', label: 'Camiseta', price: 49.90, emoji: '👕' },
-    { type: 'moletom', label: 'Moletom', price: 89.90, emoji: '🧥' },
-    { type: 'caneca', label: 'Caneca', price: 39.90, emoji: '☕' },
-    { type: 'caneca_termica', label: 'Caneca Térmica', price: 69.90, emoji: '🥤' },
-    { type: 'quadro', label: 'Quadro', price: 89.90, emoji: '🖼️' },
-    { type: 'mousepad', label: 'Mousepad', price: 29.90, emoji: '🖱️' },
-  ];
-
-  const colors = [
-    { name: 'white', label: 'Branco', hex: '#FFFFFF' },
-    { name: 'black', label: 'Preto', hex: '#1a1a1a' },
-    { name: 'navy', label: 'Azul Marinho', hex: '#1e3a8a' },
-    { name: 'gray', label: 'Cinza', hex: '#6b7280' },
-  ];
-
-  const sizes = ['PP', 'P', 'M', 'G', 'GG', 'XG'];
-
-  const selectedProductData = products.find(p => p.type === selectedProduct);
-  const totalPrice = (selectedProductData?.price || 0) * quantity;
-
+  const totalPrice = Number(physical?.product.base_price || 0) * quantity;
+  const handlePhysicalChange = choice => {
+    setPhysical(choice); setQuantity(1); setAddedToCart(false);
+    if (choice) {
+      setSelectedProduct(choice.product.type);
+      setSelectedColor(choice.product.product_color_variants?.find(c => c.name === choice.variant.color)?.hex || 'white');
+      setSelectedSize(choice.variant.size);
+    }
+  };
   const handleAddToCart = () => {
-    const cartItem = {
-      id: Date.now(),
-      design_image: design.image_url,
-      design_title: design.title,
-      product_type: selectedProduct,
-      price: selectedProductData.price,
-      color: selectedColor,
-      size: selectedSize,
-      quantity: quantity
-    };
-
-    const existingCart = localStorage.getItem('cart');
-    const cart = existingCart ? JSON.parse(existingCart) : [];
-    cart.push(cartItem);
-    localStorage.setItem('cart', JSON.stringify(cart));
-
+    if (!physical || quantity > physical.variant.stock_quantity) return;
+    cartStore.add({ id: crypto.randomUUID(), design_id: design.id, artist_id: design.artist_id, design_image: design.image_url, design_title: design.title, base_product_id: physical.product.id, catalog_product_id: physical.product.id, variant_id: physical.variant.id, product_type: physical.product.type, price: Number(physical.product.base_price), color: physical.variant.color, size: physical.variant.size, quantity });
     setAddedToCart(true);
     setTimeout(() => setAddedToCart(false), 2000);
   };
@@ -359,126 +336,7 @@ export default function DesignDetail() {
 
             {/* Product Selection */}
             <div className="bg-white rounded-3xl p-6 shadow-sm border space-y-6">
-              {/* Product Type */}
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-3 tracking-tight">Produto</h3>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  {products.map((product) => (
-                    <button
-                      key={product.type}
-                      onClick={() => setSelectedProduct(product.type)}
-                      className={`p-4 rounded-2xl transition-all duration-300 hover:scale-[1.02] ${
-                        selectedProduct === product.type
-                          ? 'bg-gray-900 text-white shadow-xl ring-2 ring-gray-900 ring-offset-2'
-                          : 'bg-gray-50 hover:bg-gray-100'
-                      }`}
-                    >
-                      <span className="text-2xl block mb-2">{product.emoji}</span>
-                      <span className={`text-xs font-semibold block leading-tight ${
-                        selectedProduct === product.type ? 'text-white' : 'text-gray-900'
-                      }`}>{product.label}</span>
-                      <span className={`text-xs block mt-1 ${
-                        selectedProduct === product.type ? 'text-gray-300' : 'text-gray-500'
-                      }`}>R$ {product.price.toFixed(2)}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Color */}
-              {(selectedProduct === 'camiseta' || selectedProduct === 'moletom') && (
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-3 tracking-tight">Cor</h3>
-                  <div className="flex gap-3">
-                    {colors.map((color) => (
-                      <button
-                        key={color.name}
-                        onClick={() => setSelectedColor(color.name)}
-                        className={`relative w-12 h-12 rounded-full transition-all duration-300 hover:scale-110 ${
-                          selectedColor === color.name
-                            ? 'ring-2 ring-offset-2 ring-gray-900 scale-110'
-                            : 'ring-1 ring-gray-200'
-                        }`}
-                        style={{ backgroundColor: color.hex }}
-                        title={color.label}
-                      >
-                        {selectedColor === color.name && (
-                          <span className="absolute inset-0 flex items-center justify-center">
-                            <span className={`w-2 h-2 rounded-full ${
-                              color.name === 'white' ? 'bg-gray-900' : 'bg-white'
-                            }`} />
-                          </span>
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Size */}
-              {(selectedProduct === 'camiseta' || selectedProduct === 'moletom') && (
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-3 tracking-tight">Tamanho</h3>
-                  <div className="flex gap-2 flex-wrap">
-                    {sizes.map((size) => (
-                      <button
-                        key={size}
-                        onClick={() => setSelectedSize(size)}
-                        className={`px-6 py-3 rounded-full font-semibold transition-all duration-300 hover:scale-105 ${
-                          selectedSize === size
-                            ? 'bg-gray-900 text-white shadow-lg scale-105'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                        }`}
-                      >
-                        {size}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              {/* Dimensions for frame and mousepad */}
-              {(selectedProduct === 'quadro') && (
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-3 tracking-tight">Dimensões</h3>
-                  <div className="flex gap-2 flex-wrap">
-                    {['30x40cm', '50x70cm', '70x100cm'].map((size) => (
-                      <button
-                        key={size}
-                        onClick={() => setSelectedSize(size)}
-                        className={`px-6 py-3 rounded-full font-semibold transition-all duration-300 hover:scale-105 ${
-                          selectedSize === size
-                            ? 'bg-gray-900 text-white shadow-lg scale-105'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                        }`}
-                      >
-                        {size}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {selectedProduct === 'mousepad' && (
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-3 tracking-tight">Tamanho</h3>
-                  <div className="flex gap-2 flex-wrap">
-                    {['Médio', 'Grande', 'XL'].map((size) => (
-                      <button
-                        key={size}
-                        onClick={() => setSelectedSize(size)}
-                        className={`px-6 py-3 rounded-full font-semibold transition-all duration-300 hover:scale-105 ${
-                          selectedSize === size
-                            ? 'bg-gray-900 text-white shadow-lg scale-105'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                        }`}
-                      >
-                        {size}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
+              <PhysicalVariantPicker onChange={handlePhysicalChange} />
 
               {/* Quantity */}
               <div>
@@ -492,7 +350,7 @@ export default function DesignDetail() {
                   </button>
                   <span className="text-xl font-bold w-12 text-center">{quantity}</span>
                   <button
-                    onClick={() => setQuantity(quantity + 1)}
+                    onClick={() => setQuantity(Math.min(10, physical?.variant.stock_quantity || 1, quantity + 1))}
                     className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
                   >
                     <Plus className="w-5 h-5" />
@@ -512,7 +370,7 @@ export default function DesignDetail() {
                   <Button 
                     onClick={handleAddToCart}
                     className="w-full h-14 rounded-xl ceu-gradient text-white text-lg"
-                    disabled={addedToCart}
+                    disabled={addedToCart || !physical || quantity > physical.variant.stock_quantity}
                   >
                     {addedToCart ? (
                       <>

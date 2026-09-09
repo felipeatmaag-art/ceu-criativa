@@ -3,26 +3,28 @@
   "type": "object",
   "properties": {
     "order_number": {
-      "type": "string",
-      "description": "N\u00famero do pedido"
+      "type": "string"
     },
     "customer_email": {
-      "type": "string",
-      "description": "Email do cliente"
+      "type": "string"
     },
     "customer_name": {
-      "type": "string",
-      "description": "Nome do cliente"
+      "type": "string"
     },
     "customer_id": {
       "type": "string"
     },
     "items": {
       "type": "array",
-      "description": "Itens do pedido",
       "items": {
         "type": "object",
         "properties": {
+          "base_product_id": {
+            "type": "string"
+          },
+          "variant_id": {
+            "type": "string"
+          },
           "product_type": {
             "type": "string"
           },
@@ -57,8 +59,7 @@
             "type": "string"
           },
           "production": {
-            "type": "object",
-            "description": "C\u00f3pia dos arquivos e posi\u00e7\u00f5es aprovados no momento do pedido"
+            "type": "object"
           }
         }
       }
@@ -83,6 +84,22 @@
         "cancelled"
       ],
       "default": "pending"
+    },
+    "payment_intent_id": {
+      "type": "string"
+    },
+    "checkout_key": {
+      "type": "string"
+    },
+    "checkout_token_hash": {
+      "type": "string"
+    },
+    "settlement_lock": {
+      "type": "string"
+    },
+    "settlement_expires": {
+      "type": "number",
+      "default": 0
     },
     "shipping_address": {
       "type": "object",
@@ -112,5 +129,34 @@
     "customer_email",
     "items",
     "total"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.customer_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
 }

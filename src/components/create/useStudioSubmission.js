@@ -4,6 +4,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import buildProductionSnapshot from '@/components/create/buildProductionSnapshot';
 import { getArtworkMetadata } from '@/components/create/artworkMetadata';
+import inventoryRepository from '@/services/products/inventoryRepository';
+import { cartStore } from '@/services/cartStore';
 export default function useStudioSubmission(options) {
   const [saving, setSaving] = useState(false), [error, setError] = useState('');
   const saved = useRef(null), lock = useRef(false), navigate = useNavigate(), cache = useQueryClient();
@@ -17,6 +19,14 @@ export default function useStudioSubmission(options) {
         sessionStorage.setItem('ceu-studio-resume', JSON.stringify({ ...options, artwork }));
         base44.auth.redirectToLogin(window.location.origin + '/Create?resume=1'); return;
       }
+      let variant;
+      if (action === 'cart') {
+        if (!options.product?.id) throw new Error('Para comprar, escolha um produto base cadastrado. Sua arte pode ser publicada sem estoque.');
+        const variants = await inventoryRepository.list(options.product.id);
+        const matching = variants.filter(v => v.color === options.color && v.size === options.size && v.is_active);
+        if (matching.length !== 1 || matching[0].stock_quantity < 1) throw new Error('Esta cor e tamanho estão sem estoque físico. Escolha outra variação; sua arte continua disponível.');
+        variant = matching[0];
+      }
       const user = await base44.auth.me();
       const signature = JSON.stringify(options);
       if (!saved.current || saved.current.signature !== signature) {
@@ -26,10 +36,9 @@ export default function useStudioSubmission(options) {
       }
       const { design, production } = saved.current;
       if (action === 'cart') {
-        const previous = JSON.parse(localStorage.getItem('cart') || '[]');
-        if (!Array.isArray(previous)) throw new Error('Não foi possível ler o carrinho atual.');
+
         const item = { id: crypto.randomUUID(), design_id: design.id, artist_id: user.id, design_image: production.front.file_url, design_title: design.title, product_type: options.productType, catalog_product_id: options.product?.id || '', price: options.price, color: options.color, size: options.size, quantity: 1, mockup_url: production.mockup_front_url || '', production };
-        localStorage.setItem('cart', JSON.stringify([...previous, item]));
+        cartStore.add({ ...item, base_product_id: options.product.id, variant_id: variant.id });
       } else {
         if (design.status !== 'pendente') await base44.entities.Design.update(design.id, { status: 'pendente' });
         if (options.generatedMockups.length) await base44.entities.Product.create({ name: design.title, type: options.productType, design_id: design.id, design_image: options.frontImage, back_design_image: options.backImage || '', base_price: options.price, final_price: options.price, mockup_url: options.generatedMockups[0].url, mockup_gallery: options.generatedMockups.map(i => i.url), mockup_style: options.mockupStyle, mockup_angles: options.generatedMockups.map(i => i.angle), colors_available: [options.color], sizes_available: [options.size], is_active: true });

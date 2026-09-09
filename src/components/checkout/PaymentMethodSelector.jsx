@@ -39,6 +39,8 @@ export default function PaymentMethodSelector({ value, onChange }) {
           <button
             key={m.id}
             type="button"
+            disabled={m.id !== 'credit'}
+            title={m.id !== 'credit' ? 'Aguardando integração sem redirecionamento' : undefined}
             onClick={() => onChange(m.id)}
             className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left ${
               active
@@ -54,13 +56,13 @@ export default function PaymentMethodSelector({ value, onChange }) {
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="font-semibold text-gray-900 text-sm">{m.label}</span>
-                {m.badge && (
+                {m.badge && m.id === 'credit' && (
                   <span className="text-xs px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-medium">
                     {m.badge}
                   </span>
                 )}
               </div>
-              <p className="text-xs text-gray-500 mt-0.5">{m.description}</p>
+              <p className="text-xs text-gray-500 mt-0.5">{m.id === 'credit' ? 'Cartão e Google Pay, aqui mesmo' : 'Em preparação para pagamento integrado'}</p>
             </div>
             {active && (
               <motion.div

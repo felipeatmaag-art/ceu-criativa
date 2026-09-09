@@ -19,9 +19,12 @@ import {
 import PaymentMethodSelector, { PAYMENT_METHODS } from '@/components/checkout/PaymentMethodSelector';
 import FreeShippingBar, { FREE_SHIPPING_THRESHOLD } from '@/components/checkout/FreeShippingBar';
 import ProductionFiles from '@/components/create/ProductionFiles';
+import useCartStore from '@/services/cartStore';
+import EmbeddedCheckout from '@/components/checkout/EmbeddedCheckout';
 
 export default function Cart() {
-  const [cartItems, setCartItems] = useState([]);
+  const [cartItems, persist] = useCartStore();
+  const [paidOrder, setPaidOrder] = useState(null);
   const [showCheckout, setShowCheckout] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('credit');
@@ -38,17 +41,7 @@ export default function Cart() {
     zipcode: ''
   });
 
-  useEffect(() => {
-    const savedCart = localStorage.getItem('cart');
-    if (savedCart) {
-      setCartItems(JSON.parse(savedCart));
-    }
-  }, []);
 
-  const persist = (items) => {
-    setCartItems(items);
-    localStorage.setItem('cart', JSON.stringify(items));
-  };
 
   const removeItem = (index) => {
     persist(cartItems.filter((_, i) => i !== index));
@@ -72,28 +65,6 @@ export default function Cart() {
     } else {
       setCouponApplied(null);
       setCouponError('Cupom inválido');
-    }
-  };
-
-  const handleCheckout = async () => {
-    if (window.self !== window.top) {
-      alert('Para sua segurança, abra o app publicado em uma nova aba para concluir o pagamento.');
-      return;
-    }
-    setIsProcessing(true);
-    setCheckoutError('');
-    try {
-      const response = await base44.functions.invoke('createStripeCheckout', {
-        items: cartItems,
-        customer,
-        shippingAddress,
-        paymentMethod,
-        couponCode: couponApplied?.code || ''
-      });
-      window.location.href = response.data.checkoutUrl;
-    } catch (error) {
-      setCheckoutError(error.response?.data?.error || 'Não foi possível iniciar o pagamento.');
-      setIsProcessing(false);
     }
   };
 
@@ -123,6 +94,7 @@ export default function Cart() {
           </div>
         </div>
 
+        {paidOrder && <div role="status" className="mb-6 rounded-2xl border bg-card p-6 text-card-foreground">Pedido {paidOrder.orderNumber} confirmado. Seu insumo foi reservado — tamo junto!</div>}
         {cartItems.length > 0 ? (
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Items */}
@@ -255,7 +227,7 @@ export default function Cart() {
                 </div>
                 <div className="flex items-center gap-2 text-xs text-gray-500">
                   <Zap className="w-4 h-4 text-amber-500" />
-                  Aprovação imediata via Pix
+                  Produção sob demanda, com estoque físico
                 </div>
                 <div className="flex items-center gap-2 text-xs text-gray-500">
                   <Lock className="w-4 h-4 text-gray-400" />
@@ -395,25 +367,7 @@ export default function Cart() {
                 <PaymentMethodSelector value={paymentMethod} onChange={setPaymentMethod} />
               </div>
 
-              <Button
-                onClick={handleCheckout}
-                disabled={isProcessing || !isAddressValid || !isCustomerValid}
-                className="w-full h-12 rounded-xl ceu-gradient text-white font-semibold"
-              >
-                {isProcessing ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
-                    Processando...
-                  </>
-                ) : (
-                  <>
-                    <Lock className="w-4 h-4 mr-2" />
-                    Pagar R$ {total.toFixed(2)}
-                  </>
-                )}
-              </Button>
-
-              {checkoutError && <p className="text-sm text-center text-red-600">{checkoutError}</p>}
+              <EmbeddedCheckout payload={{ items: cartItems, customer, shippingAddress, couponCode: couponApplied?.code || '' }} valid={!!isAddressValid && !!isCustomerValid} onPaid={result => { setPaidOrder(result); setShowCheckout(false); }} />
               <p className="text-xs text-center text-gray-400 flex items-center justify-center gap-1.5">
                 <ShieldCheck className="w-3.5 h-3.5" />
                 Compra protegida • Dados criptografados
