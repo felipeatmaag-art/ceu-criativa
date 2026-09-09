@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { mockupSourceKey } from '@/components/create/studioMockups';
 import { base44 } from '@/api/base44Client';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -98,6 +99,8 @@ export default function Create() {
   });
   const [generatedMockups, setGeneratedMockups] = useState([]);
   const [mockupStyle, setMockupStyle] = useState('studio');
+  const captureRef = useRef(null);
+  const [mockupsBusy, setMockupsBusy] = useState(false);
 
   useEffect(() => {
     base44.entities.Product.filter({ catalog_product: true, is_active: true }, '-created_date', 100).then((items) => {
@@ -118,7 +121,7 @@ export default function Create() {
           setSelectedProduct(draft.productType); setSelectedCatalogId(draft.product?.id || null);
           setProductColor(draft.color); setSelectedSize(draft.size); setMode(draft.mode);
           setCustomBaseImages(draft.customBaseImages || { front: null, back: null });
-          setGeneratedMockups(draft.generatedMockups || []); setStep(3);
+          setGeneratedMockups([]); setStep(3);
         }
       }
     });
@@ -217,12 +220,14 @@ export default function Create() {
   const studioProducts = [...catalogStudioProducts, ...missingProducts];
   const currentPrice = Number(selectedCatalogProduct?.base_price ?? productPrices[selectedProduct]);
   const currentSizes = selectedCatalogProduct?.sizes_available?.length ? selectedCatalogProduct.sizes_available : (productSizes[selectedProduct] || []);
-  const busy = isGenerating || isUploading || backBusy;
+  const busy = isGenerating || isUploading || backBusy || mockupsBusy;
   const views = { ...productViews(selectedCatalogProduct, productColor) };
   if (customBaseImages.front) views.front = customBaseImages.front;
   if (customBaseImages.back) views.back = customBaseImages.back;
-  const { submit, saving: isSaving, error: saveError } = useStudioSubmission({ frontImage: selectedImage, backImage: backDesignImage, transforms: designTransforms, views, product: selectedCatalogProduct, color: productColor, size: selectedSize, productType: selectedProduct, price: currentPrice, designData, mode, approved, generatedMockups, mockupStyle, customBaseImages });
-  useEffect(() => { setApproved(false); }, [selectedImage, backDesignImage, designTransforms, selectedCatalogId, productColor, selectedSize, customBaseImages]);
+  const mockupOptions = { frontImage: selectedImage, backImage: backDesignImage, transforms: designTransforms, views, color: productColor, productType: selectedProduct, captureRef };
+  const sourceKey = mockupSourceKey(mockupOptions);
+  const { submit, saving: isSaving, error: saveError } = useStudioSubmission({ ...mockupOptions, product: selectedCatalogProduct, size: selectedSize, price: currentPrice, designData, mode, approved, generatedMockups, mockupStyle, customBaseImages });
+  useEffect(() => { setApproved(false); setGeneratedMockups([]); }, [sourceKey, selectedCatalogId, selectedSize]);
   const handleProductChange = (value) => {
     setCustomBaseImages({ front: null, back: null });
     const catalogProduct = catalogProducts.find((product) => product.id === value);
@@ -423,6 +428,7 @@ export default function Create() {
                       className="w-full h-full"
                     >
                       <InteractiveMockupViewer
+                          captureRef={captureRef}
                         productType={selectedProduct}
                         designImage={activeDesignImage}
                         color={productColor}
@@ -711,6 +717,7 @@ export default function Create() {
                         className="w-full h-full"
                       >
                         <InteractiveMockupViewer
+                          captureRef={captureRef}
                           productType={selectedProduct}
                           designImage={activeDesignImage}
                           color={productColor}
@@ -795,10 +802,9 @@ export default function Create() {
                   </div>
 
                   <MockupStyleGenerator
-                    productType={selectedProduct}
-                    color={productColor}
-                    frontImage={selectedImage}
-                    backImage={backDesignImage}
+                    key={sourceKey}
+                    options={mockupOptions}
+                    onBusyChange={setMockupsBusy}
                     onGenerated={handleMockupsGenerated}
                   />
 

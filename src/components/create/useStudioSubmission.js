@@ -6,6 +6,7 @@ import buildProductionSnapshot from '@/components/create/buildProductionSnapshot
 import { getArtworkMetadata } from '@/components/create/artworkMetadata';
 import inventoryRepository from '@/services/products/inventoryRepository';
 import { cartStore } from '@/services/cartStore';
+import { mockupSourceKey } from '@/components/create/studioMockups';
 export default function useStudioSubmission(options) {
   const [saving, setSaving] = useState(false), [error, setError] = useState('');
   const saved = useRef(null), lock = useRef(false), navigate = useNavigate(), cache = useQueryClient();
@@ -41,7 +42,9 @@ export default function useStudioSubmission(options) {
         cartStore.add({ ...item, base_product_id: options.product.id, variant_id: variant.id });
       } else {
         if (design.status !== 'pendente') await base44.entities.Design.update(design.id, { status: 'pendente' });
-        if (options.generatedMockups.length) await base44.entities.Product.create({ name: design.title, type: options.productType, design_id: design.id, design_image: options.frontImage, back_design_image: options.backImage || '', base_price: options.price, final_price: options.price, mockup_url: options.generatedMockups[0].url, mockup_gallery: options.generatedMockups.map(i => i.url), mockup_style: options.mockupStyle, mockup_angles: options.generatedMockups.map(i => i.angle), colors_available: [options.color], sizes_available: [options.size], is_active: true });
+        const proofs = ['front', 'back'].filter(side => production[`mockup_${side}_url`]).map(angle => ({ angle, url: production[`mockup_${angle}_url`] }));
+        const gallery = [...proofs, ...options.generatedMockups.filter(item => item.sourceKey === mockupSourceKey(options))];
+        await base44.entities.Product.create({ name: design.title, type: options.productType, design_id: design.id, design_image: options.frontImage, back_design_image: options.backImage || '', base_price: options.price, final_price: options.price, mockup_url: production.mockup_front_url, mockup_gallery: gallery.map(i => i.url), mockup_style: options.mockupStyle, mockup_angles: gallery.map(i => i.angle), colors_available: [options.color], sizes_available: [options.size], is_active: true });
       }
       sessionStorage.removeItem('ceu-studio-resume');
       await cache.invalidateQueries({ queryKey: ['my-designs'] });

@@ -10,8 +10,9 @@ import MousepadMockup from '@/components/create/MousepadMockup';
 import TshirtInUseMockup from '@/components/create/TshirtInUseMockup';
 import MugInHandMockup from '@/components/create/MugInHandMockup';
 import MockupViewer3D from '@/components/design/MockupViewer3D';
+import ApprovedMockupGallery from '@/components/design/ApprovedMockupGallery';
 
-export default function MockupViewer({ designImage, selectedProduct, selectedColor }) {
+export default function MockupViewer({ designImage, selectedProduct, selectedColor, production }) {
   const [viewAngle, setViewAngle] = useState('front');
   const [view3D, setView3D] = useState(false);
 
@@ -63,6 +64,7 @@ export default function MockupViewer({ designImage, selectedProduct, selectedCol
   };
 
   const angles = getAnglesForProduct();
+  if (production?.mockup_front_url) return <ApprovedMockupGallery production={production} />;
 
   return (
     <div className="space-y-4">

@@ -8,6 +8,7 @@ import MockupViewer3D from '@/components/design/MockupViewer3D';
 import ApparelPrintStage from '@/components/create/ApparelPrintStage';
 import { printGeometry } from '@/components/create/printGeometry';
 import { getArtworkMetadata } from '@/components/create/artworkMetadata';
+import { captureStudioElement } from '@/components/create/studioMockups';
 
 /**
  * Editor de mockup inspirado no Marketgen 2026.
@@ -81,6 +82,7 @@ export default function InteractiveMockupViewer({
   productViews,
   customBaseImages,
   onBaseImagesChange,
+  captureRef,
 }) {
   const [localSide, setLocalSide] = useState('front');
   const side = controlledSide ?? localSide;
@@ -110,6 +112,11 @@ export default function InteractiveMockupViewer({
   const [presetName, setPresetName] = useState('');
   const fileInputRef = useRef(null);
   const designRef = useRef(null);
+  const stageRef = useRef(null);
+  useEffect(() => {
+    if (captureRef) captureRef.current = () => captureStudioElement(stageRef.current);
+    return () => { if (captureRef) captureRef.current = null; };
+  }, [captureRef]);
   const pointersRef = useRef(new Map());
   const gestureRef = useRef(null);
   const frameRef = useRef(null);
@@ -150,7 +157,9 @@ export default function InteractiveMockupViewer({
     frameRef.current = requestAnimationFrame(() => {
       frameRef.current = null;
       if (!designRef.current) return;
-      designRef.current.style.transform = `translate(-50%, -50%) translate3d(${next.x}px, ${next.y}px, 0) scale(${next.scale}) rotate(${next.rotation}deg)`;
+      designRef.current.style.left = `${50 + next.x / 10}%`;
+      designRef.current.style.top = `${50 + next.y / 10}%`;
+      designRef.current.style.transform = `translate(-50%, -50%) scale(${next.scale}) rotate(${next.rotation}deg)`;
     });
   }, []);
 
@@ -192,8 +201,8 @@ export default function InteractiveMockupViewer({
     }
     paintTransform({
       ...start.transform,
-      x: start.transform.x + center.x - start.center.x,
-      y: start.transform.y + center.y - start.center.y,
+      x: start.transform.x + (center.x - start.center.x) * 1000 / stageRef.current.clientWidth,
+      y: start.transform.y + (center.y - start.center.y) * 1000 / stageRef.current.clientWidth,
       scale,
     });
   }, [paintTransform]);
@@ -269,7 +278,7 @@ export default function InteractiveMockupViewer({
       </div>
 
       {/* Área de preview */}
-      <div className="flex-1 relative min-h-[420px] lg:min-h-[640px] flex items-center justify-center p-6">
+      <div ref={stageRef} className={isApparel ? 'flex-1 relative min-h-[420px] lg:min-h-[640px] flex items-center justify-center p-6' : 'relative aspect-square w-full flex items-center justify-center'}>
         {/* Modo 3D — rotação 360° por arraste */}
         {isApparel ? (
           <><ApparelPrintStage baseUrl={baseImage || productViews?.[side]} designImage={designImage} transform={transform} onChange={updateTransform} />
@@ -301,9 +310,10 @@ export default function InteractiveMockupViewer({
                 onPointerUp={handlePointerEnd}
                 onPointerCancel={handlePointerEnd}
                 style={{
-                  left: '50%',
-                  top: '50%',
-                  transform: `translate(-50%, -50%) translate3d(${offsetX}px, ${offsetY}px, 0) scale(${transform.scale}) rotate(${rotDeg}deg)`,
+                  left: `${50 + transform.x / 10}%`,
+                  top: `${50 + transform.y / 10}%`,
+                  width: '60%', height: '60%',
+                  transform: `translate(-50%, -50%) scale(${transform.scale}) rotate(${transform.rotation}deg)`,
                   transformOrigin: 'center',
                   willChange: 'transform',
                   WebkitUserSelect: 'none',
@@ -314,7 +324,7 @@ export default function InteractiveMockupViewer({
                   src={designImage}
                   alt="Estampa"
                   draggable={false}
-                  className="max-w-[60%] max-h-[60%] object-contain pointer-events-none select-none"
+                  className="w-full h-full object-contain pointer-events-none select-none"
                   style={{ filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.15))' }}
                 />
               </div>
@@ -331,9 +341,9 @@ export default function InteractiveMockupViewer({
                 onPointerMove={handlePointerMove}
                 onPointerUp={handlePointerEnd}
                 onPointerCancel={handlePointerEnd}
-                style={{ left: '50%', top: '50%', transform: `translate(-50%, -50%) translate3d(${offsetX}px, ${offsetY}px, 0) scale(${transform.scale}) rotate(${rotDeg}deg)`, transformOrigin: 'center', willChange: 'transform' }}
+                style={{ left: `${50 + transform.x / 10}%`, top: `${50 + transform.y / 10}%`, width: '60%', height: '60%', transform: `translate(-50%, -50%) scale(${transform.scale}) rotate(${transform.rotation}deg)`, transformOrigin: 'center', willChange: 'transform' }}
               >
-                <img src={designImage} alt="Estampa" draggable={false} className="max-h-[60%] max-w-[60%] select-none object-contain pointer-events-none" />
+                <img src={designImage} alt="Estampa" draggable={false} className="h-full w-full select-none object-contain pointer-events-none" />
               </div>
             )}
             <button onClick={() => fileInputRef.current?.click()} disabled={isUploadingBase} className="absolute right-3 top-3 z-20 flex items-center gap-2 rounded-full border border-ceu-navy/15 bg-card/90 px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-ceu-navy/60 shadow-sm" title="Usar foto própria do produto">
@@ -383,14 +393,14 @@ export default function InteractiveMockupViewer({
               label="Offset horizontal (X)"
               value={offsetX}
               min={-200} max={200} step={1}
-              unit={isApparel ? ' un.' : 'px'}
+              unit=" un."
               onChange={setOffsetX}
             />
             <SliderControl
               label="Offset vertical (Y)"
               value={offsetY}
               min={-200} max={200} step={1}
-              unit={isApparel ? ' un.' : 'px'}
+              unit=" un."
               onChange={setOffsetY}
             />
           </div>

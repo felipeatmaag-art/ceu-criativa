@@ -44,9 +44,9 @@ export default function DesignCard({ design, onLike, index = 0 }) {
           {/* Image Container */}
           <div className="relative aspect-square overflow-hidden">
             <img
-              src={design.image_url || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500'}
+              src={design.production?.mockup_front_url || design.image_url || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500'}
               alt={design.title}
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+              className={design.production?.mockup_front_url ? 'w-full h-full object-contain' : 'w-full h-full object-cover transition-transform duration-700 group-hover:scale-110'}
             />
             
             {/* Overlay */}

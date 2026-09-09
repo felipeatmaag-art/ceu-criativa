@@ -216,6 +216,7 @@ export default function DesignDetail() {
           >
             <div className="sticky top-28 space-y-4">
               <MockupViewer 
+                production={design.production}
                 designImage={design.image_url}
                 selectedProduct={selectedProduct}
                 selectedColor={selectedColor}

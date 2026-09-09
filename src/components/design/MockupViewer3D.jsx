@@ -69,7 +69,7 @@ export default function MockupViewer3D({ productType, designImage, productColor 
     camera.lookAt(0, 0, 0);
 
     // --- Renderer ---
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     mount.appendChild(renderer.domElement);
