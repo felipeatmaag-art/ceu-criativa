@@ -1,0 +1,6 @@
+import React from 'react';
+const money = (value) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value || 0);
+
+export default function ArtistCommissionList({ artists }) {
+  return <section className="overflow-hidden rounded-2xl border bg-card shadow-sm"><div className="border-b px-5 py-4"><h3 className="font-semibold text-foreground">Comissões por artista</h3><p className="mt-1 text-xs text-muted-foreground">Ranking calculado a partir das vendas pagas.</p></div>{artists.length ? <div className="divide-y">{artists.map(artist => <div key={artist.artistId} className="flex items-center justify-between gap-4 px-5 py-4"><div className="min-w-0"><p className="truncate font-medium text-foreground">{artist.artistName}</p><p className="text-xs text-muted-foreground">{artist.sales} itens vendidos</p></div><p className="shrink-0 font-bold text-foreground">{money(artist.commission)}</p></div>)}</div> : <p className="p-8 text-center text-sm text-muted-foreground">Ainda não há comissões registradas.</p>}</section>;
+}

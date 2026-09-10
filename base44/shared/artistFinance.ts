@@ -30,3 +30,31 @@ export async function calculateArtistFinance(db, user) {
   const monthlyHistory = Array.from({ length: 12 }, (_, index) => { const date = new Date(); date.setUTCDate(1); date.setUTCMonth(date.getUTCMonth() - (11 - index)); const month = date.toISOString().slice(0, 7); const rows = transactions.filter(item => item.date?.slice(0, 7) === month); return { month, earnings: money(rows.reduce((sum, item) => sum + item.commission, 0)), sales: rows.length }; });
   return { available, processing, totalCommissions: money(earnedAvailable + processing), grossSales: money(transactions.reduce((sum, item) => sum + item.gross, 0)), salesCount: transactions.length, viewsCount: views.filter(view => perDesign.has(view.design_id)).length, payoutReserved: reserved, pendingTransactions: transactions.filter(item => item.status !== 'delivered').slice(0, 20), monthlyHistory, perDesign: [...perDesign.values()].sort((a, b) => b.sales - a.sales || b.views - a.views) };
 }
+
+export async function calculatePlatformFinance(db) {
+  const [orders, designs] = await Promise.all([db.Order.list('-created_date', 500), db.Design.list('-created_date', 500)]);
+  const designMap = new Map(designs.map(design => [design.id, design]));
+  const eligible = new Set(['paid', 'producing', 'shipped', 'delivered']);
+  const artists = new Map();
+  const transactions = orders.filter(order => eligible.has(order.status)).map(order => {
+    let gross = 0, commissions = 0, baseCosts = 0, profit = 0;
+    (order.items || []).forEach(item => {
+      const quantity = Number(item.quantity) || 1;
+      const design = designMap.get(item.design_id);
+      const itemGross = (Number(item.price) || 0) * quantity;
+      const unitCommission = Number.isFinite(Number(item.artist_commission)) ? Number(item.artist_commission) : (Number(item.design_price ?? item.price) || 0) * Number(item.artist_commission_rate ?? design?.commission_rate ?? 25) / 100;
+      const itemCommission = unitCommission * quantity;
+      const itemCost = (Number(item.base_cost) || 0) * quantity;
+      const itemProfit = Number.isFinite(Number(item.platform_margin)) ? Number(item.platform_margin) * quantity : itemGross - itemCost - itemCommission;
+      gross += itemGross; commissions += itemCommission; baseCosts += itemCost; profit += itemProfit;
+      if (item.artist_id) {
+        const current = artists.get(item.artist_id) || { artistId: item.artist_id, artistName: design?.artist_name || 'Artista', sales: 0, commission: 0 };
+        current.sales += quantity; current.commission = money(current.commission + itemCommission); artists.set(item.artist_id, current);
+      }
+    });
+    return { date: order.created_date, gross: money(gross), commissions: money(commissions), baseCosts: money(baseCosts), profit: money(profit) };
+  });
+  const monthlyHistory = Array.from({ length: 12 }, (_, index) => { const date = new Date(); date.setUTCDate(1); date.setUTCMonth(date.getUTCMonth() - (11 - index)); const month = date.toISOString().slice(0, 7); const rows = transactions.filter(item => item.date?.slice(0, 7) === month); return { month, sales: rows.length, gross: money(rows.reduce((sum, item) => sum + item.gross, 0)), commissions: money(rows.reduce((sum, item) => sum + item.commissions, 0)), profit: money(rows.reduce((sum, item) => sum + item.profit, 0)) }; });
+  const grossSales = money(transactions.reduce((sum, item) => sum + item.gross, 0));
+  return { grossSales, totalCommissions: money(transactions.reduce((sum, item) => sum + item.commissions, 0)), baseCosts: money(transactions.reduce((sum, item) => sum + item.baseCosts, 0)), totalProfit: money(transactions.reduce((sum, item) => sum + item.profit, 0)), salesCount: transactions.length, averageTicket: money(transactions.length ? grossSales / transactions.length : 0), monthlyHistory, artistCommissions: [...artists.values()].sort((a, b) => b.commission - a.commission) };
+}

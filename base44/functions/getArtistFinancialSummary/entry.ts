@@ -1,12 +1,16 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
-import { calculateArtistFinance } from '../../shared/artistFinance.ts';
+import { calculateArtistFinance, calculatePlatformFinance } from '../../shared/artistFinance.ts';
 
 export default async function(req: Request): Promise<Response> {
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
-
+    const body = await req.json().catch(() => ({}));
+    if (body.scope === 'platform') {
+      if (user.role !== 'admin') return Response.json({ error: 'Forbidden' }, { status: 403 });
+      return Response.json(await calculatePlatformFinance(base44.asServiceRole.entities));
+    }
     return Response.json(await calculateArtistFinance(base44.asServiceRole.entities, user));
   } catch (error) {
     console.error('Financial summary error:', error);
