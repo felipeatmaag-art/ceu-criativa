@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import MockupViewer3D from '@/components/design/MockupViewer3D';
 import ApparelPrintStage from '@/components/create/ApparelPrintStage';
-import { printGeometry } from '@/components/create/printGeometry';
+import { lockPrintPlacement } from '@/components/create/printGeometry';
 import { getArtworkMetadata } from '@/components/create/artworkMetadata';
 import { captureStudioElement } from '@/components/create/studioMockups';
 
@@ -98,8 +98,8 @@ export default function InteractiveMockupViewer({
   const updateTransform = (next) => {
     if (!isApparel || !designImage) return onTransformChange(next);
     const bounds = getArtworkMetadata(designImage).bounds;
-    const g = printGeometry(next, bounds.width / bounds.height);
-    onTransformChange({ x: g.x, y: g.y, scale: g.scale, rotation: g.rotation });
+    const placement = lockPrintPlacement(next, bounds.width / bounds.height);
+    onTransformChange(placement.transform);
   };
 
   useEffect(() => {

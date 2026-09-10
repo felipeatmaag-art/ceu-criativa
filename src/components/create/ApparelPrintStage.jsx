@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { renderPrintMockup } from '@/components/create/renderPrintMockup';
-import { PRINT_AREA, printGeometry } from '@/components/create/printGeometry';
+import { PRINT_AREA, lockPrintPlacement } from '@/components/create/printGeometry';
 import { getArtworkMetadata } from '@/components/create/artworkMetadata';
 export default function ApparelPrintStage({ baseUrl, designImage, transform, onChange }) {
   const canvas = useRef(null), pointers = useRef(new Map()), start = useRef(null), sequence = useRef(0);
@@ -10,7 +10,8 @@ export default function ApparelPrintStage({ baseUrl, designImage, transform, onC
     const id = ++sequence.current;
     const buffer = document.createElement('canvas');
     setError('');
-    renderPrintMockup(buffer, baseUrl, designImage, transform).then(() => {
+    const placement = designImage ? lockPrintPlacement(transform, ratio) : null;
+    renderPrintMockup(buffer, baseUrl, designImage, transform, placement).then(() => {
       if (id !== sequence.current || !canvas.current) return;
       canvas.current.width = canvas.current.height = 1000;
       canvas.current.getContext('2d').drawImage(buffer, 0, 0);
@@ -26,8 +27,8 @@ export default function ApparelPrintStage({ baseUrl, designImage, transform, onC
     pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
     const p = [...pointers.current.values()], s = start.current, unit = 1000 / e.currentTarget.getBoundingClientRect().width;
     const distance = p.length > 1 ? Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y) : 0;
-    const g = printGeometry({ ...s.transform, x: s.transform.x + (p.reduce((a,v) => a + v.x, 0) / p.length - s.x) * unit, y: s.transform.y + (p.reduce((a,v) => a + v.y, 0) / p.length - s.y) * unit, scale: s.distance && distance ? s.transform.scale * distance / s.distance : s.transform.scale }, ratio);
-    onChange({ x: g.x, y: g.y, scale: g.scale, rotation: g.rotation });
+    const g = lockPrintPlacement({ ...s.transform, x: s.transform.x + (p.reduce((a,v) => a + v.x, 0) / p.length - s.x) * unit, y: s.transform.y + (p.reduce((a,v) => a + v.y, 0) / p.length - s.y) * unit, scale: s.distance && distance ? s.transform.scale * distance / s.distance : s.transform.scale }, ratio);
+    onChange(g.transform);
   };
   const end = e => { pointers.current.delete(e.pointerId); rebase(); };
   return <div className="w-full max-w-2xl mx-auto">

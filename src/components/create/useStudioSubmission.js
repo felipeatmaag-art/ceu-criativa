@@ -29,7 +29,7 @@ export default function useStudioSubmission(options) {
         variant = matching[0];
       }
       const user = await base44.auth.me();
-      const signature = JSON.stringify(options);
+      const signature = JSON.stringify({ source: mockupSourceKey(options), size: options.size, designData: options.designData, mode: options.mode });
       if (!saved.current || saved.current.signature !== signature) {
         const production = await buildProductionSnapshot(options);
         const design = await base44.entities.Design.create({ ...options.designData, image_url: options.frontImage, artist_id: user.id, artist_name: user.artist_name || user.full_name, tags: options.designData.tags.split(',').map(t => t.trim()).filter(Boolean), is_ai_generated: options.mode === 'ai', status: action === 'publish' ? 'pendente' : 'rascunho', commission_rate: 30, production });

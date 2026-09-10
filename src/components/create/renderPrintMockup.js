@@ -1,4 +1,4 @@
-import { PRINT_AREA, printGeometry } from '@/components/create/printGeometry';
+import { PRINT_AREA, lockPrintPlacement } from '@/components/create/printGeometry';
 import { getArtworkMetadata } from '@/components/create/artworkMetadata';
 const images = new Map();
 export function loadPrintImage(url) {
@@ -10,7 +10,7 @@ export function loadPrintImage(url) {
   }));
   return images.get(url);
 }
-export async function renderPrintMockup(canvas, baseUrl, artworkUrl, transform) {
+export async function renderPrintMockup(canvas, baseUrl, artworkUrl, transform, lockedPlacement) {
   const [base, artwork] = await Promise.all([baseUrl ? loadPrintImage(baseUrl) : null, artworkUrl ? loadPrintImage(artworkUrl) : null]);
   const buffer = document.createElement('canvas'); buffer.width = buffer.height = 1000;
   const ctx = buffer.getContext('2d');
@@ -21,7 +21,7 @@ export async function renderPrintMockup(canvas, baseUrl, artworkUrl, transform) 
   }
   if (artwork) {
     const { bounds } = getArtworkMetadata(artworkUrl);
-    const g = printGeometry(transform, bounds.width / bounds.height);
+    const g = lockedPlacement || lockPrintPlacement(transform, bounds.width / bounds.height);
     const ink = document.createElement('canvas'); ink.width = ink.height = 1000;
     const pen = ink.getContext('2d');
     pen.translate(g.cx, g.cy); pen.rotate(g.rotation * Math.PI / 180);

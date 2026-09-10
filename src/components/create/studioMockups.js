@@ -1,9 +1,18 @@
 import html2canvas from 'html2canvas';
 import { base44 } from '@/api/base44Client';
 import { renderPrintMockup } from '@/components/create/renderPrintMockup';
+import { getArtworkMetadata } from '@/components/create/artworkMetadata';
+import { lockPrintPlacement } from '@/components/create/printGeometry';
 
 export const mockupSourceKey = ({ productType, color, frontImage, backImage, transforms, views }) => JSON.stringify({ productType, color, frontImage, backImage, transforms, views });
 export const hasPrintStage = type => ['camiseta', 'baby_look'].includes(type);
+export function resolveMockupPlacement(options, side) {
+  if (options.placements?.[side]) return options.placements[side];
+  const artworkUrl = side === 'front' ? options.frontImage : options.backImage;
+  if (!artworkUrl) return null;
+  const bounds = getArtworkMetadata(artworkUrl).bounds;
+  return lockPrintPlacement(options.transforms[side], bounds.width / bounds.height);
+}
 export async function captureStudioElement(element) {
   if (!element) throw new Error('Abra a pré-visualização antes de salvar.');
   const webgl = element.querySelector('canvas');
@@ -23,7 +32,8 @@ export async function renderStudioMockup(options, side = 'front') {
   }
   if (!options.views?.[side]) throw new Error(`Adicione uma foto de ${side === 'front' ? 'frente' : 'costas'} antes de salvar.`);
   const canvas = document.createElement('canvas');
-  await renderPrintMockup(canvas, options.views[side], side === 'front' ? options.frontImage : options.backImage, options.transforms[side]);
+  const artworkUrl = side === 'front' ? options.frontImage : options.backImage;
+  await renderPrintMockup(canvas, options.views[side], artworkUrl, options.transforms[side], resolveMockupPlacement(options, side));
   return canvas;
 }
 export async function uploadMockup(canvas, name) {
