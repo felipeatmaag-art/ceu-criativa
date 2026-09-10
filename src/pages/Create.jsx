@@ -75,6 +75,7 @@ export default function Create() {
   const [customBaseImages, setCustomBaseImages] = useState({ front: null, back: null });
 
   const [aiPrompt, setAiPrompt] = useState('');
+  const [commissionRate, setCommissionRate] = useState(25);
   const [aiReferenceImage, setAiReferenceImage] = useState(null);
   const [generatedImages, setGeneratedImages] = useState([]);
   const [selectedImage, setSelectedImage] = useState(null);
@@ -128,6 +129,13 @@ export default function Create() {
       }
     });
   }, [requestedProduct]);
+
+  useEffect(() => {
+    base44.auth.me()
+      .then((user) => base44.entities.ArtistCommission.filter({ artist_id: user.id }, '-updated_date', 1))
+      .then((rates) => setCommissionRate(rates[0]?.rate ?? 25))
+      .catch(() => setCommissionRate(25));
+  }, []);
 
   const categories = [
   { value: 'abstrato', label: 'Abstrato' },
@@ -821,9 +829,9 @@ export default function Create() {
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-gray-600 text-sm">Sua comissão (30%)</span>
+                      <span className="text-gray-600 text-sm">Sua comissão ({commissionRate}%)</span>
                       <span className="font-semibold text-green-600">
-                        R$ {(currentPrice * 0.3).toFixed(2)}
+                        R$ {(Number(designData.price_base || 0) * commissionRate / 100).toFixed(2)}
                       </span>
                     </div>
                   </div>
