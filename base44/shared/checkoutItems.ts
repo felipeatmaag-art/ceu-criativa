@@ -1,4 +1,5 @@
 import { buildPodQuote } from './podPricing.ts';
+import { getArtistCommissionRate } from './artistCommission.ts';
 
 export default async function checkoutItems(base44, items) {
   const designs = new Map(), products = new Map();
@@ -17,7 +18,8 @@ export default async function checkoutItems(base44, items) {
     if (variant.stock_quantity < quantity) throw new Error(`Estoque insuficiente: ${product.name} · ${variant.color} · ${variant.size}.`);
     const design = await read(designs, 'Design', item.design_id);
     if (!design) throw new Error('Estampa indisponível.');
-    const quote = buildPodQuote(product, design, quantity);
+    const commissionRate = await getArtistCommissionRate(base44.asServiceRole.entities, design.artist_id);
+    const quote = buildPodQuote(product, { ...design, commission_rate: commissionRate }, quantity);
     let unitPrice = Math.round(quote.unit_price * 100);
     const production = item.production?.version ? design?.production : null;
     if (item.production?.version && !production) throw new Error('O arquivo aprovado não está mais disponível. Volte ao estúdio.');

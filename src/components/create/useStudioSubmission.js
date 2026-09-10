@@ -32,7 +32,8 @@ export default function useStudioSubmission(options) {
       const signature = JSON.stringify({ source: mockupSourceKey(options), size: options.size, designData: options.designData, mode: options.mode });
       if (!saved.current || saved.current.signature !== signature) {
         const production = await buildProductionSnapshot(options);
-        const design = await base44.entities.Design.create({ ...options.designData, image_url: options.frontImage, artist_id: user.id, artist_name: user.artist_name || user.full_name, tags: options.designData.tags.split(',').map(t => t.trim()).filter(Boolean), is_ai_generated: options.mode === 'ai', status: action === 'publish' ? 'pendente' : 'rascunho', commission_rate: 30, production });
+        const commission = (await base44.entities.ArtistCommission.filter({ artist_id: user.id }, '-updated_date', 1))[0]?.rate ?? 25;
+        const design = await base44.entities.Design.create({ ...options.designData, image_url: options.frontImage, artist_id: user.id, artist_name: user.artist_name || user.full_name, tags: options.designData.tags.split(',').map(t => t.trim()).filter(Boolean), is_ai_generated: options.mode === 'ai', status: action === 'publish' ? 'pendente' : 'rascunho', commission_rate: commission, production });
         saved.current = { signature, design, production };
       }
       const { design, production } = saved.current;

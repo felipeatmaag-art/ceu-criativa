@@ -30,8 +30,7 @@ export default function Profile() {
   const queryClient = useQueryClient();
   const [formData, setFormData] = useState({
     artist_name: '', bio: '', cover_image: '', store_name: '', store_slug: '',
-    pix_key: '', whatsapp: '', linkedin: '', instagram: '', twitter: '', website: '',
-    artist_commission_rate: 25
+    pix_key: '', whatsapp: '', linkedin: '', instagram: '', twitter: '', website: ''
   });
   const [isUploading, setIsUploading] = useState(false);
   const [activeTab, setActiveTab] = useState('profile');
@@ -40,6 +39,13 @@ export default function Profile() {
     queryKey: ['currentUser'],
     queryFn: () => base44.auth.me(),
   });
+
+  const { data: commissionRates = [] } = useQuery({
+    queryKey: ['my-commission-rate', user?.id],
+    queryFn: () => base44.entities.ArtistCommission.filter({ artist_id: user.id }, '-updated_date', 1),
+    enabled: !!user?.id,
+  });
+  const commissionRate = commissionRates[0]?.rate ?? 25;
 
   const { data: artistDesigns = [], isLoading: isLoadingDesigns } = useQuery({
     queryKey: ['profile-designs', user?.id],
@@ -55,7 +61,7 @@ export default function Profile() {
         artist_name: user.artist_name || '', bio: user.bio || '', cover_image: user.cover_image || '',
         store_name: user.store_name || '', store_slug: user.store_slug || '', pix_key: user.pix_key || '',
         whatsapp: user.whatsapp || '', linkedin: user.linkedin || '', instagram: user.instagram || '',
-        twitter: user.twitter || '', website: user.website || '', artist_commission_rate: user.artist_commission_rate || 25
+        twitter: user.twitter || '', website: user.website || ''
       });
     }
   }, [user]);
@@ -255,44 +261,9 @@ export default function Profile() {
 
                   {/* Commission Rate */}
                   <div className="bg-purple-50 rounded-2xl p-6 border border-purple-200">
-                    <Label className="text-base font-medium mb-2 block">
-                      Taxa de Comissão (%)
-                    </Label>
-                    <p className="text-sm text-gray-600 mb-4">
-                      Percentual que você receberá de cada venda dos seus designs
-                    </p>
-                    <div className="flex items-center gap-4">
-                      <Input
-                        type="number"
-                        min="10"
-                        max="50"
-                        value={formData.artist_commission_rate}
-                        onChange={(e) => setFormData({...formData, artist_commission_rate: Number(e.target.value)})}
-                        className="rounded-xl w-24 text-center text-lg font-bold"
-                      />
-                      <span className="text-2xl font-bold ceu-text-gradient">{formData.artist_commission_rate}%</span>
-                    </div>
-                    <div className="mt-4 pt-4 border-t border-purple-200">
-                      <p className="text-xs text-gray-500 mb-2">Seus ganhos estimados por venda:</p>
-                      <div className="grid grid-cols-2 gap-2 text-xs">
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Camiseta (R$ 79,90):</span>
-                          <span className="font-medium text-green-600">R$ {(79.90 * (formData.artist_commission_rate / 100)).toFixed(2)}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Caneca (R$ 49,90):</span>
-                          <span className="font-medium text-green-600">R$ {(49.90 * (formData.artist_commission_rate / 100)).toFixed(2)}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Quadro (R$ 129,90):</span>
-                          <span className="font-medium text-green-600">R$ {(129.90 * (formData.artist_commission_rate / 100)).toFixed(2)}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Boné (R$ 59,90):</span>
-                          <span className="font-medium text-green-600">R$ {(59.90 * (formData.artist_commission_rate / 100)).toFixed(2)}</span>
-                        </div>
-                      </div>
-                    </div>
+                    <Label className="text-base font-medium mb-2 block">Taxa de Comissão</Label>
+                    <p className="text-sm text-gray-600">Definida exclusivamente pelo painel master.</p>
+                    <p className="mt-3 text-3xl font-bold ceu-text-gradient">{commissionRate}%</p>
                   </div>
 
                   {/* Submit */}

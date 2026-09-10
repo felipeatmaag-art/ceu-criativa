@@ -1,0 +1,43 @@
+{
+  "name": "ArtistCommission",
+  "type": "object",
+  "properties": {
+    "artist_id": {
+      "type": "string",
+      "description": "Usu\u00e1rio artista vinculado \u00e0 taxa"
+    },
+    "rate": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "default": 25,
+      "description": "Percentual definido pelo painel master"
+    },
+    "updated_by": {
+      "type": "string",
+      "description": "Administrador que alterou a taxa"
+    }
+  },
+  "required": [
+    "artist_id",
+    "rate"
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

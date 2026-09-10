@@ -1,0 +1,17 @@
+import React, { useEffect, useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { base44 } from '@/api/base44Client';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+
+export default function CommissionRateManager() {
+  const cache = useQueryClient(), [values, setValues] = useState({}), [saving, setSaving] = useState(''), [message, setMessage] = useState('');
+  const { data: me } = useQuery({ queryKey: ['commission-admin'], queryFn: () => base44.auth.me() });
+  const { data: users = [], isLoading } = useQuery({ queryKey: ['commission-artists'], queryFn: () => base44.entities.User.list('-created_date', 500), enabled: me?.role === 'admin' });
+  const { data: rates = [] } = useQuery({ queryKey: ['artist-commission-rates'], queryFn: () => base44.entities.ArtistCommission.list('-updated_date', 500), enabled: me?.role === 'admin' });
+  useEffect(() => setValues(Object.fromEntries(users.map(user => [user.id, rates.find(item => item.artist_id === user.id)?.rate ?? 25]))), [users, rates]);
+  if (me && me.role !== 'admin') return null;
+  const save = async user => { const rate = Number(values[user.id]); if (!Number.isFinite(rate) || rate < 0 || rate > 100) return setMessage('Informe uma comissão entre 0% e 100%.'); setSaving(user.id); const current = rates.find(item => item.artist_id === user.id); const data = { artist_id: user.id, rate, updated_by: me.email }; if (current) await base44.entities.ArtistCommission.update(current.id, data); else await base44.entities.ArtistCommission.create(data); let result; do { result = await base44.entities.Design.updateMany({ artist_id: user.id, commission_rate: { $ne: rate } }, { $set: { commission_rate: rate } }); } while (result?.has_more); await cache.invalidateQueries({ queryKey: ['artist-commission-rates'] }); setSaving(''); setMessage(`Comissão de ${user.artist_name || user.full_name} atualizada para ${rate}%.`); };
+  const artists = users.filter(user => user.role !== 'admin');
+  return <section className="rounded-2xl border bg-card shadow-sm"><div className="border-b px-5 py-4"><h3 className="font-semibold text-foreground">Taxas de comissão</h3><p className="mt-1 text-xs text-muted-foreground">Somente o painel master pode alterar estes percentuais.</p></div>{message && <p role="status" className="mx-5 mt-4 rounded-xl bg-emerald-50 p-3 text-sm text-emerald-800">{message}</p>}{isLoading ? <div className="m-5 h-20 animate-pulse rounded-xl bg-muted"/> : artists.length ? <div className="divide-y">{artists.map(user => <div key={user.id} className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center"><div className="min-w-0 flex-1"><p className="truncate font-medium">{user.artist_name || user.full_name}</p><p className="truncate text-xs text-muted-foreground">{user.email}</p></div><div className="flex items-center gap-2"><Input aria-label={`Comissão de ${user.artist_name || user.full_name}`} type="number" min="0" max="100" value={values[user.id] ?? 25} onChange={event => setValues({ ...values, [user.id]: event.target.value })} className="w-24"/><span>%</span><Button onClick={() => save(user)} disabled={saving === user.id}>{saving === user.id ? 'Salvando...' : 'Salvar'}</Button></div></div>)}</div> : <p className="p-8 text-center text-sm text-muted-foreground">Nenhum artista cadastrado.</p>}</section>;
+}

@@ -16,6 +16,7 @@ export default function useBatchUpload(user, onComplete) {
         file,
         result: await base44.integrations.Core.UploadFile({ file })
       })));
+      const commissionRate = (await base44.entities.ArtistCommission.filter({ artist_id: user.id }, '-updated_date', 1))[0]?.rate ?? 25;
       await base44.entities.Design.bulkCreate(uploaded.map(({ file, result }) => ({
         title: file.name.replace(/\.[^/.]+$/, ''),
         image_url: result.file_url,
@@ -23,6 +24,7 @@ export default function useBatchUpload(user, onComplete) {
         artist_name: user.artist_name || user.full_name,
         category,
         price_base: 49.9,
+        commission_rate: commissionRate,
         status: 'pendente',
         is_ai_generated: false
       })));
