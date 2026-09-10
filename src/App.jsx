@@ -13,6 +13,7 @@ import CheckoutSuccess from '@/pages/CheckoutSuccess';
 import OAuthConsent from '@/pages/OAuthConsent';
 import ProductAdmin from '@/pages/ProductAdmin';
 import Storefront from '@/pages/Storefront';
+import Competitions from '@/pages/Competitions';
 import ScrollSceneMotion from '@/components/ScrollSceneMotion';
 
 const { Pages, Layout, mainPage } = pagesConfig;
@@ -62,6 +63,11 @@ const AuthenticatedApp = () => {
       <Route path="/ProductAdmin" element={
         <LayoutWrapper currentPageName="ProductAdmin">
           <ProductAdmin />
+        </LayoutWrapper>
+      } />
+      <Route path="/Concursos" element={
+        <LayoutWrapper currentPageName="Competitions">
+          <Competitions />
         </LayoutWrapper>
       } />
       <Route path="/:storeSlug" element={

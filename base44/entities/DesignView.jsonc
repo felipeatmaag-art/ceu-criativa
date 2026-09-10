@@ -1,0 +1,34 @@
+{
+  "name": "DesignView",
+  "type": "object",
+  "properties": {
+    "design_id": {
+      "type": "string"
+    },
+    "viewer_key": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "design_id",
+    "viewer_key"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

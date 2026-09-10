@@ -7,6 +7,7 @@ Pacote de referência para migração do backend gerenciado. Copie esta pasta pa
 - `routes.md`: contrato das rotas REST.
 - `pod-core.mjs`: composição e precificação POD sem dependências.
 - `stripe-webhook.mjs`: handler Stripe em Node.js com dependências injetadas.
+- `Ceu-Criativa.postman_collection.json`: coleção Postman com autenticação, rotas e payloads de teste.
 
 ## Variáveis
 `DATABASE_URL`, `STRIPE_SECRET_KEY`, `STRIPE_POD_WEBHOOK_SECRET`, `BASE44_APP_ID`.

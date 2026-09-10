@@ -24,6 +24,7 @@ import MonthlySalesChart from '@/components/dashboard/MonthlySalesChart';
 import NotificationsPanel from '@/components/dashboard/NotificationsPanel';
 import RealtimeToasts from '@/components/dashboard/RealtimeToasts';
 import ProductionQueue from '@/components/production/ProductionQueue';
+import FinancialDashboard from '@/components/financial/FinancialDashboard';
 
 export default function ArtistDashboard() {
   const [tab, setTab] = useState('overview');
@@ -148,6 +149,7 @@ export default function ArtistDashboard() {
 
           {/* Overview Tab */}
           <TabsContent value="overview">
+            <FinancialDashboard />
             {/* Stats */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
               {stats.map((s, i) => {

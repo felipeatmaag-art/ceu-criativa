@@ -1,0 +1,34 @@
+{
+  "name": "CompetitionVote",
+  "type": "object",
+  "properties": {
+    "competition_id": {
+      "type": "string"
+    },
+    "submission_id": {
+      "type": "string"
+    },
+    "voter_key": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "competition_id",
+    "submission_id",
+    "voter_key"
+  ],
+  "rls": {
+    "read": {},
+    "create": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

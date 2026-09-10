@@ -67,6 +67,14 @@ export default function DesignDetail() {
     enabled: !!designId,
   });
 
+  useEffect(() => {
+    if (!design?.id) return;
+    const key = `ceu-view-${design.id}`;
+    if (sessionStorage.getItem(key)) return;
+    sessionStorage.setItem(key, '1');
+    base44.entities.DesignView.create({ design_id: design.id, viewer_key: crypto.randomUUID() }).catch(error => console.error('Design view:', error));
+  }, [design?.id]);
+
   const { data: isLiked = false } = useQuery({
     queryKey: ['like', designId, user?.email],
     queryFn: async () => {

@@ -1,0 +1,19 @@
+{
+  "info": { "name": "Céu Criativa API", "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json" },
+  "variable": [
+    { "key": "baseUrl", "value": "https://app-2938bc15-e2d6-45aa-bba4-e6f1455821ce.base44.app/functions" },
+    { "key": "bearerToken", "value": "" }, { "key": "designId", "value": "" }, { "key": "productId", "value": "" }, { "key": "competitionId", "value": "" }, { "key": "orderId", "value": "" }
+  ],
+  "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{bearerToken}}", "type": "string" }] },
+  "item": [
+    { "name": "Artista - Métricas", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{}" }, "url": "{{baseUrl}}/getArtistFinancialSummary" } },
+    { "name": "Artista - Solicitar pagamento", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{}" }, "url": "{{baseUrl}}/requestArtistPayout" } },
+    { "name": "Concursos - Enviar arte", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"competitionId\": \"{{competitionId}}\",\n  \"title\": \"Horizonte Tropical\",\n  \"imageUrl\": \"https://example.com/arte.png\"\n}" }, "url": "{{baseUrl}}/submitCompetitionEntry" } },
+    { "name": "POD - Calcular orçamento", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"productId\": \"{{productId}}\",\n  \"designId\": \"{{designId}}\",\n  \"quantity\": 1\n}" }, "url": "{{baseUrl}}/calculatePodQuote" } },
+    { "name": "POD - Composição", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"designId\": \"{{designId}}\",\n  \"productId\": \"{{productId}}\",\n  \"side\": \"front\",\n  \"transform\": {\"x\": 30, \"y\": -20, \"scale\": 1.1, \"rotation\": 0},\n  \"artworkWidth\": 3543,\n  \"artworkHeight\": 4724\n}" }, "url": "{{baseUrl}}/processPodComposition" } },
+    { "name": "POD - Exportar 300 DPI", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"designId\": \"{{designId}}\",\n  \"side\": \"front\",\n  \"transform\": {\"x\": 30, \"y\": -20, \"scale\": 1.1, \"rotation\": 0},\n  \"artworkWidth\": 3543,\n  \"artworkHeight\": 4724\n}" }, "url": "{{baseUrl}}/exportPod300Dpi" } },
+    { "name": "Stripe - Criar checkout", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"action\": \"config\"\n}" }, "url": "{{baseUrl}}/createStripeCheckout" } },
+    { "name": "Stripe - Confirmar checkout", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"orderId\": \"{{orderId}}\",\n  \"checkoutToken\": \"token-de-teste-com-pelo-menos-32-caracteres\"\n}" }, "url": "{{baseUrl}}/confirmStripeCheckout" } },
+    { "name": "Stripe - Webhook", "request": { "auth": { "type": "noauth" }, "method": "POST", "header": [{ "key": "Stripe-Signature", "value": "{{stripeSignature}}" }], "body": { "mode": "raw", "raw": "{}" }, "url": "{{baseUrl}}/stripePodWebhook" } }
+  ]
+}

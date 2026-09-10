@@ -10,6 +10,8 @@ import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Skeleton } from '@/components/ui/skeleton';
+import CompetitionUploadForm from '@/components/competitions/CompetitionUploadForm';
+import CompetitionRanking from '@/components/competitions/CompetitionRanking';
 
 export default function CompetitionDetail() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -163,26 +165,7 @@ export default function CompetitionDetail() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Participate */}
-            {competition.status === 'active' && (
-              <div className="bg-white rounded-3xl p-6 shadow-sm sticky top-28">
-                <h3 className="font-bold text-lg mb-4">Participar</h3>
-                <p className="text-sm text-gray-600 mb-6">
-                  Crie seu design baseado no tema "{competition.theme}" e concorra ao prêmio!
-                </p>
-                <Link to={createPageUrl('Create')}>
-                  <Button className="w-full h-12 rounded-xl ceu-gradient text-white mb-3">
-                    <Sparkles className="w-4 h-4 mr-2" />
-                    Criar com IA
-                  </Button>
-                </Link>
-                <Link to={createPageUrl('Create')}>
-                  <Button variant="outline" className="w-full h-12 rounded-xl">
-                    <Upload className="w-4 h-4 mr-2" />
-                    Fazer Upload
-                  </Button>
-                </Link>
-              </div>
-            )}
+            {competition.status === 'active' && <CompetitionUploadForm competition={competition} />}
 
             {/* Info */}
             <div className="bg-purple-50 rounded-3xl p-6 border border-purple-200">
@@ -212,6 +195,7 @@ export default function CompetitionDetail() {
             </div>
           </div>
         </div>
+        <CompetitionRanking competition={competition} />
       </div>
     </div>
   );
