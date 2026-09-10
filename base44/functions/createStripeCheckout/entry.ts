@@ -28,7 +28,9 @@ export default async function(req: Request): Promise<Response> {
       const shipping = subtotal >= 15000 ? 0 : 1500;
       const discount = body.couponCode === 'CRIATIVO10' ? 0.1 : body.couponCode === 'BEMVINDO' ? 0.05 : 0;
       const total = subtotal - Math.round(subtotal * discount) + shipping;
-      order = await db.Order.create({ order_number: `CEU-${crypto.randomUUID().slice(0,8).toUpperCase()}`, customer_name: body.customer.name.trim().slice(0,100), customer_email: body.customer.email.trim().toLowerCase().slice(0,150), items: safeItems, subtotal: subtotal/100, shipping_cost: shipping/100, total: total/100, status: 'pending', checkout_key: body.requestId, checkout_token_hash: hash, shipping_address: Object.fromEntries(['zipcode','street','number','city','state'].map(k => [k, body.shippingAddress[k].trim().slice(0,200)])) });
+      const baseCostTotal = safeItems.reduce((sum, item) => sum + Math.round(item.base_cost * 100) * item.quantity, 0);
+      const artistCommissionTotal = safeItems.reduce((sum, item) => sum + Math.round(item.artist_commission * 100) * item.quantity, 0);
+      order = await db.Order.create({ order_number: `CEU-${crypto.randomUUID().slice(0,8).toUpperCase()}`, customer_name: body.customer.name.trim().slice(0,100), customer_email: body.customer.email.trim().toLowerCase().slice(0,150), items: safeItems, subtotal: subtotal/100, shipping_cost: shipping/100, total: total/100, base_cost_total: baseCostTotal/100, artist_commission_total: artistCommissionTotal/100, status: 'pending', checkout_key: body.requestId, checkout_token_hash: hash, shipping_address: Object.fromEntries(['zipcode','street','number','city','state'].map(k => [k, body.shippingAddress[k].trim().slice(0,200)])) });
     }
     if (order.status === 'cancelled') throw new Error('Este pagamento foi cancelado. Inicie uma nova tentativa.');
     let intent;

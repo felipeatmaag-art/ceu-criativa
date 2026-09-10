@@ -49,6 +49,21 @@
           "price": {
             "type": "number"
           },
+          "base_cost": {
+            "type": "number"
+          },
+          "design_price": {
+            "type": "number"
+          },
+          "artist_commission_rate": {
+            "type": "number"
+          },
+          "artist_commission": {
+            "type": "number"
+          },
+          "platform_margin": {
+            "type": "number"
+          },
           "cart_item_id": {
             "type": "string"
           },
@@ -72,6 +87,14 @@
     },
     "total": {
       "type": "number"
+    },
+    "base_cost_total": {
+      "type": "number",
+      "default": 0
+    },
+    "artist_commission_total": {
+      "type": "number",
+      "default": 0
     },
     "status": {
       "type": "string",
