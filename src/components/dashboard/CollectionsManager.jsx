@@ -30,18 +30,18 @@ export default function CollectionsManager({ designs, user }) {
   const queryClient = useQueryClient();
   const [createOpen, setCreateOpen] = useState(false);
   const [editTarget, setEditTarget] = useState(null);
-  const [form, setForm] = useState({ title: '', description: '', is_public: false, theme: 'personalizado', design_ids: [] });
+  const [form, setForm] = useState({ title: '', description: '', banner_url: '', position_order: 0, is_active: true, is_public: false, theme: 'personalizado', design_ids: [] });
   const [loading, setLoading] = useState(false);
   const [themeFilter, setThemeFilter] = useState('all');
 
   const { data: collections = [] } = useQuery({
     queryKey: ['artist-collections', user?.id],
-    queryFn: () => base44.entities.Collection.filter({ artist_id: user.id }),
+    queryFn: () => base44.entities.Collection.filter({ artist_id: user.id }, 'position_order', 100),
     enabled: !!user?.id
   });
 
   const openCreate = () => {
-    setForm({ title: '', description: '', is_public: false, theme: 'personalizado', design_ids: [] });
+    setForm({ title: '', description: '', banner_url: '', position_order: collections.length, is_active: true, is_public: false, theme: 'personalizado', design_ids: [] });
     setCreateOpen(true);
     setEditTarget(null);
   };
@@ -50,6 +50,9 @@ export default function CollectionsManager({ designs, user }) {
     setForm({
       title: col.title,
       description: col.description || '',
+      banner_url: col.banner_url || col.cover_image || '',
+      position_order: col.position_order || 0,
+      is_active: col.is_active !== false,
       is_public: col.is_public || false,
       theme: col.theme || 'personalizado',
       design_ids: col.design_ids || []
@@ -77,7 +80,8 @@ export default function CollectionsManager({ designs, user }) {
   const save = async () => {
     if (!form.title.trim()) { toast.error('Dê um nome para a coleção'); return; }
     setLoading(true);
-    const payload = { ...form, artist_id: user.id, artist_name: user.full_name };
+    const slug = form.title.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    const payload = { ...form, slug, artist_id: user.id, artist_name: user.full_name };
     if (editTarget) {
       await base44.entities.Collection.update(editTarget.id, payload);
       toast.success('Coleção atualizada!');
@@ -247,16 +251,20 @@ export default function CollectionsManager({ designs, user }) {
                 rows={2}
               />
             </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div><label className="text-sm font-medium text-gray-700">Banner da coleção</label><Input value={form.banner_url} onChange={e => setForm(f => ({ ...f, banner_url: e.target.value }))} placeholder="https://..." className="mt-1.5 rounded-xl" /></div>
+              <div><label className="text-sm font-medium text-gray-700">Ordem na loja</label><Input type="number" min="0" value={form.position_order} onChange={e => setForm(f => ({ ...f, position_order: Number(e.target.value) }))} className="mt-1.5 rounded-xl" /></div>
+            </div>
             <div className="flex items-center justify-between py-1">
               <div>
-                <p className="text-sm font-medium text-gray-700">Coleção pública</p>
+                <p className="text-sm font-medium text-gray-700">Coleção pública e ativa</p>
                 <p className="text-xs text-gray-500">Visível para todos os usuários</p>
               </div>
               <button
-                onClick={() => setForm(f => ({ ...f, is_public: !f.is_public }))}
-                className={`w-12 h-6 rounded-full transition-colors relative ${form.is_public ? 'bg-emerald-500' : 'bg-gray-200'}`}
+                onClick={() => setForm(f => ({ ...f, is_public: !f.is_public, is_active: !f.is_public }))}
+                className={`w-12 h-6 rounded-full transition-colors relative ${form.is_public && form.is_active ? 'bg-emerald-500' : 'bg-gray-200'}`}
               >
-                <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all ${form.is_public ? 'left-7' : 'left-1'}`} />
+                <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all ${form.is_public && form.is_active ? 'left-7' : 'left-1'}`} />
               </button>
             </div>
 

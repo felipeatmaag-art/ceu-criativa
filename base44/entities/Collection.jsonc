@@ -2,18 +2,6 @@
   "name": "Collection",
   "type": "object",
   "properties": {
-    "title": {
-      "type": "string",
-      "description": "Nome da cole\u00e7\u00e3o"
-    },
-    "description": {
-      "type": "string",
-      "description": "Descri\u00e7\u00e3o da cole\u00e7\u00e3o"
-    },
-    "cover_image": {
-      "type": "string",
-      "description": "Imagem de capa"
-    },
     "artist_id": {
       "type": "string",
       "description": "ID do artista"
@@ -22,12 +10,43 @@
       "type": "string",
       "description": "Nome do artista"
     },
+    "title": {
+      "type": "string",
+      "description": "Nome da cole\u00e7\u00e3o"
+    },
+    "slug": {
+      "type": "string",
+      "description": "Identificador amig\u00e1vel da cole\u00e7\u00e3o"
+    },
+    "banner_url": {
+      "type": "string",
+      "description": "Imagem de banner da cole\u00e7\u00e3o"
+    },
+    "cover_image": {
+      "type": "string",
+      "description": "Imagem de capa legada"
+    },
+    "description": {
+      "type": "string",
+      "description": "Descri\u00e7\u00e3o da cole\u00e7\u00e3o"
+    },
     "design_ids": {
       "type": "array",
       "items": {
         "type": "string"
       },
-      "description": "IDs dos designs da cole\u00e7\u00e3o"
+      "default": [],
+      "description": "Artes na ordem de exibi\u00e7\u00e3o"
+    },
+    "position_order": {
+      "type": "integer",
+      "default": 0,
+      "description": "Ordem da cole\u00e7\u00e3o na loja"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Cole\u00e7\u00e3o ativa na loja"
     },
     "is_public": {
       "type": "boolean",
@@ -54,6 +73,51 @@
   },
   "required": [
     "title",
-    "artist_id"
-  ]
+    "artist_id",
+    "slug"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.is_public": true
+        },
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "data.artist_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

@@ -15,8 +15,8 @@ export default function BatchUploadTab({ user, onComplete }) {
         <label className="flex min-h-52 cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-ceu-sky bg-ceu-cloud text-center">
           <UploadCloud className="mb-3 h-9 w-9 text-ceu-aqua" />
           <span className="font-semibold text-ceu-navy">Selecionar imagens</span>
-          <span className="mt-1 text-sm text-ceu-navy/50">PNG, JPG ou WEBP</span>
-          <input type="file" accept="image/png,image/jpeg,image/webp" multiple className="hidden" onChange={(e) => batch.setFiles(Array.from(e.target.files || []))} />
+          <span className="mt-1 text-sm text-ceu-navy/50">PNG transparente • 300 DPI recomendado</span>
+          <input type="file" accept="image/png" multiple className="hidden" onChange={(e) => batch.chooseFiles(Array.from(e.target.files || []))} />
         </label>
         <div className="space-y-4">
           <div><Label>Categoria das estampas</Label><select value={batch.category} onChange={(e) => batch.setCategory(e.target.value)} className="mt-2 h-11 w-full rounded-xl border bg-white px-3 text-sm">{categories.map((item) => <option key={item} value={item}>{item.replace('_', ' ')}</option>)}</select></div>

@@ -1,12 +1,14 @@
 import React from 'react';
 import { Shirt, Coffee, Frame, ShoppingBag, Badge } from 'lucide-react';
+import CatalogProductFilters from '@/components/create/CatalogProductFilters';
 
 const icons = { camiseta: Shirt, baby_look: Shirt, caneca: Coffee, quadro: Frame, ecobag: ShoppingBag, logo_uniforme: Badge };
 
 export default function ProductSelector({ products, value, onChange }) {
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-      {products.map((product) => {
+    <CatalogProductFilters products={products}>
+      {(filteredProducts) => <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+      {filteredProducts.map((product) => {
         const Icon = icons[product.type || product.value] || Shirt;
         const selected = value === product.value;
         return (
@@ -22,6 +24,8 @@ export default function ProductSelector({ products, value, onChange }) {
           </button>
         );
       })}
-    </div>
+      {!filteredProducts.length && <p className="col-span-full py-8 text-center text-sm text-muted-foreground">Nenhum produto encontrado com esses filtros.</p>}
+    </div>}
+    </CatalogProductFilters>
   );
 }

@@ -20,6 +20,8 @@ import InventoryManagement from '@/pages/InventoryManagement';
 import Terms from '@/pages/Terms';
 import Notifications from '@/pages/Notifications';
 import CuratorPanel from '@/pages/CuratorPanel';
+import ArtistDashboard from '@/pages/ArtistDashboard';
+import Explore from '@/pages/Explore';
 import ScrollSceneMotion from '@/components/ScrollSceneMotion';
 
 const { Pages, Layout, mainPage } = pagesConfig;
@@ -82,6 +84,8 @@ const AuthenticatedApp = () => {
       <Route path="/terms" element={<LayoutWrapper currentPageName="Terms"><Terms /></LayoutWrapper>} />
       <Route path="/notifications" element={<LayoutWrapper currentPageName="Notifications"><Notifications /></LayoutWrapper>} />
       <Route path="/curadoria" element={<LayoutWrapper currentPageName="CuratorPanel"><CuratorPanel /></LayoutWrapper>} />
+      <Route path="/dashboard" element={<LayoutWrapper currentPageName="ArtistDashboard"><ArtistDashboard /></LayoutWrapper>} />
+      <Route path="/Explorar" element={<LayoutWrapper currentPageName="Explore"><Explore /></LayoutWrapper>} />
       <Route path="/:storeSlug" element={
         <LayoutWrapper currentPageName="Storefront">
           <Storefront />

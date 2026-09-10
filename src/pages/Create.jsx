@@ -69,6 +69,7 @@ export default function Create() {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadStage, setUploadStage] = useState('Enviando...');
   const [uploadError, setUploadError] = useState('');
+  const [uploadWarning, setUploadWarning] = useState('');
   const [generationError, setGenerationError] = useState('');
   const [backBusy, setBackBusy] = useState(false);
   const [approved, setApproved] = useState(false);
@@ -186,9 +187,10 @@ export default function Create() {
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    setUploadError(''); setIsUploading(true); setUploadStage('Validando imagem...');
+    setUploadError(''); setUploadWarning(''); setIsUploading(true); setUploadStage('Validando imagem...');
     try {
-      await validateArtworkFile(file);
+      const quality = await validateArtworkFile(file);
+      setUploadWarning(quality.warning || '');
       setUploadStage('Enviando imagem...');
       const result = await base44.integrations.Core.UploadFile({ file });
       if (!result?.file_url) throw new Error('O envio da imagem não foi concluído.');
@@ -226,7 +228,7 @@ export default function Create() {
   const selectedCatalogProduct = catalogProducts.find((product) => product.id === selectedCatalogId);
   const printStandard = getPrintStandard(selectedProduct);
   const availableColors = selectedCatalogProduct?.product_color_variants?.length ? selectedCatalogProduct.product_color_variants : colors;
-  const catalogStudioProducts = catalogProducts.map((product) => ({ value: product.id, type: product.type, label: product.name, price: product.base_price, image: product.front_model_url }));
+  const catalogStudioProducts = catalogProducts.map((product) => ({ value: product.id, type: product.type, label: product.name, price: product.base_cost ?? product.base_price, image: product.front_model_url, category_id: product.category_id, collection_id: product.collection_id, tags: product.tags || [] }));
   const missingProducts = PRODUCTS.filter((option) => !catalogProducts.some((product) => product.type === option.value)).map((option) => ({ ...option, type: option.value, price: productPrices[option.value] }));
   const studioProducts = [...catalogStudioProducts, ...missingProducts];
   const currentPrice = Number(selectedCatalogProduct?.base_price ?? productPrices[selectedProduct]);
@@ -586,7 +588,7 @@ export default function Create() {
 
                         <input
                       type="file"
-                      accept="image/*"
+                      accept="image/png"
                       onChange={handleFileUpload}
                       className="absolute inset-0 opacity-0 cursor-pointer"
                       disabled={busy} />
@@ -609,9 +611,10 @@ export default function Create() {
                             ou clique para selecionar
                           </p>
                           <p className="text-xs text-gray-400">
-                            PNG, JPG ou WEBP • a partir de 256 px • máximo 10 MB<br />Imagens menores são reconstruídas e preparadas automaticamente para impressão
+                            PNG transparente • a partir de 256 px • máximo 10 MB<br />Recomendamos ao menos 3000 × 3000 px para impressão em 300 DPI
                           </p>
-                          {uploadError && <p className="mt-3 text-sm font-medium text-destructive">{uploadError}</p>}
+                          {uploadWarning && <p role="status" className="mt-3 rounded-xl bg-amber-50 p-3 text-sm font-medium text-amber-700">{uploadWarning}</p>}
+                          {uploadError && <p role="alert" className="mt-3 text-sm font-medium text-destructive">{uploadError}</p>}
                         </>
                     }
                       </div>

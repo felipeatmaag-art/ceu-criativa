@@ -33,39 +33,28 @@ import { Skeleton } from '@/components/ui/skeleton';
 export default function Explore() {
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedCollection, setSelectedCollection] = useState('all');
   const [sortBy, setSortBy] = useState('-created_date');
   const [gridCols, setGridCols] = useState(4);
 
-  const categories = [
-    { value: 'all', label: 'Todas', emoji: '🎨' },
-    { value: 'abstrato', label: 'Abstrato', emoji: '🌀' },
-    { value: 'natureza', label: 'Natureza', emoji: '🌿' },
-    { value: 'urbano', label: 'Urbano', emoji: '🏙️' },
-    { value: 'minimalista', label: 'Minimalista', emoji: '◽' },
-    { value: 'ilustracao', label: 'Ilustração', emoji: '✏️' },
-    { value: 'tipografia', label: 'Tipografia', emoji: '🔤' },
-    { value: 'geometrico', label: 'Geométrico', emoji: '📐' },
-    { value: 'vintage', label: 'Vintage', emoji: '📻' },
-    { value: 'pop_art', label: 'Pop Art', emoji: '🎭' },
-    { value: 'surreal', label: 'Surreal', emoji: '👁️' },
-  ];
+  const { data: categoryRecords = [] } = useQuery({ queryKey: ['catalog-categories'], queryFn: () => base44.entities.Category.list('position_order', 100) });
+  const { data: collections = [] } = useQuery({ queryKey: ['public-collections'], queryFn: () => base44.entities.Collection.filter({ is_public: true, is_active: true }, 'position_order', 100) });
+  const categories = [{ value: 'all', slug: 'all', label: 'Todas', emoji: '🎨' }, ...categoryRecords.map((item) => ({ value: item.id, slug: item.slug, label: item.name, emoji: item.icon || '✦' }))];
 
   const { data: designs = [], isLoading } = useQuery({
-    queryKey: ['designs', selectedCategory, sortBy],
-    queryFn: async () => {
-      const query = { status: 'aprovado' };
-      if (selectedCategory !== 'all') {
-        query.category = selectedCategory;
-      }
-      return base44.entities.Design.filter(query, sortBy, 50);
-    },
+    queryKey: ['designs', sortBy],
+    queryFn: () => base44.entities.Design.filter({ status: 'aprovado' }, sortBy, 100),
   });
 
-  const filteredDesigns = designs.filter(design => 
-    design.title?.toLowerCase().includes(search.toLowerCase()) ||
-    design.artist_name?.toLowerCase().includes(search.toLowerCase()) ||
-    design.tags?.some(tag => tag.toLowerCase().includes(search.toLowerCase()))
-  );
+  const filteredDesigns = designs.filter((design) => {
+    const term = search.toLowerCase();
+    const category = categories.find((item) => item.value === selectedCategory);
+    const activeCollection = collections.find((item) => item.id === selectedCollection);
+    const matchesText = design.title?.toLowerCase().includes(term) || design.artist_name?.toLowerCase().includes(term) || design.tags?.some((tag) => tag.toLowerCase().includes(term));
+    const matchesCategory = selectedCategory === 'all' || design.category_id === selectedCategory || design.category === category?.slug?.replace('-', '_');
+    const matchesCollection = selectedCollection === 'all' || design.collection_id === selectedCollection || activeCollection?.design_ids?.includes(design.id);
+    return matchesText && matchesCategory && matchesCollection;
+  });
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-ceu-cloud to-background text-foreground">
@@ -94,6 +83,10 @@ export default function Explore() {
 
             {/* Filters */}
             <div className="flex items-center gap-3">
+              <Select value={selectedCollection} onValueChange={setSelectedCollection}>
+                <SelectTrigger className="w-44 h-12 rounded-xl"><SelectValue placeholder="Coleção" /></SelectTrigger>
+                <SelectContent><SelectItem value="all">Todas as coleções</SelectItem>{collections.map((item) => <SelectItem key={item.id} value={item.id}>{item.title}</SelectItem>)}</SelectContent>
+              </Select>
               <Select value={sortBy} onValueChange={setSortBy}>
                 <SelectTrigger className="w-40 h-12 rounded-xl">
                   <SelectValue placeholder="Ordenar" />

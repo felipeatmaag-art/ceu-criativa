@@ -1,0 +1,70 @@
+{
+  "name": "ArtistSettings",
+  "type": "object",
+  "properties": {
+    "artist_id": {
+      "type": "string",
+      "description": "Artista propriet\u00e1rio das configura\u00e7\u00f5es"
+    },
+    "meta_pixel_id": {
+      "type": "string",
+      "description": "Identificador do Meta Pixel"
+    },
+    "ga4_id": {
+      "type": "string",
+      "description": "Identificador de medi\u00e7\u00e3o GA4"
+    },
+    "tiktok_pixel_id": {
+      "type": "string",
+      "description": "Identificador do TikTok Pixel"
+    },
+    "custom_domain": {
+      "type": "string",
+      "description": "Dom\u00ednio personalizado da loja"
+    }
+  },
+  "required": [
+    "artist_id"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "data.artist_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

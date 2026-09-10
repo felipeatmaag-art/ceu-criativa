@@ -13,3 +13,6 @@ Pacote de referência para migração do backend gerenciado. Copie esta pasta pa
 `DATABASE_URL`, `STRIPE_SECRET_KEY`, `STRIPE_POD_WEBHOOK_SECRET`, `BASE44_APP_ID`.
 
 As funções puras usam ESM e Node.js 20+. O adaptador HTTP e a persistência devem ser conectados pelo projeto de destino.
+
+## Catálogo e margens
+Categorias são globais e ordenadas por `position_order`. Coleções pertencem ao artista e mantêm `design_ids` na ordem visual. A precificação usa `preço final = custo base + margem do artista + taxa da plataforma`; a taxa é derivada da comissão central do artista e recalculada no servidor em cada venda.

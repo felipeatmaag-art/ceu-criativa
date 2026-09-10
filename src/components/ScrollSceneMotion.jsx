@@ -19,6 +19,7 @@ export default function ScrollSceneMotion() {
     }, { threshold: 0.12, rootMargin: '0px 0px -7% 0px' });
     const register = () => {
       document.querySelectorAll(REVEAL).forEach((element, index) => {
+        if (element.closest('[role="tabpanel"]')) { element.classList.remove('scroll-scene-reveal', 'scroll-scene-visible'); return; }
         if (observed.has(element) || element.closest('[role="dialog"]') || element.parentElement?.closest(REVEAL)) return;
         observed.add(element);
         element.classList.add('scroll-scene-reveal');

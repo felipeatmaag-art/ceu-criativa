@@ -1,10 +1,11 @@
 const money = value => Math.round((Number(value) || 0) * 100) / 100;
 export const PRINT_AREA = { x: 320, y: 290, width: 360, height: 450, width_mm: 300, height_mm: 375, coordinate_space: 1000 };
 export function quote(product, design, quantity = 1) {
-  const baseCost = money(product.base_price), designPrice = money(design.price_base);
+  const baseCost = money(product.base_cost ?? product.base_price), designPrice = money(design.price_base);
   const rate = Math.max(0, Math.min(100, Number(design.commission_rate ?? 25)));
-  const unitPrice = money(baseCost + designPrice), commission = money(designPrice * rate / 100);
-  return { quantity, base_cost: baseCost, design_price: designPrice, unit_price: unitPrice, artist_commission_rate: rate, artist_commission: commission, platform_margin: money(designPrice - commission), total: money(unitPrice * quantity) };
+  const commission = money(designPrice * rate / 100);
+  const platformFee = money(Math.max(0, designPrice - commission)), unitPrice = money(baseCost + commission + platformFee);
+  return { quantity, base_cost: baseCost, design_price: designPrice, unit_price: unitPrice, final_price: unitPrice, artist_commission_rate: rate, artist_commission: commission, platform_margin: platformFee, total: money(unitPrice * quantity) };
 }
 export function composition({ transform = {}, artworkWidth, artworkHeight, printArea = PRINT_AREA }) {
   const ratio = artworkWidth / artworkHeight, rotation = Number(transform.rotation) || 0, angle = rotation * Math.PI / 180;

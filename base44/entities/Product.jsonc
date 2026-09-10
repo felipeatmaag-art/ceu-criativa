@@ -37,24 +37,40 @@
     },
     "material": {
       "type": "string",
-      "description": "Material principal, como algod\u00e3o ou cer\u00e2mica"
+      "description": "Material principal"
     },
     "fit": {
       "type": "string",
-      "description": "Modelagem, como tradicional, oversized ou ajustada"
+      "description": "Modelagem"
+    },
+    "category_id": {
+      "type": "string",
+      "description": "Categoria vinculada"
+    },
+    "collection_id": {
+      "type": "string",
+      "description": "Cole\u00e7\u00e3o vinculada"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Tags de busca"
     },
     "catalog_product": {
       "type": "boolean",
       "default": false,
-      "description": "Identifica um modelo dispon\u00edvel no est\u00fadio"
+      "description": "Modelo dispon\u00edvel no est\u00fadio"
     },
     "front_model_url": {
       "type": "string",
-      "description": "Imagem real do modelo visto de frente"
+      "description": "Imagem real frontal"
     },
     "back_model_url": {
       "type": "string",
-      "description": "Imagem real ou gerada do modelo visto de costas"
+      "description": "Imagem real traseira"
     },
     "product_color_variants": {
       "type": "array",
@@ -80,39 +96,51 @@
           "front_url",
           "back_url"
         ]
-      },
-      "description": "Imagens do produto geradas pela IA para cada cor"
+      }
     },
     "design_id": {
       "type": "string",
-      "description": "ID do design aplicado"
+      "description": "Design aplicado"
     },
     "design_image": {
       "type": "string",
-      "description": "URL da imagem do design"
+      "description": "URL do design"
     },
     "back_design_image": {
       "type": "string",
-      "description": "URL da arte aplicada nas costas"
+      "description": "Arte das costas"
     },
     "base_price": {
       "type": "number",
-      "description": "Pre\u00e7o base do produto"
+      "description": "Pre\u00e7o base legado"
+    },
+    "base_cost": {
+      "type": "number",
+      "description": "Custo de fabrica\u00e7\u00e3o"
+    },
+    "artist_margin": {
+      "type": "number",
+      "default": 0,
+      "description": "Lucro definido pelo artista"
+    },
+    "platform_fee": {
+      "type": "number",
+      "default": 0,
+      "description": "Taxa calculada da plataforma"
     },
     "final_price": {
       "type": "number",
-      "description": "Pre\u00e7o final com design"
+      "description": "Custo base + margem do artista + taxa da plataforma"
     },
     "mockup_url": {
       "type": "string",
-      "description": "URL principal do mockup"
+      "description": "Mockup principal"
     },
     "mockup_gallery": {
       "type": "array",
       "items": {
         "type": "string"
-      },
-      "description": "Galeria de mockups gerados"
+      }
     },
     "mockup_style": {
       "type": "string",
@@ -121,29 +149,25 @@
         "external",
         "beige",
         "artistic"
-      ],
-      "description": "Estilo visual dos mockups"
+      ]
     },
     "mockup_angles": {
       "type": "array",
       "items": {
         "type": "string"
-      },
-      "description": "\u00c2ngulos dispon\u00edveis na galeria"
+      }
     },
     "colors_available": {
       "type": "array",
       "items": {
         "type": "string"
-      },
-      "description": "Cores dispon\u00edveis"
+      }
     },
     "sizes_available": {
       "type": "array",
       "items": {
         "type": "string"
-      },
-      "description": "Tamanhos dispon\u00edveis"
+      }
     },
     "is_active": {
       "type": "boolean",

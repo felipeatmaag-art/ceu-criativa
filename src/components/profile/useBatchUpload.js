@@ -1,11 +1,21 @@
 import { useState } from 'react';
 import { base44 } from '@/api/base44Client';
+import { validateArtworkFile } from '@/components/create/artworkMetadata';
 
 export default function useBatchUpload(user, onComplete) {
   const [files, setFiles] = useState([]);
   const [category, setCategory] = useState('ilustracao');
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState('');
+
+  const chooseFiles = async (selected) => {
+    try {
+      const quality = await Promise.all(selected.map(validateArtworkFile));
+      setFiles(selected);
+      const warnings = quality.map((item, index) => item.warning ? `${selected[index].name}: ${item.warning}` : '').filter(Boolean);
+      setMessage(warnings.join(' '));
+    } catch (error) { setFiles([]); setMessage(error.message); }
+  };
 
   const upload = async () => {
     if (!files.length) return;
@@ -38,5 +48,5 @@ export default function useBatchUpload(user, onComplete) {
     }
   };
 
-  return { files, setFiles, category, setCategory, uploading, message, upload };
+  return { files, chooseFiles, category, setCategory, uploading, message, upload };
 }

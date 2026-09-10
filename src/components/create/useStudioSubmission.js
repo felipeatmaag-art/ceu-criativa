@@ -45,7 +45,9 @@ export default function useStudioSubmission(options) {
         if (design.status !== 'pendente') await base44.entities.Design.update(design.id, { status: 'pendente' });
         const proofs = ['front', 'back'].filter(side => production[`mockup_${side}_url`]).map(angle => ({ angle, url: production[`mockup_${angle}_url`] }));
         const gallery = [...proofs, ...options.generatedMockups.filter(item => item.sourceKey === mockupSourceKey(options))];
-        await base44.entities.Product.create({ name: design.title, type: options.productType, design_id: design.id, design_image: options.frontImage, back_design_image: options.backImage || '', base_price: options.price, final_price: options.price, mockup_url: production.mockup_front_url, mockup_gallery: gallery.map(i => i.url), mockup_style: options.mockupStyle, mockup_angles: gallery.map(i => i.angle), colors_available: [options.color], sizes_available: [options.size], is_active: true });
+        const artistMargin = Number(design.artist_margin || (design.price_base * design.commission_rate / 100) || 0);
+        const platformFee = Math.max(0, Number(design.price_base || 0) - artistMargin);
+        await base44.entities.Product.create({ name: design.title, type: options.productType, design_id: design.id, design_image: options.frontImage, back_design_image: options.backImage || '', category_id: design.category_id || '', collection_id: design.collection_id || '', tags: design.tags || [], base_price: options.price, base_cost: options.price, artist_margin: artistMargin, platform_fee: platformFee, final_price: Number(options.price) + artistMargin + platformFee, mockup_url: production.mockup_front_url, mockup_gallery: gallery.map(i => i.url), mockup_style: options.mockupStyle, mockup_angles: gallery.map(i => i.angle), colors_available: [options.color], sizes_available: [options.size], is_active: true });
       }
       sessionStorage.removeItem('ceu-studio-resume');
       await cache.invalidateQueries({ queryKey: ['my-designs'] });

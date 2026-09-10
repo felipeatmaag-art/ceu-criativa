@@ -8,15 +8,15 @@
     },
     "description": {
       "type": "string",
-      "description": "Descri\u00e7\u00e3o art\u00edstica do design"
+      "description": "Descri\u00e7\u00e3o art\u00edstica"
     },
     "image_url": {
       "type": "string",
-      "description": "URL da imagem do design"
+      "description": "URL da imagem"
     },
     "artist_id": {
       "type": "string",
-      "description": "ID do artista criador"
+      "description": "Artista criador"
     },
     "artist_name": {
       "type": "string",
@@ -36,42 +36,72 @@
         "pop_art",
         "surreal"
       ],
-      "description": "Categoria do design"
+      "description": "Categoria legada"
+    },
+    "category_id": {
+      "type": "string",
+      "description": "Categoria vinculada"
+    },
+    "collection_id": {
+      "type": "string",
+      "description": "Cole\u00e7\u00e3o vinculada"
     },
     "tags": {
       "type": "array",
       "items": {
         "type": "string"
       },
+      "default": [],
       "description": "Tags para busca"
     },
     "price_base": {
       "type": "number",
-      "description": "Pre\u00e7o base do design"
+      "description": "Margem do artista mais taxa da plataforma"
+    },
+    "base_cost": {
+      "type": "number",
+      "default": 0,
+      "description": "Custo de fabrica\u00e7\u00e3o de refer\u00eancia"
+    },
+    "artist_margin": {
+      "type": "number",
+      "default": 0,
+      "description": "Lucro desejado pelo artista"
+    },
+    "platform_fee": {
+      "type": "number",
+      "default": 0,
+      "description": "Taxa calculada da plataforma"
+    },
+    "final_price": {
+      "type": "number",
+      "default": 0,
+      "description": "Pre\u00e7o final de refer\u00eancia"
     },
     "commission_rate": {
       "type": "number",
-      "description": "Taxa de comiss\u00e3o do artista (0-100)"
+      "description": "Percentual central do artista"
+    },
+    "position_order": {
+      "type": "integer",
+      "default": 0,
+      "description": "Ordem na cole\u00e7\u00e3o"
     },
     "sales_count": {
       "type": "number",
-      "default": 0,
-      "description": "Quantidade de vendas"
+      "default": 0
     },
     "likes_count": {
       "type": "number",
-      "default": 0,
-      "description": "Quantidade de curtidas"
+      "default": 0
     },
     "is_featured": {
       "type": "boolean",
-      "default": false,
-      "description": "Design em destaque"
+      "default": false
     },
     "is_ai_generated": {
       "type": "boolean",
-      "default": false,
-      "description": "Criado com IA"
+      "default": false
     },
     "status": {
       "type": "string",
@@ -84,21 +114,18 @@
       "default": "rascunho"
     },
     "review_note": {
-      "type": "string",
-      "description": "Parecer registrado pela curadoria"
+      "type": "string"
     },
     "reviewed_by": {
-      "type": "string",
-      "description": "Nome do respons\u00e1vel pela revis\u00e3o"
+      "type": "string"
     },
     "reviewed_at": {
       "type": "string",
-      "format": "date-time",
-      "description": "Data e hora da revis\u00e3o"
+      "format": "date-time"
     },
     "production": {
       "type": "object",
-      "description": "Snapshot versionado: arquivos PNG originais e limpos, SHA256, dimens\u00f5es, alfa, dpi efetivo, posi\u00e7\u00f5es em coordenadas 1000, \u00e1rea estimada e mockups aprovados",
+      "description": "Snapshot t\u00e9cnico de produ\u00e7\u00e3o",
       "properties": {
         "version": {
           "type": "integer"

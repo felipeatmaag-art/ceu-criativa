@@ -9,7 +9,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import {
   TrendingUp, ShoppingBag, Heart, Palette, Plus,
-  LayoutGrid, FolderOpen, Lightbulb, PackageCheck
+  LayoutGrid, FolderOpen, Lightbulb, PackageCheck, Percent, Megaphone
 } from 'lucide-react';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
@@ -25,6 +25,9 @@ import NotificationsPanel from '@/components/dashboard/NotificationsPanel';
 import RealtimeToasts from '@/components/dashboard/RealtimeToasts';
 import ProductionQueue from '@/components/production/ProductionQueue';
 import FinancialDashboard from '@/components/financial/FinancialDashboard';
+import CategoryBrowser from '@/components/dashboard/CategoryBrowser';
+import MarginCalculator from '@/components/dashboard/MarginCalculator';
+import MarketingSettings from '@/components/dashboard/MarketingSettings';
 
 export default function ArtistDashboard() {
   const [tab, setTab] = useState('overview');
@@ -37,7 +40,8 @@ export default function ArtistDashboard() {
   const { data: designs = [] } = useQuery({
     queryKey: ['artist-designs', user?.id],
     queryFn: () => base44.entities.Design.filter({ artist_id: user.id }),
-    enabled: !!user?.id
+    enabled: !!user?.id,
+    refetchOnMount: 'always'
   });
 
   const { data: orders = [] } = useQuery({
@@ -66,7 +70,7 @@ export default function ArtistDashboard() {
   const totalRevenue = myOrders.reduce((sum, o) => {
     return sum + (o.items || [])
       .filter(it => it.artist_id === user?.id)
-      .reduce((s, it) => s + ((it.price || 0) * (it.quantity || 1) * 0.3), 0);
+      .reduce((s, it) => s + ((it.artist_commission || 0) * (it.quantity || 1)), 0);
   }, 0);
   const totalLikes = likes.length;
   const approvedDesigns = designs.filter(d => d.status === 'aprovado').length;
@@ -90,7 +94,7 @@ export default function ArtistDashboard() {
 
   const stats = [
     { label: 'Vendas Totais', value: totalSales, icon: ShoppingBag, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-    { label: 'Receita (30%)', value: `R$ ${totalRevenue.toFixed(2)}`, icon: TrendingUp, color: 'text-blue-600', bg: 'bg-blue-50' },
+    { label: 'Receita do artista', value: `R$ ${totalRevenue.toFixed(2)}`, icon: TrendingUp, color: 'text-blue-600', bg: 'bg-blue-50' },
     { label: 'Curtidas', value: totalLikes, icon: Heart, color: 'text-rose-500', bg: 'bg-rose-50' },
     { label: 'Designs Aprovados', value: approvedDesigns, icon: Palette, color: 'text-purple-600', bg: 'bg-purple-50' },
   ];
@@ -138,6 +142,12 @@ export default function ArtistDashboard() {
             </TabsTrigger>
             <TabsTrigger value="collections" className="rounded-xl gap-2 text-sm data-[state=active]:bg-gray-900 data-[state=active]:text-white">
               <FolderOpen className="w-4 h-4" /> Coleções
+            </TabsTrigger>
+            <TabsTrigger value="margin" className="rounded-xl gap-2 text-sm data-[state=active]:bg-gray-900 data-[state=active]:text-white">
+              <Percent className="w-4 h-4" /> Margens
+            </TabsTrigger>
+            <TabsTrigger value="marketing" className="rounded-xl gap-2 text-sm data-[state=active]:bg-gray-900 data-[state=active]:text-white">
+              <Megaphone className="w-4 h-4" /> Marketing
             </TabsTrigger>
             <TabsTrigger value="production" className="rounded-xl gap-2 text-sm data-[state=active]:bg-gray-900 data-[state=active]:text-white">
               <PackageCheck className="w-4 h-4" /> Produção
@@ -261,8 +271,12 @@ export default function ArtistDashboard() {
 
           {/* Collections Tab */}
           <TabsContent value="collections">
+            <CategoryBrowser />
             <CollectionsManager designs={designs} user={user} />
           </TabsContent>
+
+          <TabsContent value="margin"><MarginCalculator user={user} designs={designs} /></TabsContent>
+          <TabsContent value="marketing"><MarketingSettings user={user} /></TabsContent>
 
           <TabsContent value="production">
             <ProductionQueue orders={myOrders} userId={user.id} />

@@ -26,3 +26,15 @@ Autenticada. Corpo: `designId`, `side`, `transform`, `artworkWidth`, `artworkHei
 
 ## POST /webhooks/stripe
 Pública, autenticada pela assinatura `Stripe-Signature`. Trata `payment_intent.amount_capturable_updated`, `payment_intent.succeeded`, `payment_intent.canceled` e `payment_intent.payment_failed`.
+
+## GET/POST/PATCH/DELETE /artist/collections
+Autenticada. Lista e gerencia coleções próprias com slug, banner, ordem, status e artes ordenadas.
+
+## GET /catalog/categories
+Pública. Lista categorias pela ordem de exibição.
+
+## GET/PUT /artist/settings
+Autenticada. Lê ou salva Meta Pixel, GA4, TikTok Pixel e domínio do artista.
+
+## PUT /artist/designs/:id/margin
+Autenticada. Recebe `artist_margin` e `product_id`; usa a comissão central para calcular `platform_fee`, `price_base` e `final_price`.
