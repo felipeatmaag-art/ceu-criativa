@@ -11,6 +11,7 @@ import { format, differenceInDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import CompetitionLeaderboardSection from '@/components/competitions/CompetitionLeaderboardSection';
 
 export default function Competitions() {
   const { data: competitions = [], isLoading } = useQuery({
@@ -21,6 +22,7 @@ export default function Competitions() {
   const activeCompetitions = competitions.filter(c => c.status === 'active' || c.status === 'voting');
   const upcomingCompetitions = competitions.filter(c => c.status === 'upcoming');
   const finishedCompetitions = competitions.filter(c => c.status === 'finished');
+  const rankedCompetition = activeCompetitions.find(c => c.status === 'voting') || activeCompetitions[0] || finishedCompetitions[0];
 
   const CompetitionCard = ({ competition, index }) => {
     const daysLeft = differenceInDays(new Date(competition.end_date), new Date());
@@ -183,6 +185,7 @@ export default function Competitions() {
         ) : (
           <EmptyState message="Nenhum concurso disponível" />
         )}
+        {!isLoading && <CompetitionLeaderboardSection competition={rankedCompetition} />}
       </div>
     </div>
   );
