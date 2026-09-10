@@ -40,6 +40,7 @@ import ProductColorSelector from '@/components/create/ProductColorSelector';
 import ProductSizeSelector from '@/components/create/ProductSizeSelector';
 import { prepareGeneratedArtwork, prepareUploadedArtwork } from '@/components/create/preparePrintArtwork';
 import BackArtworkGenerator from '@/components/create/BackArtworkGenerator';
+import AIReferenceImage from '@/components/create/AIReferenceImage';
 import { validateArtworkFile, getArtworkMetadata, rememberArtwork } from '@/components/create/artworkMetadata';
 import productViews from '@/components/create/productViews';
 import useStudioSubmission from '@/components/create/useStudioSubmission';
@@ -74,6 +75,7 @@ export default function Create() {
   const [customBaseImages, setCustomBaseImages] = useState({ front: null, back: null });
 
   const [aiPrompt, setAiPrompt] = useState('');
+  const [aiReferenceImage, setAiReferenceImage] = useState(null);
   const [generatedImages, setGeneratedImages] = useState([]);
   const [selectedImage, setSelectedImage] = useState(null);
 
@@ -160,7 +162,8 @@ export default function Create() {
 
     try {
       const result = await base44.integrations.Core.GenerateImage({
-        prompt: `Você é Iara, uma designer especializada exclusivamente em criar estampas. Crie SOMENTE a arte gráfica plana solicitada pelo usuário: "${aiPrompt}". ${getPrintPrompt(selectedProduct)} Mostre apenas os desenhos, símbolos e textos que compõem a estampa, isolados e centralizados, com alta definição e canal alfa realmente transparente. Nunca desenhe grade, tabuleiro, quadriculado ou padrão visual para representar transparência. Se o canal alfa nativo não estiver disponível, use somente um fundo técnico verde puro #00FF00, plano e uniforme, sem usar essa cor na arte. Se o pedido contiver uma frase, reproduza o texto exatamente como foi escrito, sem corrigir, trocar ou acrescentar palavras. É terminantemente proibido desenhar ou mostrar camiseta, roupa, caneca, quadro, produto, manequim, pessoa vestindo, embalagem, etiqueta, mockup, ambiente, cenário ou a estampa aplicada em qualquer superfície. Não inclua bordas de fotografia ou sombras externas. Mantenha uma margem vazia nas quatro bordas, sem tocar nos limites. A saída deve ser exclusivamente o arquivo gráfico plano da estampa.`
+        prompt: `Você é Iara, uma designer especializada exclusivamente em criar estampas. Crie SOMENTE a arte gráfica plana solicitada pelo usuário: "${aiPrompt}". ${aiReferenceImage ? 'Use a imagem enviada como referência visual, preservando seus elementos principais, estilo e paleta sem simplesmente copiá-la.' : ''} ${getPrintPrompt(selectedProduct)} Mostre apenas os desenhos, símbolos e textos que compõem a estampa, isolados e centralizados, com alta definição e canal alfa realmente transparente. Nunca desenhe grade, tabuleiro, quadriculado ou padrão visual para representar transparência. Se o canal alfa nativo não estiver disponível, use somente um fundo técnico verde puro #00FF00, plano e uniforme, sem usar essa cor na arte. Se o pedido contiver uma frase, reproduza o texto exatamente como foi escrito, sem corrigir, trocar ou acrescentar palavras. É terminantemente proibido desenhar ou mostrar camiseta, roupa, caneca, quadro, produto, manequim, pessoa vestindo, embalagem, etiqueta, mockup, ambiente, cenário ou a estampa aplicada em qualquer superfície. Não inclua bordas de fotografia ou sombras externas. Mantenha uma margem vazia nas quatro bordas, sem tocar nos limites. A saída deve ser exclusivamente o arquivo gráfico plano da estampa.`,
+        ...(aiReferenceImage ? { existing_image_urls: [aiReferenceImage] } : {})
       });
 
       if (!result?.url) throw new Error('A geração não retornou uma imagem. Tente novamente.');
@@ -413,7 +416,7 @@ export default function Create() {
 
             <div className={`grid gap-8 ${selectedImage ? 'xl:grid-cols-[minmax(0,2fr)_minmax(24rem,1fr)]' : 'lg:grid-cols-2'}`}>
               {/* Mockup with applied design */}
-              <div>
+              <div className="min-w-0">
                 <Label className="text-base font-semibold mb-3 block text-gray-900">
                   Pré-visualização
                 </Label>
@@ -455,7 +458,7 @@ export default function Create() {
               </div>
 
               {/* AI / Upload Tabs */}
-              <div>
+              <div className="min-w-0">
                 <Tabs value={mode} onValueChange={setMode} className="w-full">
                   <TabsList className="w-full grid grid-cols-2 h-12 rounded-2xl bg-gray-100 p-1">
                     <TabsTrigger value="ai" className="rounded-xl h-full data-[state=active]:bg-white data-[state=active]:shadow">
@@ -480,6 +483,8 @@ export default function Create() {
                         onChange={(e) => setAiPrompt(e.target.value)} className="bg-transparent text-zinc-950 px-3 py-2 text-base rounded-xl flex min-h-[60px] w-full border border-input shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm h-28 resize-none" />
 
                       </div>
+
+                      <AIReferenceImage value={aiReferenceImage} onChange={setAiReferenceImage} disabled={busy} />
 
                       <div>
                         <p className="text-sm text-gray-500 mb-2">Sugestões:</p>
