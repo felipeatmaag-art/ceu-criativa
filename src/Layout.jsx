@@ -18,7 +18,8 @@ import {
   Cloud,
   Bell,
   BarChart3,
-  Boxes } from
+  Boxes,
+  ShieldCheck } from
 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -357,6 +358,12 @@ export default function Layout({ children, currentPageName }) {
                       <Link to="/inventory-management" className="cursor-pointer rounded-lg">
                         <Boxes className="w-4 h-4 mr-2" />
                         Gestão de Estoque
+                      </Link>
+                    </DropdownMenuItem>}
+                    {['admin', 'curator'].includes(user.role) && <DropdownMenuItem asChild>
+                      <Link to="/curadoria" className="cursor-pointer rounded-lg">
+                        <ShieldCheck className="w-4 h-4 mr-2" />
+                        Aprovar Estampas
                       </Link>
                     </DropdownMenuItem>}
                     <DropdownMenuSeparator />

@@ -2,6 +2,16 @@
   "name": "User",
   "type": "object",
   "properties": {
+    "role": {
+      "type": "string",
+      "enum": [
+        "admin",
+        "user",
+        "curator"
+      ],
+      "default": "user",
+      "description": "N\u00edvel de acesso \u00e0 plataforma"
+    },
     "artist_name": {
       "type": "string",
       "description": "Nome art\u00edstico do usu\u00e1rio"
