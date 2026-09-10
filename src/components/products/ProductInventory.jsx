@@ -5,7 +5,7 @@ import inventoryRepository from '@/services/products/inventoryRepository';
 import VariantStockRow from '@/components/products/VariantStockRow';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-export default function ProductInventory({ product }) {
+export default function ProductInventory({ product, open = false }) {
   const cache = useQueryClient(), key = ['inventory', product.id];
   const { data: admin } = useQuery({ queryKey: ['inventory-admin'], queryFn: async () => await base44.auth.isAuthenticated() && (await base44.auth.me()).role === 'admin' });
   const { data: variants = [], isLoading, error } = useQuery({ queryKey: key, queryFn: () => inventoryRepository.list(product.id), enabled: !!admin });
@@ -16,7 +16,7 @@ export default function ProductInventory({ product }) {
     try { await inventoryRepository.save(product, color, size, Number(stock)); await refresh(); setColor(''); setSize(''); setStock('0'); } catch (e) { setFailure(e.message); } finally { setBusy(false); }
   };
   if (!admin) return null;
-  return <details className="mt-4 rounded-2xl border bg-background p-4 text-foreground"><summary className="cursor-pointer font-semibold">Estoque físico por cor e tamanho</summary>
+  return <details open={open} className="mt-4 rounded-2xl border bg-background p-4 text-foreground"><summary className="cursor-pointer font-semibold">Estoque físico por cor e tamanho</summary>
     <p className="my-3 text-sm text-muted-foreground">O estoque pertence ao produto base. Estampas são ilimitadas. Variações não cadastradas não podem ser compradas.</p>
     {isLoading ? <p>Carregando estoque...</p> : error ? <p role="alert">Não foi possível carregar o estoque.</p> : <div className="space-y-3">{!variants.length && <p className="text-sm">Nenhuma variação cadastrada.</p>}{variants.map(v => <VariantStockRow key={`${v.id}-${v.stock_quantity}-${v.is_active}`} product={product} variant={v} onChanged={refresh} />)}</div>}
     <form onSubmit={add} className="mt-4 space-y-3"><label className="block text-sm">Cor<select aria-label="Cor do insumo" required value={color} onChange={e => setColor(e.target.value)} className="mt-1 w-full rounded-md border bg-background p-2"><option value="">Selecione</option>{(product.colors_available || []).map(c => <option key={c}>{c}</option>)}</select></label>

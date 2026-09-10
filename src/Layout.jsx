@@ -15,7 +15,10 @@ import {
   Palette,
   Trophy,
   Home,
-  Cloud } from
+  Cloud,
+  Bell,
+  BarChart3,
+  Boxes } from
 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -338,6 +341,24 @@ export default function Layout({ children, currentPageName }) {
                         Meus Pedidos
                       </Link>
                     </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/sales-reports" className="cursor-pointer rounded-lg">
+                        <BarChart3 className="w-4 h-4 mr-2" />
+                        Relatórios de Vendas
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/notifications" className="cursor-pointer rounded-lg">
+                        <Bell className="w-4 h-4 mr-2" />
+                        Notificações
+                      </Link>
+                    </DropdownMenuItem>
+                    {user.role === 'admin' && <DropdownMenuItem asChild>
+                      <Link to="/inventory-management" className="cursor-pointer rounded-lg">
+                        <Boxes className="w-4 h-4 mr-2" />
+                        Gestão de Estoque
+                      </Link>
+                    </DropdownMenuItem>}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
                       <Link to={createPageUrl('Settings')} className="cursor-pointer rounded-lg">
@@ -438,8 +459,8 @@ export default function Layout({ children, currentPageName }) {
             <div>
               <h4 className="font-semibold mb-4">Suporte</h4>
               <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white transition-colors">Central de Ajuda</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Termos de Uso</a></li>
+                <li><Link to="/support" className="hover:text-white transition-colors">Central de Ajuda</Link></li>
+                <li><Link to="/terms" className="hover:text-white transition-colors">Termos de Uso</Link></li>
                 <li><a href="#" className="hover:text-white transition-colors">Política de Privacidade</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">Contato</a></li>
               </ul>

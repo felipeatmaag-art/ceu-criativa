@@ -14,6 +14,11 @@ import OAuthConsent from '@/pages/OAuthConsent';
 import ProductAdmin from '@/pages/ProductAdmin';
 import Storefront from '@/pages/Storefront';
 import Competitions from '@/pages/Competitions';
+import Support from '@/pages/Support';
+import SalesReports from '@/pages/SalesReports';
+import InventoryManagement from '@/pages/InventoryManagement';
+import Terms from '@/pages/Terms';
+import Notifications from '@/pages/Notifications';
 import ScrollSceneMotion from '@/components/ScrollSceneMotion';
 
 const { Pages, Layout, mainPage } = pagesConfig;
@@ -70,6 +75,11 @@ const AuthenticatedApp = () => {
           <Competitions />
         </LayoutWrapper>
       } />
+      <Route path="/support" element={<LayoutWrapper currentPageName="Support"><Support /></LayoutWrapper>} />
+      <Route path="/sales-reports" element={<LayoutWrapper currentPageName="SalesReports"><SalesReports /></LayoutWrapper>} />
+      <Route path="/inventory-management" element={<LayoutWrapper currentPageName="InventoryManagement"><InventoryManagement /></LayoutWrapper>} />
+      <Route path="/terms" element={<LayoutWrapper currentPageName="Terms"><Terms /></LayoutWrapper>} />
+      <Route path="/notifications" element={<LayoutWrapper currentPageName="Notifications"><Notifications /></LayoutWrapper>} />
       <Route path="/:storeSlug" element={
         <LayoutWrapper currentPageName="Storefront">
           <Storefront />
