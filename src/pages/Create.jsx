@@ -171,7 +171,7 @@ export default function Create() {
 
     try {
       const result = await base44.integrations.Core.GenerateImage({
-        prompt: `Você é Iara, uma designer especializada exclusivamente em criar estampas. Crie SOMENTE a arte gráfica plana solicitada pelo usuário: "${aiPrompt}". ${aiReferenceImage ? 'Use a imagem enviada como referência visual, preservando seus elementos principais, estilo e paleta sem simplesmente copiá-la.' : ''} ${getPrintPrompt(selectedProduct)} Mostre apenas os desenhos, símbolos e textos que compõem a estampa, isolados e centralizados, com alta definição e canal alfa realmente transparente. Nunca desenhe grade, tabuleiro, quadriculado ou padrão visual para representar transparência. Se o canal alfa nativo não estiver disponível, use somente um fundo técnico verde puro #00FF00, plano e uniforme, sem usar essa cor na arte. Se o pedido contiver uma frase, reproduza o texto exatamente como foi escrito, sem corrigir, trocar ou acrescentar palavras. É terminantemente proibido desenhar ou mostrar camiseta, roupa, caneca, quadro, produto, manequim, pessoa vestindo, embalagem, etiqueta, mockup, ambiente, cenário ou a estampa aplicada em qualquer superfície. Não inclua bordas de fotografia ou sombras externas. Mantenha uma margem vazia nas quatro bordas, sem tocar nos limites. A saída deve ser exclusivamente o arquivo gráfico plano da estampa.`,
+        prompt: `Você é Iara, uma designer especializada exclusivamente em criar estampas. Crie SOMENTE a arte gráfica plana solicitada pelo usuário: "${aiPrompt}". ${aiReferenceImage ? 'Use a imagem enviada como referência visual, preservando seus elementos principais, estilo e paleta sem simplesmente copiá-la.' : ''} ${getPrintPrompt(selectedProduct)} Mostre apenas os desenhos, símbolos e textos que compõem a estampa, isolados e centralizados, com alta definição. Gere sobre um único fundo técnico verde puro #00FF00, completamente plano e uniforme até as quatro bordas; o aplicativo removerá esse fundo depois. Não tente representar transparência: nunca desenhe grade, tabuleiro, quadriculado, textura, gradiente ou sombra no fundo. Reserve #00FF00 exclusivamente para o fundo, usando outros tons nos elementos da arte. Deixe pelo menos 10% de margem desse fundo ao redor de toda a composição. Se o pedido contiver uma frase, reproduza o texto exatamente como foi escrito, sem corrigir, trocar ou acrescentar palavras. É terminantemente proibido desenhar ou mostrar camiseta, roupa, caneca, quadro, produto, manequim, pessoa vestindo, embalagem, etiqueta, mockup, ambiente, cenário ou a estampa aplicada em qualquer superfície. Não inclua bordas de fotografia ou sombras externas. Mantenha uma margem vazia nas quatro bordas, sem tocar nos limites. A saída deve ser exclusivamente o arquivo gráfico plano da estampa.`,
         ...(aiReferenceImage ? { existing_image_urls: [aiReferenceImage] } : {})
       });
 
@@ -180,7 +180,10 @@ export default function Create() {
       setGeneratedImages([pngUrl]);
       setSelectedImage(pngUrl);
     } catch (error) {
-      setGenerationError(error.message || 'Não foi possível gerar e validar a arte. Tente novamente.');
+      const invalidBackground = /Fundo ambíguo|arte isolada com transparência/.test(error.message || '');
+      setGenerationError(invalidBackground
+        ? 'A IA gerou um fundo que não pôde ser removido com segurança. Seu texto foi mantido; clique em Gerar com IA para tentar novamente.'
+        : error.message || 'Não foi possível gerar e validar a arte. Tente novamente.');
     } finally { setIsGenerating(false); }
   };
 
@@ -481,7 +484,7 @@ export default function Create() {
                     </TabsTrigger>
                   </TabsList>
 
-                  <TabsContent value="ai" className="mt-6" forceMount>
+                  <TabsContent value="ai" className="mt-6 text-foreground" forceMount>
                     <div className="space-y-5">
                       <div>
                         <Label className="text-base font-semibold mb-3 block">
