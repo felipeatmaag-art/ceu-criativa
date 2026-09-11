@@ -1,0 +1,3 @@
+import React,{useEffect,useState} from 'react';
+import { base44 } from '@/api/base44Client';
+export default function AdminAccessGate({children}){const [user,setUser]=useState();useEffect(()=>{base44.auth.me().then(setUser).catch(()=>base44.auth.redirectToLogin('/admin/users'));},[]);if(!user)return <div className="flex min-h-[60vh] items-center justify-center">Carregando...</div>;if(user.role!=='admin')return <div className="flex min-h-[60vh] items-center justify-center text-center"><div><h1 className="text-2xl font-bold">Acesso restrito</h1><p className="mt-2 text-muted-foreground">Somente a equipe administrativa pode acessar este painel.</p></div></div>;return children(user);}

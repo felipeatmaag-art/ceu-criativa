@@ -1,0 +1,58 @@
+{
+  "name": "TeamInvite",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "intended_role": {
+      "type": "string",
+      "enum": [
+        "master",
+        "admin"
+      ]
+    },
+    "email": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "invited",
+        "active"
+      ],
+      "default": "pending"
+    },
+    "user_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "intended_role",
+    "status"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

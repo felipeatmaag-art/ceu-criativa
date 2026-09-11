@@ -1,0 +1,3 @@
+import React from 'react';
+import ArtistRegistrationForm from '@/components/artists/ArtistRegistrationForm';
+export default function ArtistRegistration(){return <div className="min-h-screen bg-ceu-cloud py-16"><main className="mx-auto max-w-3xl px-4"><header className="mb-8 text-center"><p className="text-sm font-bold uppercase tracking-widest text-ceu-aqua">Faça parte da Céu</p><h1 className="mt-3 text-4xl font-bold text-ceu-navy">Cadastro de artistas</h1><p className="mx-auto mt-4 max-w-xl text-muted-foreground">Apresente seu trabalho. Após a análise, você recebe o convite para criar sua loja e publicar estampas.</p></header><ArtistRegistrationForm/></main></div>;}

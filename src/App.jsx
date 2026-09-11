@@ -22,6 +22,9 @@ import Notifications from '@/pages/Notifications';
 import CuratorPanel from '@/pages/CuratorPanel';
 import ArtistDashboard from '@/pages/ArtistDashboard';
 import Explore from '@/pages/Explore';
+import ArtistRegistration from '@/pages/ArtistRegistration';
+import AdminUsers from '@/pages/AdminUsers';
+import AccessDisabled from '@/components/AccessDisabled';
 import ScrollSceneMotion from '@/components/ScrollSceneMotion';
 
 const { Pages, Layout, mainPage } = pagesConfig;
@@ -48,6 +51,8 @@ const AuthenticatedApp = () => {
   if (authError) {
     if (authError.type === 'user_not_registered') {
       return <UserNotRegisteredError />;
+    } else if (authError.type === 'access_disabled') {
+      return <AccessDisabled />;
     } else if (authError.type === 'auth_required') {
       // Redirect to login automatically
       navigateToLogin();
@@ -86,6 +91,8 @@ const AuthenticatedApp = () => {
       <Route path="/curadoria" element={<LayoutWrapper currentPageName="CuratorPanel"><CuratorPanel /></LayoutWrapper>} />
       <Route path="/dashboard" element={<LayoutWrapper currentPageName="ArtistDashboard"><ArtistDashboard /></LayoutWrapper>} />
       <Route path="/Explorar" element={<LayoutWrapper currentPageName="Explore"><Explore /></LayoutWrapper>} />
+      <Route path="/cadastrar-artista" element={<LayoutWrapper currentPageName="ArtistRegistration"><ArtistRegistration /></LayoutWrapper>} />
+      <Route path="/admin/users" element={<LayoutWrapper currentPageName="AdminUsers"><AdminUsers /></LayoutWrapper>} />
       <Route path="/:storeSlug" element={
         <LayoutWrapper currentPageName="Storefront">
           <Storefront />

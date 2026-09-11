@@ -10,7 +10,9 @@ Pacote de referência para migração do backend gerenciado. Copie esta pasta pa
 - `Ceu-Criativa.postman_collection.json`: coleção Postman com autenticação, rotas e payloads de teste.
 
 ## Variáveis
-`DATABASE_URL`, `STRIPE_SECRET_KEY`, `STRIPE_POD_WEBHOOK_SECRET`, `BASE44_APP_ID`.
+Copie `.env.example` para `.env` e preencha `DATABASE_URL`, `APP_ORIGIN`, `ALLOWED_ORIGINS`, `JWT_SECRET`, `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, `STRIPE_POD_WEBHOOK_SECRET` e `BASE44_APP_ID`.
+
+`ALLOWED_ORIGINS` aceita uma lista separada por vírgulas, permitindo trocar ou adicionar domínios personalizados sem alterar código.
 
 As funções puras usam ESM e Node.js 20+. O adaptador HTTP e a persistência devem ser conectados pelo projeto de destino.
 

@@ -1,5 +1,19 @@
 # Rotas REST
 
+Todas as respostas HTTP devem refletir `Origin` somente quando ele estiver listado em `ALLOWED_ORIGINS`, enviar `Vary: Origin` e aceitar credenciais. URLs públicas e retornos de autenticação devem ser construídos a partir de `APP_ORIGIN`, nunca de um hostname fixo.
+
+## POST /auth/invite
+Autenticada, exclusiva de master. Envia convite e define o papel inicial.
+
+## PATCH /admin/users/:id
+Autenticada, exclusiva de master. Altera papel ou situação de acesso; senhas continuam privadas ao próprio usuário.
+
+## POST /artists/applications
+Pública. Recebe perfil, chave PIX protegida e referências privadas do portfólio com status inicial `pending`.
+
+## PATCH /artists/applications/:id
+Autenticada, para master/admin. Aprova ou rejeita o cadastro e dispara o convite quando aprovado.
+
 ## POST /pod/compositions
 Autenticada. Corpo: `designId`, `productId`, `side`, `transform`, `artworkWidth`, `artworkHeight`, `artworkUrl`, `persist`. Retorna posição normalizada, escala, rotação, dimensões e DPI efetivo.
 

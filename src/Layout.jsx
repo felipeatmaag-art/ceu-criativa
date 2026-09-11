@@ -324,12 +324,20 @@ export default function Layout({ children, currentPageName }) {
                         Minhas Estampas
                       </Link>
                     </DropdownMenuItem>
-                    {user.role === 'admin' && <DropdownMenuItem asChild>
-                      <Link to="/ProductAdmin" className="cursor-pointer rounded-lg">
-                        <ShoppingBag className="w-4 h-4 mr-2" />
-                        Produtos do Estúdio
-                      </Link>
-                    </DropdownMenuItem>}
+                    {user.role === 'admin' && <>
+                      <DropdownMenuItem asChild>
+                        <Link to="/ProductAdmin" className="cursor-pointer rounded-lg">
+                          <ShoppingBag className="w-4 h-4 mr-2" />
+                          Produtos do Estúdio
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link to="/admin/users" className="cursor-pointer rounded-lg">
+                          <ShieldCheck className="w-4 h-4 mr-2" />
+                          Equipe e Artistas
+                        </Link>
+                      </DropdownMenuItem>
+                    </>}
                     <DropdownMenuItem asChild>
                       <Link to={createPageUrl('Favorites')} className="cursor-pointer rounded-lg">
                         <Heart className="w-4 h-4 mr-2" />

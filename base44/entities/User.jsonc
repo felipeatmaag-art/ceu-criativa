@@ -10,7 +10,27 @@
         "curator"
       ],
       "default": "user",
-      "description": "N\u00edvel de acesso \u00e0 plataforma"
+      "description": "Papel t\u00e9cnico de autentica\u00e7\u00e3o"
+    },
+    "app_role": {
+      "type": "string",
+      "enum": [
+        "master",
+        "admin",
+        "artist",
+        "user"
+      ],
+      "default": "user",
+      "description": "Papel funcional no C\u00e9u Criativa"
+    },
+    "access_status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "disabled"
+      ],
+      "default": "active",
+      "description": "Situa\u00e7\u00e3o do acesso"
     },
     "artist_name": {
       "type": "string",
@@ -66,17 +86,15 @@
       "default": 25,
       "minimum": 10,
       "maximum": 50,
-      "description": "Taxa de comiss\u00e3o do artista (10-50%)"
+      "description": "Taxa de comiss\u00e3o do artista"
     },
     "total_sales": {
       "type": "number",
-      "default": 0,
-      "description": "Total de vendas realizadas"
+      "default": 0
     },
     "total_earnings": {
       "type": "number",
-      "default": 0,
-      "description": "Total ganho em comiss\u00f5es"
+      "default": 0
     }
   },
   "required": []

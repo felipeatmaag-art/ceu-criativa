@@ -49,6 +49,7 @@ import PrintStandardCard from '@/components/create/PrintStandardCard';
 import PhysicalStockNotice from '@/components/create/PhysicalStockNotice';
 import EcobagMockup from '@/components/create/EcobagMockup';
 import { getPrintPrompt, getPrintStandard } from '@/components/production/printStandards';
+import { FALLBACK_PRODUCTS } from '@/data/catalogFallback';
 
 const PRODUCTS = [
   { value: 'camiseta', label: 'Camiseta' },
@@ -107,10 +108,17 @@ export default function Create() {
   const [mockupsBusy, setMockupsBusy] = useState(false);
 
   useEffect(() => {
-    base44.entities.Product.filter({ catalog_product: true, is_active: true }, '-created_date', 100).then((items) => {
+    const initializeCatalog = async () => {
+      let items;
+      try {
+        items = await base44.entities.Product.filter({ catalog_product: true, is_active: true }, '-created_date', 100);
+        if (!items.length) items = FALLBACK_PRODUCTS;
+      } catch {
+        items = FALLBACK_PRODUCTS;
+      }
       setCatalogProducts(items);
-      if (items.length) {
-        const chosen = items.find((item) => item.type === requestedProduct) || items.find((item) => item.type === 'camiseta') || items[0];
+      const chosen = items.find((item) => item.type === requestedProduct) || items.find((item) => item.type === 'camiseta') || items[0];
+      if (chosen) {
         setSelectedCatalogId(chosen.id);
         setSelectedProduct(chosen.type);
         setProductColor(chosen.product_color_variants?.[0]?.name || 'white');
@@ -128,7 +136,8 @@ export default function Create() {
           setGeneratedMockups([]); setStep(3);
         }
       }
-    });
+    };
+    initializeCatalog();
   }, [requestedProduct]);
 
   useEffect(() => {
