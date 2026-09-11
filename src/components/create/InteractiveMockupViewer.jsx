@@ -1,10 +1,8 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Upload, GalleryHorizontalEnd, Save, History, Trash2,
-  FlipHorizontal2, Check, X, Box, Image as ImageIcon, MoveHorizontal,
+  GalleryHorizontalEnd, Save, History, Trash2, Check,
 } from 'lucide-react';
-import MockupViewer3D from '@/components/design/MockupViewer3D';
 import ApparelPrintStage from '@/components/create/ApparelPrintStage';
 import { lockPrintPlacement } from '@/components/create/printGeometry';
 import { getArtworkMetadata } from '@/components/create/artworkMetadata';
@@ -91,10 +89,7 @@ export default function InteractiveMockupViewer({
     onSideChange?.(nextSide);
   };
   const isApparel = productType === 'camiseta' || productType === 'baby_look';
-  const isMug = productType === 'caneca';
-  const [viewMode, setViewMode] = useState(isMug ? '3d' : '2d');
-  const [baseImages, setBaseImages] = useState({ front: null, back: null });
-  const baseImage = (customBaseImages || baseImages)[side];
+  const baseImage = productViews?.[side] || productViews?.front;
   const updateTransform = (next) => {
     if (!isApparel || !designImage) return onTransformChange(next);
     const bounds = getArtworkMetadata(designImage).bounds;
@@ -103,10 +98,8 @@ export default function InteractiveMockupViewer({
   };
 
   useEffect(() => {
-    setViewMode(isMug ? '3d' : '2d');
     setSide('front');
-  }, [productType, isMug]);
-  const [isUploadingBase, setIsUploadingBase] = useState(false);
+  }, [productType]);
   const [presets, setPresets] = useState({});
   const [showPresets, setShowPresets] = useState(false);
   const [presetName, setPresetName] = useState('');
@@ -125,25 +118,6 @@ export default function InteractiveMockupViewer({
   useEffect(() => {
     setPresets(loadPresets());
   }, []);
-
-  // Upload da foto base do produto
-  const handleBaseUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setIsUploadingBase(true);
-    try {
-      const { base44 } = await import('@/api/base44Client');
-      const result = await base44.integrations.Core.UploadFile({ file });
-      if (result?.file_url) {
-        const next = { ...(customBaseImages || baseImages), [side]: result.file_url };
-        setBaseImages(next);
-        onBaseImagesChange?.(next);
-      }
-    } catch (err) {
-      console.error('Erro no upload da base:', err);
-    }
-    setIsUploadingBase(false);
-  };
 
   // --- Transform helpers ---
   const setScale = (v) => updateTransform({ ...transform, scale: v / 100 });
@@ -269,28 +243,18 @@ export default function InteractiveMockupViewer({
             <button onClick={() => setSide('back')} className={`rounded-full px-5 py-2.5 text-xs font-bold uppercase tracking-wider ${side === 'back' ? 'bg-ceu-navy text-ceu-cloud' : 'text-ceu-navy/50'}`}>Costas</button>
           </div>
         ) : (
-          <span className="rounded-full border border-neutral-700 px-4 py-2 text-xs font-bold uppercase tracking-wider text-gray-300">{isMug ? 'Visualização 360°' : 'Vista frontal'}</span>
+          <span className="rounded-full border border-ceu-navy/15 px-4 py-2 text-xs font-bold uppercase tracking-wider text-ceu-navy/60">Vista frontal</span>
         )}
         <div className="ml-auto flex items-center gap-2 text-[10px] uppercase tracking-widest text-ceu-navy/50">
-          {isMug ? <MoveHorizontal className="h-4 w-4" /> : <GalleryHorizontalEnd className="h-4 w-4" />}
-          {isMug ? 'Arraste para girar' : PRODUCT_LABELS[productType]}
+          <GalleryHorizontalEnd className="h-4 w-4" />
+          {PRODUCT_LABELS[productType]}
         </div>
       </div>
 
       {/* Área de preview */}
       <div ref={stageRef} className={isApparel ? 'flex-1 relative min-h-[420px] lg:min-h-[640px] flex items-center justify-center p-6' : 'relative aspect-square w-full flex items-center justify-center'}>
-        {/* Modo 3D — rotação 360° por arraste */}
         {isApparel ? (
-          <><ApparelPrintStage baseUrl={baseImage || productViews?.[side]} designImage={designImage} transform={transform} onChange={updateTransform} />
-          {!baseImage && <button onClick={() => fileInputRef.current?.click()} disabled={isUploadingBase} className="absolute right-3 top-3 z-20 rounded-full bg-card px-3 py-2 text-xs text-foreground border border-border">Base própria</button>}</>
-        ) : viewMode === '3d' ? (
-          <div className="absolute inset-0">
-            <MockupViewer3D
-              productType={productType}
-              designImage={designImage}
-              productColor={color}
-            />
-          </div>
+          <ApparelPrintStage baseUrl={baseImage} designImage={designImage} transform={transform} onChange={updateTransform} />
         ) : baseImage ? (
           <>
             {/* Foto base do produto */}
@@ -331,48 +295,12 @@ export default function InteractiveMockupViewer({
             )}
           </>
         ) : (
-          <>
-            <div className="absolute inset-0">{renderMockup?.(null)}</div>
-            {designImage && (
-              <div
-                ref={designRef}
-                className="absolute z-10 touch-none cursor-grab select-none active:cursor-grabbing"
-                onPointerDown={handlePointerDown}
-                onPointerMove={handlePointerMove}
-                onPointerUp={handlePointerEnd}
-                onPointerCancel={handlePointerEnd}
-                style={{ left: `${50 + transform.x / 10}%`, top: `${50 + transform.y / 10}%`, width: '60%', height: '60%', transform: `translate(-50%, -50%) scale(${transform.scale}) rotate(${transform.rotation}deg)`, transformOrigin: 'center', willChange: 'transform' }}
-              >
-                <img src={designImage} alt="Estampa" draggable={false} className="h-full w-full select-none object-contain pointer-events-none" />
-              </div>
-            )}
-            <button onClick={() => fileInputRef.current?.click()} disabled={isUploadingBase} className="absolute right-3 top-3 z-20 flex items-center gap-2 rounded-full border border-ceu-navy/15 bg-card/90 px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-ceu-navy/60 shadow-sm" title="Usar foto própria do produto">
-              <Upload className="h-3.5 w-3.5" /> Base própria
-            </button>
-          </>
+          <div className="absolute inset-0">{renderMockup?.(designImage)}</div>
         )}
-
-        {/* Trocar peça base */}
-        {baseImage && (
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            className="absolute top-2 right-2 z-20 w-9 h-9 rounded-xl bg-card/90 hover:bg-ceu-aqua flex items-center justify-center border border-ceu-navy/10 shadow-sm transition-colors"
-            title="Trocar peça base"
-          >
-            <Upload className="w-4 h-4 text-gray-400" />
-          </button>
-        )}
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          onChange={handleBaseUpload}
-          className="hidden"
-        />
       </div>
 
-      {/* Painel de controles — 4 sliders (apenas 2D) */}
-      {viewMode === '2d' && designImage && (
+      {/* Painel de controles da estampa */}
+      {designImage && (
         <div className="px-6 py-5 border-t border-ceu-navy/10 space-y-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5">
             <SliderControl

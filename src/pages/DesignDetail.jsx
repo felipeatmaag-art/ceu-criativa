@@ -153,7 +153,7 @@ export default function DesignDetail() {
     setPhysical(choice); setQuantity(1); setAddedToCart(false);
     if (choice) {
       setSelectedProduct(choice.product.type);
-      setSelectedColor(choice.product.product_color_variants?.find(c => c.name === choice.variant.color)?.hex || 'white');
+      setSelectedColor(choice.variant.color);
       setSelectedSize(choice.variant.size);
     }
   };
@@ -228,6 +228,7 @@ export default function DesignDetail() {
                 designImage={design.image_url}
                 selectedProduct={selectedProduct}
                 selectedColor={selectedColor}
+                catalogProduct={physical?.product}
               />
               
               {/* Badges */}

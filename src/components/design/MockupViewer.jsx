@@ -9,14 +9,11 @@ import TravelMugMockup from '@/components/create/TravelMugMockup';
 import MousepadMockup from '@/components/create/MousepadMockup';
 import TshirtInUseMockup from '@/components/create/TshirtInUseMockup';
 import MugInHandMockup from '@/components/create/MugInHandMockup';
-import MockupViewer3D from '@/components/design/MockupViewer3D';
 import ApprovedMockupGallery from '@/components/design/ApprovedMockupGallery';
+import CatalogProductMockup from '@/components/create/CatalogProductMockup';
 
-export default function MockupViewer({ designImage, selectedProduct, selectedColor, production }) {
+export default function MockupViewer({ designImage, selectedProduct, selectedColor, production, catalogProduct }) {
   const [viewAngle, setViewAngle] = useState('front');
-  const [view3D, setView3D] = useState(false);
-
-  const supports3D = ['camiseta', 'moletom', 'caneca', 'caneca_termica'].includes(selectedProduct);
 
   const mockupComponents = {
     camiseta: TshirtMockup,
@@ -65,36 +62,11 @@ export default function MockupViewer({ designImage, selectedProduct, selectedCol
 
   const angles = getAnglesForProduct();
   if (production?.mockup_front_url) return <ApprovedMockupGallery production={production} />;
+  if (catalogProduct) return <div className="aspect-square overflow-hidden rounded-3xl"><CatalogProductMockup product={catalogProduct} color={selectedColor} /></div>;
 
   return (
     <div className="space-y-4">
-      {/* View Mode Toggle */}
       <div className="flex gap-2">
-        {supports3D && (
-          <Button
-            variant={view3D ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setView3D(true)}
-            className={`rounded-xl ${view3D ? 'ceu-gradient text-white' : ''}`}
-          >
-            3D Interativo
-          </Button>
-        )}
-        {!view3D && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setView3D(false)}
-            className="rounded-xl"
-          >
-            2D
-          </Button>
-        )}
-      </div>
-
-      {/* Angle Selector (2D only) */}
-      {!view3D && (
-        <div className="flex gap-2">
           {angles.map((angle) => (
             <Button
               key={angle.value}
@@ -110,18 +82,10 @@ export default function MockupViewer({ designImage, selectedProduct, selectedCol
               {angle.label}
             </Button>
           ))}
-        </div>
-      )}
+      </div>
 
       {/* Mockup Display */}
       <div className="relative aspect-square rounded-3xl overflow-hidden bg-gradient-to-br from-slate-100 to-stone-100">
-        {view3D && supports3D ? (
-          <MockupViewer3D
-            productType={selectedProduct}
-            designImage={designImage}
-            productColor={selectedColor}
-          />
-        ) : (
           <AnimatePresence mode="wait">
           <motion.div
             key={`${selectedProduct}-${viewAngle}`}
@@ -169,7 +133,6 @@ export default function MockupViewer({ designImage, selectedProduct, selectedCol
             )}
           </motion.div>
         </AnimatePresence>
-        )}
       </div>
     </div>
   );
