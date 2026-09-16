@@ -1,0 +1,6 @@
+{
+  "name": "Céu Criativa - Crie e Venda Designs Únicos",
+  "description": "Uma plataforma intuitiva e artística onde você pode criar, vender e colecionar estampas. Bem-vindo ao nosso universo!",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

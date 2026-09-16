@@ -5,7 +5,6 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { 
   Search, 
   BadgeCheck, 
@@ -13,8 +12,7 @@ import {
   Heart,
   Instagram,
   Twitter,
-  Globe,
-  TrendingUp
+  Globe
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Skeleton } from '@/components/ui/skeleton';

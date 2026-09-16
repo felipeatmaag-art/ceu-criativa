@@ -20,11 +20,19 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import { Palette, Users, TrendingUp, Shield } from 'lucide-react';
+import { FALLBACK_DESIGNS } from '@/data/catalogFallback';
 
 export default function Home() {
   const { data: designs = [] } = useQuery({
     queryKey: ['featured-designs'],
-    queryFn: () => base44.entities.Design.filter({ is_featured: true, status: 'aprovado' }, '-created_date', 8),
+    queryFn: async () => {
+      try {
+        const items = await base44.entities.Design.filter({ is_featured: true, status: 'aprovado' }, '-created_date', 8);
+        return items?.length ? items : FALLBACK_DESIGNS.slice(0, 8);
+      } catch {
+        return FALLBACK_DESIGNS.slice(0, 8);
+      }
+    },
   });
 
   const { data: competitions = [] } = useQuery({

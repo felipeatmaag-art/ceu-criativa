@@ -4,8 +4,7 @@ import { createPageUrl } from '@/utils';
 import { Trophy, Clock, Users, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
-import { format, differenceInDays } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { differenceInDays } from 'date-fns';
 
 export default function CompetitionBanner({ competition }) {
   if (!competition) return null;

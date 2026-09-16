@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, Users, Trophy, TrendingUp, Zap, Heart } from 'lucide-react';
+import { Sparkles, Users, Trophy, TrendingUp, Zap } from 'lucide-react';
 
 export default function BentoShowcase() {
   const bentoItems = [
