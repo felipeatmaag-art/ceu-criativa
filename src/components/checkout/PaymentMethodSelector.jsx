@@ -1,74 +1,67 @@
-import React from 'react';
-import { CreditCard, Smartphone, FileText, Check } from 'lucide-react';
+import { CreditCard, Smartphone, Check } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-const METHODS = [
+export const PAYMENT_METHODS = [
   {
     id: 'pix',
-    label: 'Pix',
-    description: 'Aprovação imediata',
+    label: 'Pix Instantâneo',
+    description: 'Aprovação imediata via QR Code ou Copia e Cola',
     icon: Smartphone,
-    badge: '5% off',
+    badge: '5% OFF',
     discount: 0.05
   },
   {
     id: 'credit',
     label: 'Cartão de Crédito',
-    description: 'Até 12x sem juros',
+    description: 'Até 12x no cartão com processamento seguro',
     icon: CreditCard,
-    badge: null,
-    discount: 0
-  },
-  {
-    id: 'boleto',
-    label: 'Boleto',
-    description: 'Vencimento em 3 dias',
-    icon: FileText,
-    badge: null,
+    badge: '12x',
     discount: 0
   }
 ];
 
 export default function PaymentMethodSelector({ value, onChange }) {
   return (
-    <div className="space-y-2">
-      {METHODS.map(m => {
+    <div className="space-y-2.5">
+      {PAYMENT_METHODS.map((m) => {
         const Icon = m.icon;
         const active = value === m.id;
         return (
           <button
             key={m.id}
             type="button"
-            disabled={m.id !== 'credit'}
-            title={m.id !== 'credit' ? 'Aguardando integração sem redirecionamento' : undefined}
             onClick={() => onChange(m.id)}
-            className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left ${
+            className={`w-full flex items-center gap-3.5 p-3.5 rounded-2xl border-2 transition-all text-left ${
               active
-                ? 'border-emerald-500 bg-emerald-50'
+                ? 'border-emerald-500 bg-emerald-50/80 shadow-sm'
                 : 'border-gray-200 bg-white hover:border-gray-300'
             }`}
           >
-            <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
-              active ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-500'
+            <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
+              active ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/20' : 'bg-gray-100 text-gray-600'
             }`}>
               <Icon className="w-5 h-5" />
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="font-semibold text-gray-900 text-sm">{m.label}</span>
-                {m.badge && m.id === 'credit' && (
-                  <span className="text-xs px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-medium">
+                <span className="font-bold text-gray-900 text-sm">{m.label}</span>
+                {m.badge && (
+                  <span className={`text-[11px] px-2 py-0.5 rounded-full font-bold ${
+                    m.id === 'pix' 
+                      ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                      : 'bg-blue-100 text-blue-800'
+                  }`}>
                     {m.badge}
                   </span>
                 )}
               </div>
-              <p className="text-xs text-gray-500 mt-0.5">{m.id === 'credit' ? 'Cartão e Google Pay, aqui mesmo' : 'Em preparação para pagamento integrado'}</p>
+              <p className="text-xs text-gray-500 mt-0.5">{m.description}</p>
             </div>
             {active && (
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                className="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center shrink-0"
+                className="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center shrink-0 shadow-sm"
               >
                 <Check className="w-4 h-4 text-white" />
               </motion.div>
@@ -79,5 +72,3 @@ export default function PaymentMethodSelector({ value, onChange }) {
     </div>
   );
 }
-
-export const PAYMENT_METHODS = METHODS;

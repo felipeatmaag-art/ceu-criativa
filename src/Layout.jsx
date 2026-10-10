@@ -1,25 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from './utils';
-import { base44 } from '@/api/base44Client';
 import {
   Menu,
   X,
   Search,
   ShoppingBag,
-  User,
   Sparkles,
-  Heart,
   LogOut,
   Settings,
   Palette,
   Trophy,
   Home,
   Cloud,
-  Bell,
   BarChart3,
   Boxes,
-  ShieldCheck } from
+  ShieldCheck,
+  Sliders } from
 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -33,24 +30,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import BrandLogo from '@/components/BrandLogo';
 import SaleRealtimeAlert from '@/components/notifications/SaleRealtimeAlert';
 import useCartStore from '@/services/cartStore';
+import { useAuth } from '@/lib/AuthContext';
 
 export default function Layout({ children, currentPageName }) {
-  const [user, setUser] = useState(null);
+  const { user, openLoginModal, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [cartItems] = useCartStore();
-
-  useEffect(() => {
-    const loadUser = async () => {
-      try {
-        const currentUser = await base44.auth.me();
-        setUser(currentUser);
-      } catch (e) {
-        setUser(null);
-      }
-    };
-    loadUser();
-  }, []);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -306,95 +292,111 @@ export default function Layout({ children, currentPageName }) {
                       </div>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56 rounded-xl p-2">
-                    <div className="px-3 py-2 mb-2">
-                      <p className="font-medium">{user.artist_name || user.full_name}</p>
-                      <p className="text-sm text-gray-500">{user.email}</p>
+                  <DropdownMenuContent align="end" className="w-64 bg-[#0d0e15] border border-white/10 text-white rounded-2xl p-2 shadow-2xl backdrop-blur-xl">
+                    <div className="px-3 py-2.5 mb-2 rounded-xl bg-white/[0.04] border border-white/5">
+                      <div className="flex items-center justify-between mb-1">
+                        <p className="font-bold text-sm text-white">{user.artist_name || user.full_name}</p>
+                        <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
+                          user.role === 'admin' 
+                            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' 
+                            : 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                        }`}>
+                          {user.role === 'admin' ? '🛡️ Admin' : '👑 Artista'}
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-400 font-mono truncate">{user.email}</p>
                     </div>
-                    <DropdownMenuSeparator />
+                    <DropdownMenuSeparator className="bg-white/10" />
+
+                    {/* Artist Links */}
+                    {user.role === 'artist' && (
+                      <>
+                        <DropdownMenuItem asChild>
+                          <Link to="/loja/felipe-silverio" className="cursor-pointer rounded-lg hover:bg-white/10 transition-colors">
+                            <ShoppingBag className="w-4 h-4 mr-2 text-emerald-400" />
+                            Minha Loja
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link to="/MyDesigns" className="cursor-pointer rounded-lg font-medium hover:bg-white/10 transition-colors">
+                            <Palette className="w-4 h-4 mr-2 text-purple-400" />
+                            Minhas Estampas
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link to="/Create" className="cursor-pointer rounded-lg hover:bg-white/10 transition-colors">
+                            <Sparkles className="w-4 h-4 mr-2 text-pink-400" />
+                            Criar Nova Estampa
+                          </Link>
+                        </DropdownMenuItem>
+                      </>
+                    )}
+
+                    {/* Admin Links */}
+                    {user.role === 'admin' && (
+                      <>
+                        <DropdownMenuItem asChild>
+                          <Link to="/curadoria" className="cursor-pointer rounded-lg font-medium hover:bg-white/10 transition-colors">
+                            <ShieldCheck className="w-4 h-4 mr-2 text-emerald-400" />
+                            Aprovação de Estampas
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link to="/ProductAdmin?tab=designs" className="cursor-pointer rounded-lg font-medium hover:bg-white/10 transition-colors">
+                            <Sliders className="w-4 h-4 mr-2 text-purple-400" />
+                            Catálogo & Ações em Lote
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link to="/ProductAdmin?tab=catalog" className="cursor-pointer rounded-lg hover:bg-white/10 transition-colors">
+                            <Boxes className="w-4 h-4 mr-2 text-blue-400" />
+                            Modelos & Peças Base
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link to="/inventory-management" className="cursor-pointer rounded-lg hover:bg-white/10 transition-colors">
+                            <Boxes className="w-4 h-4 mr-2 text-amber-400" />
+                            Gestão de Estoque
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link to="/admin/users" className="cursor-pointer rounded-lg hover:bg-white/10 transition-colors">
+                            <ShieldCheck className="w-4 h-4 mr-2 text-teal-400" />
+                            Equipe e Artistas
+                          </Link>
+                        </DropdownMenuItem>
+                      </>
+                    )}
+
                     <DropdownMenuItem asChild>
-                      <Link to={createPageUrl('Profile')} className="cursor-pointer rounded-lg">
-                        <User className="w-4 h-4 mr-2" />
-                        Meu Perfil
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to={createPageUrl('MyDesigns')} className="cursor-pointer rounded-lg">
-                        <Palette className="w-4 h-4 mr-2" />
-                        Minhas Estampas
-                      </Link>
-                    </DropdownMenuItem>
-                    {user.role === 'admin' && <>
-                      <DropdownMenuItem asChild>
-                        <Link to="/ProductAdmin" className="cursor-pointer rounded-lg">
-                          <ShoppingBag className="w-4 h-4 mr-2" />
-                          Produtos do Estúdio
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link to="/admin/users" className="cursor-pointer rounded-lg">
-                          <ShieldCheck className="w-4 h-4 mr-2" />
-                          Equipe e Artistas
-                        </Link>
-                      </DropdownMenuItem>
-                    </>}
-                    <DropdownMenuItem asChild>
-                      <Link to={createPageUrl('Favorites')} className="cursor-pointer rounded-lg">
-                        <Heart className="w-4 h-4 mr-2" />
-                        Favoritos
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to={createPageUrl('MyOrders')} className="cursor-pointer rounded-lg">
-                        <ShoppingBag className="w-4 h-4 mr-2" />
-                        Meus Pedidos
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to="/sales-reports" className="cursor-pointer rounded-lg">
-                        <BarChart3 className="w-4 h-4 mr-2" />
+                      <Link to="/sales-reports" className="cursor-pointer rounded-lg hover:bg-white/10 transition-colors">
+                        <BarChart3 className="w-4 h-4 mr-2 text-blue-400" />
                         Relatórios de Vendas
                       </Link>
                     </DropdownMenuItem>
+
                     <DropdownMenuItem asChild>
-                      <Link to="/notifications" className="cursor-pointer rounded-lg">
-                        <Bell className="w-4 h-4 mr-2" />
-                        Notificações
+                      <Link to={createPageUrl('Settings')} className="cursor-pointer rounded-lg hover:bg-white/10 transition-colors">
+                        <Settings className="w-4 h-4 mr-2 text-gray-400" />
+                        Configurações & Pagamento
                       </Link>
                     </DropdownMenuItem>
-                    {user.role === 'admin' && <DropdownMenuItem asChild>
-                      <Link to="/inventory-management" className="cursor-pointer rounded-lg">
-                        <Boxes className="w-4 h-4 mr-2" />
-                        Gestão de Estoque
-                      </Link>
-                    </DropdownMenuItem>}
-                    {['admin', 'curator'].includes(user.role) && <DropdownMenuItem asChild>
-                      <Link to="/curadoria" className="cursor-pointer rounded-lg">
-                        <ShieldCheck className="w-4 h-4 mr-2" />
-                        Aprovar Estampas
-                      </Link>
-                    </DropdownMenuItem>}
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link to={createPageUrl('Settings')} className="cursor-pointer rounded-lg">
-                        <Settings className="w-4 h-4 mr-2" />
-                        Configurações
-                      </Link>
-                    </DropdownMenuItem>
+
+                    <DropdownMenuSeparator className="bg-white/10" />
+
                     <DropdownMenuItem
-                    onClick={() => base44.auth.logout()}
-                    className="cursor-pointer rounded-lg text-red-600 focus:text-red-600">
-                    
+                      onClick={() => logout()}
+                      className="cursor-pointer rounded-lg text-red-400 focus:text-red-300 hover:bg-red-500/10 transition-colors"
+                    >
                       <LogOut className="w-4 h-4 mr-2" />
-                      Sair
+                      Sair da Conta
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu> :
 
               <Button
-                onClick={() => base44.auth.redirectToLogin()}
-                className="ceu-gradient text-white rounded-xl px-6 hover:opacity-90 transition-opacity">
-                
+                onClick={() => openLoginModal()}
+                className="ceu-gradient text-white font-bold rounded-xl px-6 hover:opacity-90 transition-opacity shadow-lg shadow-emerald-500/25">
                   Entrar
                 </Button>
               }
@@ -422,6 +424,78 @@ export default function Layout({ children, currentPageName }) {
             className="md:hidden glass-effect border-t">
             
               <div className="px-4 py-6 space-y-2">
+                {/* User section on Mobile */}
+                {user ? (
+                  <div className="p-3 mb-4 rounded-2xl bg-white/[0.05] border border-white/10">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-bold text-white text-sm">{user.artist_name || user.full_name}</span>
+                      <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
+                        user.role === 'admin' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-purple-500/20 text-purple-300'
+                      }`}>
+                        {user.role === 'admin' ? '🛡️ Admin' : '👑 Artista'}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-xs pt-1">
+                      {user.role === 'artist' ? (
+                        <>
+                          <Link 
+                            to="/loja/felipe-silverio" 
+                            onClick={() => setIsMenuOpen(false)}
+                            className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 font-medium text-center"
+                          >
+                            Minha Loja
+                          </Link>
+                          <Link 
+                            to="/MyDesigns" 
+                            onClick={() => setIsMenuOpen(false)}
+                            className="p-2 rounded-lg bg-purple-500/10 text-purple-400 font-medium text-center"
+                          >
+                            Minhas Estampas
+                          </Link>
+                        </>
+                      ) : (
+                        <>
+                          <Link 
+                            to="/curadoria" 
+                            onClick={() => setIsMenuOpen(false)}
+                            className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 font-medium text-center"
+                          >
+                            Aprovação
+                          </Link>
+                          <Link 
+                            to="/ProductAdmin?tab=designs" 
+                            onClick={() => setIsMenuOpen(false)}
+                            className="p-2 rounded-lg bg-blue-500/10 text-blue-400 font-medium text-center"
+                          >
+                            Catálogo
+                          </Link>
+                        </>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => {
+                        logout();
+                        setIsMenuOpen(false);
+                      }}
+                      className="w-full mt-3 text-center text-xs text-red-400 py-1.5 rounded-lg hover:bg-red-500/10"
+                    >
+                      Sair da Conta
+                    </button>
+                  </div>
+                ) : (
+                  <div className="mb-4">
+                    <Button
+                      onClick={() => {
+                        setIsMenuOpen(false);
+                        openLoginModal();
+                      }}
+                      className="w-full ceu-gradient text-white font-bold rounded-xl py-3"
+                    >
+                      Entrar na Conta
+                    </Button>
+                  </div>
+                )}
+
                 {navItems.map((item) => {
                 const Icon = item.icon;
                 return (
@@ -430,11 +504,9 @@ export default function Layout({ children, currentPageName }) {
                     to={createPageUrl(item.page)}
                     onClick={() => setIsMenuOpen(false)}
                     className="flex items-center gap-3 rounded-xl px-4 py-3 font-medium text-gray-100 transition-colors hover:bg-white/10 hover:text-white">
-                    
                       <Icon className="w-5 h-5" />
                       {item.name}
                     </Link>);
-
               })}
               </div>
             </motion.div>

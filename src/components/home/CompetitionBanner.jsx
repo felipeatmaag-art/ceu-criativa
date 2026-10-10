@@ -8,9 +8,17 @@ import { format, differenceInDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 export default function CompetitionBanner({ competition }) {
-  if (!competition) return null;
+  if (!competition || typeof competition !== 'object' || !competition.id) return null;
 
-  const daysLeft = differenceInDays(new Date(competition.end_date), new Date());
+  let daysLeft = 0;
+  try {
+    if (competition.end_date) {
+      daysLeft = differenceInDays(new Date(competition.end_date), new Date());
+      if (Number.isNaN(daysLeft)) daysLeft = 0;
+    }
+  } catch {
+    daysLeft = 0;
+  }
 
   return (
     <section className="py-16">

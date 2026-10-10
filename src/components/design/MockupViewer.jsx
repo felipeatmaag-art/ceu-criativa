@@ -1,137 +1,117 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
+import ApprovedMockupGallery from './ApprovedMockupGallery';
+import MockupViewer3D from './MockupViewer3D';
 import TshirtMockup from '@/components/create/TshirtMockup';
 import MugMockup from '@/components/create/MugMockup';
 import FrameMockup from '@/components/create/FrameMockup';
 import HoodieMockup from '@/components/create/HoodieMockup';
 import TravelMugMockup from '@/components/create/TravelMugMockup';
 import MousepadMockup from '@/components/create/MousepadMockup';
-import TshirtInUseMockup from '@/components/create/TshirtInUseMockup';
-import MugInHandMockup from '@/components/create/MugInHandMockup';
-import ApprovedMockupGallery from '@/components/design/ApprovedMockupGallery';
-import CatalogProductMockup from '@/components/create/CatalogProductMockup';
+import EcobagMockup from '@/components/create/EcobagMockup';
 
-export default function MockupViewer({ designImage, selectedProduct, selectedColor, production, catalogProduct }) {
+export default function MockupViewer({
+  designImage,
+  selectedProduct = 'camiseta',
+  selectedColor = 'white',
+  production,
+  design
+}) {
+  const [viewMode, setViewMode] = useState('2d');
   const [viewAngle, setViewAngle] = useState('front');
 
-  const mockupComponents = {
-    camiseta: TshirtMockup,
-    moletom: HoodieMockup,
-    caneca: MugMockup,
-    caneca_termica: TravelMugMockup,
-    quadro: FrameMockup,
-    mousepad: MousepadMockup,
-  };
+  // Se o design já possui mockups reais de produção/estúdio aprovados, usa a galeria oficial aprovada
+  if (production?.mockup_front_url || production?.mockup_human_url) {
+    return <ApprovedMockupGallery production={production} design={design} />;
+  }
 
-  const MockupComponent = mockupComponents[selectedProduct] || TshirtMockup;
-
-  const getAnglesForProduct = () => {
-    switch(selectedProduct) {
-      case 'camiseta':
-      case 'moletom':
-        return [
-          { value: 'front', label: 'Frontal' },
-          { value: 'angled', label: '3/4' },
-          { value: 'inuse', label: 'Em Uso' },
-        ];
-      case 'caneca':
-      case 'caneca_termica':
-        return [
-          { value: 'front', label: 'Frontal' },
-          { value: 'angled', label: '3/4' },
-          { value: 'inhand', label: 'Na Mão' },
-        ];
-      case 'quadro':
-        return [
-          { value: 'front', label: 'Frontal' },
-          { value: 'angled', label: 'Perspectiva' },
-        ];
-      case 'mousepad':
-        return [
-          { value: 'front', label: 'Vista Superior' },
-          { value: 'angled', label: 'Ângulo 3D' },
-        ];
-      default:
-        return [
-          { value: 'front', label: 'Frontal' },
-          { value: 'angled', label: '3/4' },
-        ];
-    }
-  };
-
-  const angles = getAnglesForProduct();
-  if (production?.mockup_front_url) return <ApprovedMockupGallery production={production} />;
-  if (catalogProduct) return <div className="aspect-square overflow-hidden rounded-3xl"><CatalogProductMockup product={catalogProduct} color={selectedColor} /></div>;
+  const angles = [
+    { value: 'front', label: 'Frontal' },
+    { value: 'angled', label: '3/4' },
+    { value: 'flat', label: 'Plana' }
+  ];
 
   return (
     <div className="space-y-4">
-      <div className="flex gap-2">
-          {angles.map((angle) => (
-            <Button
-              key={angle.value}
-              variant={viewAngle === angle.value ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setViewAngle(angle.value)}
-              className={`rounded-xl ${
-                viewAngle === angle.value 
-                  ? 'ceu-gradient text-white' 
-                  : ''
-              }`}
-            >
-              {angle.label}
-            </Button>
-          ))}
+      <div className="flex items-center justify-between">
+        <div className="flex gap-2">
+          <Button
+            variant={viewMode === '2d' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setViewMode('2d')}
+            className={viewMode === '2d' ? 'bg-slate-900 text-white' : ''}
+          >
+            2D
+          </Button>
+          <Button
+            variant={viewMode === '3d' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setViewMode('3d')}
+            className={viewMode === '3d' ? 'bg-slate-900 text-white' : ''}
+          >
+            3D Interativo
+          </Button>
+        </div>
+
+        {viewMode === '2d' && (
+          <div className="flex gap-1 bg-gray-100 p-1 rounded-xl">
+            {angles.map((angle) => (
+              <button
+                key={angle.value}
+                onClick={() => setViewAngle(angle.value)}
+                className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all ${
+                  viewAngle === angle.value
+                    ? 'bg-white text-gray-900 shadow-xs'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                {angle.label}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Mockup Display */}
-      <div className="relative aspect-square rounded-3xl overflow-hidden bg-gradient-to-br from-slate-100 to-stone-100">
-          <AnimatePresence mode="wait">
-          <motion.div
-            key={`${selectedProduct}-${viewAngle}`}
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.3 }}
-            className="w-full h-full"
-          >
-            {/* Renderizar mockup baseado no produto e ângulo */}
-            {selectedProduct === 'camiseta' && viewAngle === 'inuse' && (
-              <TshirtInUseMockup designImage={designImage} color={selectedColor} />
-            )}
-            {selectedProduct === 'camiseta' && viewAngle !== 'inuse' && (
-              <TshirtMockup designImage={designImage} color={selectedColor} angle={viewAngle} />
-            )}
-            
-            {selectedProduct === 'moletom' && viewAngle === 'inuse' && (
-              <TshirtInUseMockup designImage={designImage} color={selectedColor} />
-            )}
-            {selectedProduct === 'moletom' && viewAngle !== 'inuse' && (
-              <HoodieMockup designImage={designImage} color={selectedColor} angle={viewAngle} />
-            )}
-            
-            {selectedProduct === 'caneca' && viewAngle === 'inhand' && (
-              <MugInHandMockup designImage={designImage} />
-            )}
-            {selectedProduct === 'caneca' && viewAngle !== 'inhand' && (
-              <MugMockup designImage={designImage} angle={viewAngle} />
-            )}
-            
-            {selectedProduct === 'caneca_termica' && viewAngle === 'inhand' && (
-              <MugInHandMockup designImage={designImage} />
-            )}
-            {selectedProduct === 'caneca_termica' && viewAngle !== 'inhand' && (
-              <TravelMugMockup designImage={designImage} angle={viewAngle} />
-            )}
-            
-            {selectedProduct === 'quadro' && (
-              <FrameMockup designImage={designImage} angle={viewAngle} />
-            )}
-            
-            {selectedProduct === 'mousepad' && (
-              <MousepadMockup designImage={designImage} angle={viewAngle} />
-            )}
-          </motion.div>
+      <div className="relative aspect-square rounded-3xl overflow-hidden bg-slate-100 border border-slate-200">
+        <AnimatePresence mode="wait">
+          {viewMode === '3d' ? (
+            <MockupViewer3D
+              productType={selectedProduct}
+              designImage={designImage}
+              productColor={selectedColor}
+            />
+          ) : (
+            <motion.div
+              key={`${selectedProduct}-${viewAngle}`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="w-full h-full"
+            >
+              {selectedProduct === 'camiseta' && (
+                <TshirtMockup designImage={designImage} color={selectedColor} angle={viewAngle} />
+              )}
+              {selectedProduct === 'caneca' && (
+                <MugMockup designImage={designImage} angle={viewAngle} />
+              )}
+              {selectedProduct === 'quadro' && (
+                <FrameMockup designImage={designImage} angle={viewAngle} />
+              )}
+              {selectedProduct === 'moletom' && (
+                <HoodieMockup designImage={designImage} color={selectedColor} angle={viewAngle} />
+              )}
+              {selectedProduct === 'caneca_termica' && (
+                <TravelMugMockup designImage={designImage} angle={viewAngle} />
+              )}
+              {selectedProduct === 'mousepad' && (
+                <MousepadMockup designImage={designImage} angle={viewAngle} />
+              )}
+              {selectedProduct === 'ecobag' && (
+                <EcobagMockup designImage={designImage} angle={viewAngle} />
+              )}
+            </motion.div>
+          )}
         </AnimatePresence>
       </div>
     </div>

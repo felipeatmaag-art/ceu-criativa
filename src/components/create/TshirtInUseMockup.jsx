@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
-export default function TshirtInUseMockup({ designImage, color = 'white' }) {
+export default function TshirtInUseMockup({ designImage, color = 'white', transform = { x: 0, y: 0, scale: 1, rotation: 0 } }) {
   const colorMap = {
     white: '#FFFFFF',
     black: '#1a1a1a',
@@ -12,6 +12,11 @@ export default function TshirtInUseMockup({ designImage, color = 'white' }) {
   const currentColor = colorMap[color] || colorMap.white;
 
   if (!designImage) return null;
+
+  const shiftX = (transform?.x || 0) * 0.45;
+  const shiftY = (transform?.y || 0) * 0.45;
+  const scale = (transform?.scale || 1);
+  const rot = (transform?.rotation || 0);
 
   return (
     <motion.div
@@ -258,9 +263,9 @@ export default function TshirtInUseMockup({ designImage, color = 'white' }) {
         <motion.div
           className="absolute flex items-center justify-center"
           style={{ 
-            top: '180px',
-            left: '50%',
-            transform: 'translateX(-50%)',
+            top: `${180 + shiftY}px`,
+            left: `calc(50% + ${shiftX}px)`,
+            transform: `translateX(-50%) scale(${scale}) rotate(${rot}deg)`,
             width: '160px',
             height: '160px'
           }}

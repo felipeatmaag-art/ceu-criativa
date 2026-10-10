@@ -16,11 +16,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import PaymentMethodSelector, { PAYMENT_METHODS } from '@/components/checkout/PaymentMethodSelector';
+import { PAYMENT_METHODS } from '@/components/checkout/PaymentMethodSelector';
 import FreeShippingBar, { FREE_SHIPPING_THRESHOLD } from '@/components/checkout/FreeShippingBar';
 import ProductionFiles from '@/components/create/ProductionFiles';
 import useCartStore from '@/services/cartStore';
-import EmbeddedCheckout from '@/components/checkout/EmbeddedCheckout';
+import CieloCheckout from '@/components/checkout/CieloCheckout';
 
 export default function Cart() {
   const [cartItems, persist] = useCartStore();
@@ -94,7 +94,31 @@ export default function Cart() {
           </div>
         </div>
 
-        {paidOrder && <div role="status" className="mb-6 rounded-2xl border bg-card p-6 text-card-foreground">Pedido {paidOrder.orderNumber} confirmado. Seu insumo foi reservado — tamo junto!</div>}
+        {paidOrder && (
+          <div role="status" className="mb-8 rounded-3xl border-2 border-emerald-500 bg-emerald-50/70 p-6 shadow-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 text-emerald-800 font-bold text-lg">
+                  <ShieldCheck className="w-6 h-6 text-emerald-600" />
+                  <span>Pedido #{paidOrder.order_number || paidOrder.orderNumber} confirmado com sucesso!</span>
+                </div>
+                <p className="text-sm text-emerald-700">
+                  Transação registrada. Sua peça sob demanda já foi encaminhada para a fila de produção da Céu Criativa.
+                </p>
+                {(paidOrder.cielo_tid || paidOrder.payment_method) && (
+                  <p className="text-xs font-mono text-emerald-900/70">
+                    Forma: {paidOrder.payment_method === 'pix' ? 'Pix Instantâneo' : 'Cartão de Crédito'} {paidOrder.cielo_tid ? `• TID: ${paidOrder.cielo_tid}` : ''}
+                  </p>
+                )}
+              </div>
+              <Link to={createPageUrl('MyOrders')}>
+                <Button className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-sm shrink-0">
+                  Ver em Meus Pedidos
+                </Button>
+              </Link>
+            </div>
+          </div>
+        )}
         {cartItems.length > 0 ? (
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Items */}
@@ -300,8 +324,10 @@ export default function Cart() {
               <div>
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Seus dados</p>
                 <div className="grid sm:grid-cols-2 gap-3">
-                  <div><Label className="text-xs">Nome completo</Label><Input value={customer.name} onChange={(e) => setCustomer({ ...customer, name: e.target.value })} className="rounded-xl" /></div>
-                  <div><Label className="text-xs">E-mail</Label><Input type="email" value={customer.email} onChange={(e) => setCustomer({ ...customer, email: e.target.value })} className="rounded-xl" /></div>
+                  <div><Label className="text-xs">Nome completo</Label><Input placeholder="Nome completo" value={customer.name} onChange={(e) => setCustomer({ ...customer, name: e.target.value })} className="rounded-xl" /></div>
+                  <div><Label className="text-xs">E-mail</Label><Input placeholder="seu@email.com" type="email" value={customer.email} onChange={(e) => setCustomer({ ...customer, email: e.target.value })} className="rounded-xl" /></div>
+                  <div><Label className="text-xs">CPF</Label><Input placeholder="000.000.000-00" value={customer.cpf || ''} onChange={(e) => setCustomer({ ...customer, cpf: e.target.value })} className="rounded-xl" /></div>
+                  <div><Label className="text-xs">Telefone / WhatsApp</Label><Input placeholder="(11) 99999-9999" value={customer.phone || ''} onChange={(e) => setCustomer({ ...customer, phone: e.target.value })} className="rounded-xl" /></div>
                 </div>
               </div>
 
@@ -361,13 +387,23 @@ export default function Cart() {
                 </div>
               </div>
 
-              {/* Payment method */}
-              <div>
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Forma de Pagamento</p>
-                <PaymentMethodSelector value={paymentMethod} onChange={setPaymentMethod} />
+              {/* Cielo Checkout Form */}
+              <div className="pt-2">
+                <CieloCheckout
+                  payload={{
+                    items: cartItems,
+                    customer,
+                    shippingAddress,
+                    totalAmount: total,
+                    couponCode: couponApplied?.code || ''
+                  }}
+                  valid={!!isAddressValid && !!isCustomerValid}
+                  onPaid={(order) => {
+                    setPaidOrder(order);
+                    setShowCheckout(false);
+                  }}
+                />
               </div>
-
-              <EmbeddedCheckout payload={{ items: cartItems, customer, shippingAddress, couponCode: couponApplied?.code || '' }} valid={!!isAddressValid && !!isCustomerValid} onPaid={result => { setPaidOrder(result); setShowCheckout(false); }} />
               <p className="text-xs text-center text-gray-400 flex items-center justify-center gap-1.5">
                 <ShieldCheck className="w-3.5 h-3.5" />
                 Compra protegida • Dados criptografados

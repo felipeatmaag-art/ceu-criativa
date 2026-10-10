@@ -63,6 +63,7 @@ import MyDesigns from './pages/MyDesigns';
 import MyOrders from './pages/MyOrders';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
+import Login from './pages/Login';
 import __Layout from './Layout.jsx';
 
 
@@ -83,6 +84,7 @@ export const PAGES = {
     "MyOrders": MyOrders,
     "Profile": Profile,
     "Settings": Settings,
+    "Login": Login,
 }
 
 export const pagesConfig = {

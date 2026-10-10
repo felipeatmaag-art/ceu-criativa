@@ -33,13 +33,13 @@ export default function FeaturedDesigns({ designs, title = "Estampas em Destaque
 
         {/* Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {designs?.map((design, index) => (
-            <DesignCard key={design.id} design={design} index={index} />
+          {Array.isArray(designs) && designs.map((design, index) => (
+            <DesignCard key={design.id || index} design={design} index={index} />
           ))}
         </div>
 
         {/* Empty State */}
-        {(!designs || designs.length === 0) && (
+        {(!Array.isArray(designs) || designs.length === 0) && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

@@ -30,6 +30,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import MockupViewer from '@/components/design/MockupViewer';
 import CommentSection from '@/components/design/CommentSection';
 import PhysicalVariantPicker from '@/components/design/PhysicalVariantPicker';
+import ArtworkAudioNarrator from '@/components/audio/ArtworkAudioNarrator';
 import { cartStore } from '@/services/cartStore';
 
 export default function DesignDetail() {
@@ -225,6 +226,7 @@ export default function DesignDetail() {
             <div className="sticky top-28 space-y-4">
               <MockupViewer 
                 production={design.production}
+                design={design}
                 designImage={design.image_url}
                 selectedProduct={selectedProduct}
                 selectedColor={selectedColor}
@@ -324,6 +326,15 @@ export default function DesignDetail() {
                 )}
               </div>
             </div>
+
+            {/* Narração em Áudio da Estampa */}
+            <ArtworkAudioNarrator
+              narration={design.narration || ''}
+              title={design.title}
+              description={design.description}
+              isEditable={false}
+              artistName={design.artist_name}
+            />
 
             {/* Description */}
             {design.description && (

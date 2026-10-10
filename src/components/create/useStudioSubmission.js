@@ -14,7 +14,10 @@ export default function useStudioSubmission(options) {
     if (lock.current) return;
     lock.current = true; setSaving(true); setError('');
     try {
-      if (!options.approved || !options.size || !options.frontImage || !options.designData.title.trim() || !options.designData.category) throw new Error('Escolha tamanho, nome e categoria e aprove o mockup antes de continuar.');
+      const hasArtwork = Boolean(options.frontImage || options.backImage);
+      if (!options.approved || !options.size || !hasArtwork || !options.designData.title.trim() || !options.designData.category) {
+        throw new Error('Escolha tamanho, nome e categoria e aprove o mockup antes de continuar.');
+      }
       if (!await base44.auth.isAuthenticated()) {
         const artwork = Object.fromEntries([options.frontImage, options.backImage].filter(Boolean).map(url => [url, getArtworkMetadata(url)]));
         sessionStorage.setItem('ceu-studio-resume', JSON.stringify({ ...options, artwork }));
@@ -33,21 +36,70 @@ export default function useStudioSubmission(options) {
       if (!saved.current || saved.current.signature !== signature) {
         const production = await buildProductionSnapshot(options);
         const commission = (await base44.entities.ArtistCommission.filter({ artist_id: user.id }, '-updated_date', 1))[0]?.rate ?? 25;
-        const design = await base44.entities.Design.create({ ...options.designData, image_url: options.frontImage, artist_id: user.id, artist_name: user.artist_name || user.full_name, tags: options.designData.tags.split(',').map(t => t.trim()).filter(Boolean), is_ai_generated: options.mode === 'ai', status: action === 'publish' ? 'pendente' : 'rascunho', commission_rate: commission, production });
+        const primaryImage = options.frontImage || options.backImage;
+        const isActivatedArtist = Boolean(user.has_purchased_first_print);
+        const designStatus = (action === 'publish' && isActivatedArtist) ? 'aprovado' : (action === 'publish' ? 'pendente' : 'rascunho');
+        const design = await base44.entities.Design.create({
+          ...options.designData,
+          narration: options.designData?.narration || '',
+          image_url: primaryImage,
+          front_image_url: options.frontImage || '',
+          back_image_url: options.backImage || '',
+          artist_id: user.id,
+          artist_name: user.artist_name || user.full_name,
+          tags: options.designData.tags.split(',').map(t => t.trim()).filter(Boolean),
+          is_ai_generated: options.mode === 'ai',
+          status: designStatus,
+          commission_rate: commission,
+          production
+        });
         saved.current = { signature, design, production };
       }
       const { design, production } = saved.current;
       if (action === 'cart') {
-
-        const item = { id: crypto.randomUUID(), design_id: design.id, artist_id: user.id, design_image: production.front.file_url, design_title: design.title, product_type: options.productType, catalog_product_id: options.product?.id || '', price: options.price, color: options.color, size: options.size, quantity: 1, mockup_url: production.mockup_front_url || '', production };
+        const cartDesignImage = production.front?.file_url || production.back?.file_url || options.frontImage || options.backImage;
+        const cartMockup = production.mockup_human_url || production.mockup_front_url || production.mockup_back_url || '';
+        const item = { id: crypto.randomUUID(), design_id: design.id, artist_id: user.id, design_image: cartDesignImage, design_title: design.title, product_type: options.productType, catalog_product_id: options.product?.id || '', price: options.price, color: options.color, size: options.size, quantity: 1, mockup_url: cartMockup, production };
         cartStore.add({ ...item, base_product_id: options.product.id, variant_id: variant.id });
       } else {
-        if (design.status !== 'pendente') await base44.entities.Design.update(design.id, { status: 'pendente' });
-        const proofs = ['front', 'back'].filter(side => production[`mockup_${side}_url`]).map(angle => ({ angle, url: production[`mockup_${angle}_url`] }));
+        const primaryMockup = production.mockup_human_url || production.mockup_front_url || production.mockup_back_url || '';
+        const isActivatedArtist = Boolean(user.has_purchased_first_print);
+        await base44.entities.Design.update(design.id, {
+          status: isActivatedArtist ? 'aprovado' : 'pendente',
+          mockup_url: primaryMockup,
+          production
+        });
+        const proofs = ['front', 'back', 'human'].filter(side => production[`mockup_${side}_url`]).map(angle => ({
+          angle,
+          label: angle === 'human' ? 'Modelo Humanizado (Em Uso)' : (angle === 'back' ? 'Costas' : 'Frente'),
+          url: production[`mockup_${angle}_url`]
+        }));
         const gallery = [...proofs, ...options.generatedMockups.filter(item => item.sourceKey === mockupSourceKey(options))];
         const artistMargin = Number(design.artist_margin || (design.price_base * design.commission_rate / 100) || 0);
         const platformFee = Math.max(0, Number(design.price_base || 0) - artistMargin);
-        await base44.entities.Product.create({ name: design.title, type: options.productType, design_id: design.id, design_image: options.frontImage, back_design_image: options.backImage || '', category_id: design.category_id || '', collection_id: design.collection_id || '', tags: design.tags || [], base_price: options.price, base_cost: options.price, artist_margin: artistMargin, platform_fee: platformFee, final_price: Number(options.price) + artistMargin + platformFee, mockup_url: production.mockup_front_url, mockup_gallery: gallery.map(i => i.url), mockup_style: options.mockupStyle, mockup_angles: gallery.map(i => i.angle), colors_available: [options.color], sizes_available: [options.size], is_active: true });
+        await base44.entities.Product.create({
+          name: design.title,
+          type: options.productType,
+          design_id: design.id,
+          narration: options.designData?.narration || design.narration || '',
+          design_image: options.frontImage || options.backImage,
+          back_design_image: options.backImage || '',
+          category_id: design.category_id || '',
+          collection_id: design.collection_id || '',
+          tags: design.tags || [],
+          base_price: options.price,
+          base_cost: options.price,
+          artist_margin: artistMargin,
+          platform_fee: platformFee,
+          final_price: Number(options.price) + artistMargin + platformFee,
+          mockup_url: primaryMockup,
+          mockup_gallery: gallery.map(i => i.url),
+          mockup_style: options.mockupStyle || 'human_street',
+          mockup_angles: gallery.map(i => i.angle),
+          colors_available: [options.color],
+          sizes_available: [options.size],
+          is_active: true
+        });
       }
       sessionStorage.removeItem('ceu-studio-resume');
       await cache.invalidateQueries({ queryKey: ['my-designs'] });

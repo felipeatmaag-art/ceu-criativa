@@ -5,24 +5,24 @@ import { Star, Quote } from 'lucide-react';
 export default function Testimonials() {
   const testimonials = [
     {
-      name: "Maria Silva",
-      role: "Artista Digital",
-      avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200",
-      content: "A Céu mudou minha vida! Consegui transformar minha paixão por arte em uma fonte de renda real. Já vendi mais de 200 estampas e conheci uma comunidade incrível.",
+      name: "Rodrigo Almeida",
+      role: "Colecionador de Streetwear",
+      avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200",
+      content: "As estampas autorais do Felipe Silvério têm uma identidade visual surreal. A qualidade do algodão e a precisão das cores superaram qualquer expectativa. Já comprei três peças!",
       rating: 5
     },
     {
-      name: "João Santos",
-      role: "Ilustrador",
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200",
-      content: "Nunca imaginei que poderia viver da minha arte. Com a Céu, consigo criar designs que realmente representam minhas raízes e ainda ganhar por isso. É um sonho!",
-      rating: 5
-    },
-    {
-      name: "Ana Costa",
-      role: "Designer Freelancer",
+      name: "Camila Guimarães",
+      role: "Diretora de Arte",
       avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200",
-      content: "A plataforma é super intuitiva e o suporte da IA para criar designs é incrível. Já participei de várias competições e conheci artistas do Brasil inteiro.",
+      content: "A estampa Tubarão Bomba e a Linha Serena são obras primas do design contemporâneo brasileiro. A experiência de compra e a entrega sob demanda da Céu foram impecáveis.",
+      rating: 5
+    },
+    {
+      name: "Lucas Fontes",
+      role: "Cliente & Entusiasta de Design",
+      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200",
+      content: "A Céu Criativa trouxe uma proposta única com artistas reais. Saber que estou vestindo uma arte exclusiva e apoiando criação de verdade faz toda a diferença.",
       rating: 5
     }
   ];

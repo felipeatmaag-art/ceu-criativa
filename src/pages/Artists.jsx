@@ -18,17 +18,26 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Skeleton } from '@/components/ui/skeleton';
+import { FALLBACK_USERS } from '@/data/catalogFallback';
 
 export default function Artists() {
   const [search, setSearch] = useState('');
 
   const { data: users = [], isLoading } = useQuery({
     queryKey: ['artists'],
-    queryFn: () => base44.entities.User.list('-total_sales', 50),
+    queryFn: async () => {
+      try {
+        const res = await base44.entities.User.list('-total_sales', 50);
+        return res?.length > 0 ? res : FALLBACK_USERS;
+      } catch {
+        return FALLBACK_USERS;
+      }
+    },
+    initialData: FALLBACK_USERS,
   });
 
-  // Filter only users who have artist_name (are artists)
-  const artists = users.filter(u => u.artist_name);
+  // Filter only users who are artists (exclude admin account)
+  const artists = users.filter(u => u.artist_name && u.id !== 'admin-ceu-gestor' && u.store_slug !== 'admin');
   
   const filteredArtists = artists.filter(artist => 
     artist.artist_name?.toLowerCase().includes(search.toLowerCase()) ||
@@ -95,8 +104,8 @@ export default function Artists() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.05 }}
               >
-                <Link to={createPageUrl(`ArtistProfile?id=${artist.id}`)}>
-                  <div className="group bg-white rounded-3xl p-6 shadow-sm hover:shadow-xl transition-all duration-500 transform hover:-translate-y-2">
+                <div className="group bg-white rounded-3xl p-6 shadow-sm hover:shadow-xl transition-all duration-500 transform hover:-translate-y-2 flex flex-col justify-between h-full">
+                  <Link to={createPageUrl(`ArtistProfile?id=${artist.id}`)} className="block flex-1">
                     {/* Cover Image */}
                     {artist.cover_url && (
                       <div className="h-24 -mx-6 -mt-6 mb-4 overflow-hidden rounded-t-3xl">
@@ -132,7 +141,7 @@ export default function Artists() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <h3 className="font-bold text-gray-900 truncate">
+                          <h3 className="font-bold text-gray-900 truncate group-hover:text-ceu-navy transition-colors">
                             {artist.artist_name || artist.full_name}
                           </h3>
                         </div>
@@ -160,47 +169,47 @@ export default function Artists() {
                         <span>{artist.followers_count || 0} seguidores</span>
                       </div>
                     </div>
+                  </Link>
 
-                    {/* Social Links */}
-                    {(artist.social_instagram || artist.social_twitter || artist.social_portfolio) && (
-                      <div className="flex items-center gap-2 mt-4">
-                        {artist.social_instagram && (
-                          <a
-                            href={artist.social_instagram}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={(e) => e.stopPropagation()}
-                            className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-purple-100 transition-colors"
-                          >
-                            <Instagram className="w-4 h-4 text-gray-600" />
-                          </a>
-                        )}
-                        {artist.social_twitter && (
-                          <a
-                            href={artist.social_twitter}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={(e) => e.stopPropagation()}
-                            className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-purple-100 transition-colors"
-                          >
-                            <Twitter className="w-4 h-4 text-gray-600" />
-                          </a>
-                        )}
-                        {artist.social_portfolio && (
-                          <a
-                            href={artist.social_portfolio}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={(e) => e.stopPropagation()}
-                            className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-purple-100 transition-colors"
-                          >
-                            <Globe className="w-4 h-4 text-gray-600" />
-                          </a>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </Link>
+                  {/* Social Links (separados fora do Link para evitar aninhamento de <a>) */}
+                  {(artist.social_instagram || artist.social_twitter || artist.social_portfolio) && (
+                    <div className="flex items-center gap-2 mt-4 pt-2">
+                      {artist.social_instagram && (
+                        <a
+                          href={artist.social_instagram}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-purple-100 transition-colors"
+                          title="Instagram"
+                        >
+                          <Instagram className="w-4 h-4 text-gray-600" />
+                        </a>
+                      )}
+                      {artist.social_twitter && (
+                        <a
+                          href={artist.social_twitter}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-purple-100 transition-colors"
+                          title="Twitter"
+                        >
+                          <Twitter className="w-4 h-4 text-gray-600" />
+                        </a>
+                      )}
+                      {artist.social_portfolio && (
+                        <a
+                          href={artist.social_portfolio}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-purple-100 transition-colors"
+                          title="Portfólio"
+                        >
+                          <Globe className="w-4 h-4 text-gray-600" />
+                        </a>
+                      )}
+                    </div>
+                  )}
+                </div>
               </motion.div>
             ))}
           </div>

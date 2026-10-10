@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
@@ -25,15 +26,25 @@ import CatalogTab from '@/components/profile/CatalogTab';
 import BatchUploadTab from '@/components/profile/BatchUploadTab';
 import PriceEditorTab from '@/components/profile/PriceEditorTab';
 import StorePreviewTab from '@/components/profile/StorePreviewTab';
+import ModernTactileStudioDashboard from '@/components/dashboard/ModernTactileStudioDashboard';
+import ErrorBoundary from '@/components/common/ErrorBoundary';
 
 export default function Profile() {
   const queryClient = useQueryClient();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialTab = searchParams.get('tab') || 'profile';
+
   const [formData, setFormData] = useState({
     artist_name: '', bio: '', cover_image: '', store_name: '', store_slug: '',
     pix_key: '', whatsapp: '', linkedin: '', instagram: '', twitter: '', website: ''
   });
   const [isUploading, setIsUploading] = useState(false);
-  const [activeTab, setActiveTab] = useState('profile');
+  const [activeTab, setActiveTab] = useState(initialTab);
+
+  const handleTabChange = (tabId) => {
+    setActiveTab(tabId);
+    setSearchParams({ tab: tabId });
+  };
 
   const { data: user, isLoading } = useQuery({
     queryKey: ['currentUser'],
@@ -58,6 +69,8 @@ export default function Profile() {
   useEffect(() => {
     if (user) {
       setFormData({
+        full_name: user.full_name || user.name || '',
+        email: user.email || '',
         artist_name: user.artist_name || '', bio: user.bio || '', cover_image: user.cover_image || '',
         store_name: user.store_name || '', store_slug: user.store_slug || '', pix_key: user.pix_key || '',
         whatsapp: user.whatsapp || '', linkedin: user.linkedin || '', instagram: user.instagram || '',
@@ -123,9 +136,14 @@ export default function Profile() {
           </p>
         </motion.div>
 
-        <ProfileTabs active={activeTab} onChange={setActiveTab} publishedCount={publishedDesigns.length} />
+        <ProfileTabs active={activeTab} onChange={handleTabChange} publishedCount={artistDesigns.length} />
 
-        {activeTab === 'sales' && <FinancialDashboard />}
+        {activeTab === 'sales' && (
+          <div className="space-y-8">
+            <ModernTactileStudioDashboard user={user} designs={artistDesigns} />
+            <FinancialDashboard />
+          </div>
+        )}
 
         {activeTab === 'profile' && <div className="grid lg:grid-cols-3 gap-8">
           {/* Stats Cards */}
@@ -228,8 +246,31 @@ export default function Profile() {
                       </label>
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-900">{user?.full_name}</p>
-                      <p className="text-sm text-gray-500">{user?.email}</p>
+                      <p className="font-semibold text-gray-900">{formData.full_name || user?.full_name}</p>
+                      <p className="text-sm text-gray-500">{formData.email || user?.email}</p>
+                    </div>
+                  </div>
+
+                  {/* Nome Completo & E-mail */}
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-base font-medium">Nome Completo</Label>
+                      <Input
+                        placeholder="Seu nome completo"
+                        value={formData.full_name || ''}
+                        onChange={(e) => setFormData({...formData, full_name: e.target.value})}
+                        className="mt-2 h-12 rounded-xl"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-base font-medium">E-mail</Label>
+                      <Input
+                        type="email"
+                        placeholder="seu.email@exemplo.com"
+                        value={formData.email || ''}
+                        onChange={(e) => setFormData({...formData, email: e.target.value})}
+                        className="mt-2 h-12 rounded-xl"
+                      />
                     </div>
                   </div>
 
@@ -296,7 +337,16 @@ export default function Profile() {
             </Card>
           </div>
         </div>}
-        {activeTab === 'catalog' && <CatalogTab designs={publishedDesigns} isLoading={isLoadingDesigns} />}
+        {activeTab === 'catalog' && (
+          <ErrorBoundary title="Meu Catálogo de Estampas" onRetry={refreshDesigns}>
+            <CatalogTab
+              designs={artistDesigns}
+              isLoading={isLoadingDesigns}
+              onRefresh={refreshDesigns}
+              user={user}
+            />
+          </ErrorBoundary>
+        )}
         {activeTab === 'upload' && <BatchUploadTab user={user} onComplete={refreshDesigns} />}
         {activeTab === 'prices' && <PriceEditorTab designs={publishedDesigns} onComplete={refreshDesigns} />}
         {activeTab === 'preview' && <StorePreviewTab user={user} designs={publishedDesigns} />}

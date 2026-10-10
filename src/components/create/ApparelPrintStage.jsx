@@ -5,7 +5,14 @@ import { getArtworkMetadata } from '@/components/create/artworkMetadata';
 export default function ApparelPrintStage({ baseUrl, designImage, transform, onChange }) {
   const canvas = useRef(null), pointers = useRef(new Map()), start = useRef(null), sequence = useRef(0);
   const [error, setError] = useState('');
-  const ratio = designImage ? (() => { const b = getArtworkMetadata(designImage).bounds; return b.width / b.height; })() : 1;
+  const ratio = designImage ? (() => {
+    try {
+      const b = getArtworkMetadata(designImage)?.bounds;
+      return (b && b.width && b.height) ? (b.width / b.height) : 1;
+    } catch {
+      return 1;
+    }
+  })() : 1;
   useEffect(() => {
     const id = ++sequence.current;
     const buffer = document.createElement('canvas');

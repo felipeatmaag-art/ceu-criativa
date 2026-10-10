@@ -2,12 +2,48 @@ import { PRINT_AREA, lockPrintPlacement } from '@/components/create/printGeometr
 import { getArtworkMetadata } from '@/components/create/artworkMetadata';
 const images = new Map();
 export function loadPrintImage(url) {
-  if (!images.has(url)) images.set(url, new Promise((resolve, reject) => {
-    const image = new Image(); image.crossOrigin = 'anonymous';
-    image.onload = () => resolve(image);
-    image.onerror = () => { images.delete(url); reject(new Error('Não foi possível carregar a imagem do mockup.')); };
-    image.src = url;
-  }));
+  if (!url) return Promise.resolve(null);
+  if (!images.has(url)) {
+    images.set(url, new Promise(async (resolve, reject) => {
+      // 1. Try fetch with CORS first (safest for Canvas and toBlob)
+      try {
+        const response = await fetch(url, { mode: 'cors' });
+        if (response.ok) {
+          const blob = await response.blob();
+          const objectUrl = URL.createObjectURL(blob);
+          const image = new Image();
+          image.onload = () => resolve(image);
+          image.onerror = () => {
+            // If objectUrl failed, fall through to direct load
+            loadDirect();
+          };
+          image.src = objectUrl;
+          return;
+        }
+      } catch {
+        // Fetch failed (network or local), continue to direct Image load
+      }
+
+      function loadDirect() {
+        const image = new Image();
+        image.crossOrigin = 'anonymous';
+        image.onload = () => resolve(image);
+        image.onerror = () => {
+          // Retry without crossOrigin
+          const fallback = new Image();
+          fallback.onload = () => resolve(fallback);
+          fallback.onerror = () => {
+            images.delete(url);
+            reject(new Error('Não foi possível carregar a imagem do mockup.'));
+          };
+          fallback.src = url;
+        };
+        image.src = url;
+      }
+
+      loadDirect();
+    }));
+  }
   return images.get(url);
 }
 export async function renderPrintMockup(canvas, baseUrl, artworkUrl, transform, lockedPlacement) {

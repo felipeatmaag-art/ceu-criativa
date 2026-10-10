@@ -9,6 +9,7 @@ import { ArrowLeft, MapPin, Calendar, Instagram, Twitter, Globe } from 'lucide-r
 import { motion } from 'framer-motion';
 import { Skeleton } from '@/components/ui/skeleton';
 import DesignCard from '@/components/design/DesignCard';
+import { FALLBACK_USERS } from '@/data/catalogFallback';
 
 export default function ArtistProfile() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -17,10 +18,14 @@ export default function ArtistProfile() {
   const { data: artist, isLoading: artistLoading } = useQuery({
     queryKey: ['artist', artistId],
     queryFn: async () => {
-      const users = await base44.entities.User.filter({ id: artistId });
-      return users[0];
+      try {
+        const users = await base44.entities.User.filter({ id: artistId });
+        if (users?.[0]) return users[0];
+      } catch (err) {}
+      return FALLBACK_USERS.find(u => u.id === artistId);
     },
     enabled: !!artistId,
+    initialData: () => FALLBACK_USERS.find(u => u.id === artistId),
   });
 
   const { data: designs = [], isLoading: designsLoading } = useQuery({

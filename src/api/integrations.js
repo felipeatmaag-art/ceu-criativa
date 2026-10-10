@@ -1,21 +1,22 @@
-import { base44 } from './base44Client';
+import { GeminiCore } from './geminiIntegrations';
 
+export const Core = GeminiCore;
 
+export const InvokeLLM = GeminiCore.InvokeLLM;
 
+export const SendEmail = GeminiCore.SendEmail;
 
-export const Core = base44.integrations.Core;
+export const SendSMS = GeminiCore.SendSMS;
 
-export const InvokeLLM = base44.integrations.Core.InvokeLLM;
+export const UploadFile = GeminiCore.UploadFile;
 
-export const SendEmail = base44.integrations.Core.SendEmail;
+export const UploadPrivateFile = GeminiCore.UploadPrivateFile;
 
-export const SendSMS = base44.integrations.Core.SendSMS;
+export const GenerateImage = GeminiCore.GenerateImage;
 
-export const UploadFile = base44.integrations.Core.UploadFile;
+export const ExtractDataFromUploadedFile = GeminiCore.ExtractDataFromUploadedFile;
 
-export const GenerateImage = base44.integrations.Core.GenerateImage;
-
-export const ExtractDataFromUploadedFile = base44.integrations.Core.ExtractDataFromUploadedFile;
+export const EnhancePrompt = GeminiCore.EnhancePrompt;
 
 
 

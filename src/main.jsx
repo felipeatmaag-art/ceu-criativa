@@ -3,10 +3,21 @@ import ReactDOM from 'react-dom/client'
 import App from '@/App.jsx'
 import '@/index.css'
 
+// Defensive filter for environment-level websocket error noise
+const origConsoleError = console.error;
+console.error = function (...args) {
+  const msg = args
+    .map((a) => (typeof a === 'string' ? a : a?.message || String(a || '')))
+    .join(' ')
+    .toLowerCase();
+  if (msg.includes('connect_error') || msg.includes('websocket error') || msg.includes('websocket')) {
+    return;
+  }
+  origConsoleError.apply(console, args);
+};
+
 ReactDOM.createRoot(document.getElementById('root')).render(
-  // <React.StrictMode>
   <App />
-  // </React.StrictMode>,
 )
 
 if (import.meta.hot) {

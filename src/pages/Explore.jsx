@@ -72,19 +72,19 @@ export default function Explore() {
           <div className="flex flex-col lg:flex-row lg:items-center gap-4">
             {/* Search */}
             <div className="relative flex-1 max-w-xl">
-              <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-700" />
+              <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-500" />
               <Input
                 placeholder="Buscar estampas, artistas, tags..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-12 h-12 rounded-xl border-gray-200 focus:border-purple-500 focus:ring-purple-500"
+                className="pl-12 h-12 rounded-xl bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 focus-visible:ring-slate-800"
               />
               {search && (
                 <button
                   onClick={() => setSearch('')}
-                  className="absolute right-4 top-1/2 -translate-y-1/2"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-800"
                 >
-                  <X className="h-4 w-4 text-slate-700" />
+                  <X className="h-4 w-4" />
                 </button>
               )}
             </div>
@@ -92,19 +92,19 @@ export default function Explore() {
             {/* Filters */}
             <div className="flex items-center gap-3">
               <Select value={selectedCollection} onValueChange={setSelectedCollection}>
-                <SelectTrigger className="w-44 h-12 rounded-xl"><SelectValue placeholder="Coleção" /></SelectTrigger>
-                <SelectContent><SelectItem value="all">Todas as coleções</SelectItem>{collections.map((item) => <SelectItem key={item.id} value={item.id}>{item.title}</SelectItem>)}</SelectContent>
+                <SelectTrigger className="w-44 h-12 rounded-xl bg-white border-slate-300 text-slate-900"><SelectValue placeholder="Coleção" /></SelectTrigger>
+                <SelectContent className="bg-white text-slate-900 border-slate-200"><SelectItem value="all">Todas as coleções</SelectItem>{collections.map((item) => <SelectItem key={item.id} value={item.id} className="text-slate-900 focus:bg-slate-100">{item.title}</SelectItem>)}</SelectContent>
               </Select>
               <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-40 h-12 rounded-xl">
+                <SelectTrigger className="w-40 h-12 rounded-xl bg-white border-slate-300 text-slate-900">
                   <SelectValue placeholder="Ordenar" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="-created_date">Mais Recentes</SelectItem>
-                  <SelectItem value="-likes_count">Mais Curtidos</SelectItem>
-                  <SelectItem value="-sales_count">Mais Vendidos</SelectItem>
-                  <SelectItem value="price_base">Menor Preço</SelectItem>
-                  <SelectItem value="-price_base">Maior Preço</SelectItem>
+                <SelectContent className="bg-white text-slate-900 border-slate-200">
+                  <SelectItem value="-created_date" className="text-slate-900 focus:bg-slate-100">Mais Recentes</SelectItem>
+                  <SelectItem value="-likes_count" className="text-slate-900 focus:bg-slate-100">Mais Curtidos</SelectItem>
+                  <SelectItem value="-sales_count" className="text-slate-900 focus:bg-slate-100">Mais Vendidos</SelectItem>
+                  <SelectItem value="price_base" className="text-slate-900 focus:bg-slate-100">Menor Preço</SelectItem>
+                  <SelectItem value="-price_base" className="text-slate-900 focus:bg-slate-100">Maior Preço</SelectItem>
                 </SelectContent>
               </Select>
 

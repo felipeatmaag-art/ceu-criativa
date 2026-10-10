@@ -1,138 +1,87 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { appParams } from '@/lib/app-params';
-import { createAxiosClient } from '@base44/sdk/dist/utils/axios-client';
+import { authService } from '@/services/authService';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoadingAuth, setIsLoadingAuth] = useState(true);
-  const [isLoadingPublicSettings, setIsLoadingPublicSettings] = useState(true);
+  const [user, setUser] = useState(() => authService.getCurrentUser());
+  const [isAuthenticated, setIsAuthenticated] = useState(() => !!authService.getCurrentUser());
+  const [isLoadingAuth, setIsLoadingAuth] = useState(false);
+  const [isLoadingPublicSettings, setIsLoadingPublicSettings] = useState(false);
   const [authError, setAuthError] = useState(null);
-  const [appPublicSettings, setAppPublicSettings] = useState(null); // Contains only { id, public_settings }
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [redirectPathAfterLogin, setRedirectPathAfterLogin] = useState(null);
+  const [appPublicSettings, setAppPublicSettings] = useState({
+    id: appParams.appId || 'seuceu',
+    public_settings: { auth_required: false }
+  });
 
   useEffect(() => {
-    checkAppState();
+    // Escuta mudanças de auth locais
+    const unsubscribe = authService.subscribe((newUser) => {
+      setUser(newUser);
+      setIsAuthenticated(!!newUser);
+    });
+
+    // Escuta evento global para abrir modal de login
+    const handleOpenLogin = (e) => {
+      if (e?.detail?.nextPath) {
+        setRedirectPathAfterLogin(e.detail.nextPath);
+      }
+      setIsLoginModalOpen(true);
+    };
+
+    window.addEventListener('open-ceu-login', handleOpenLogin);
+
+    // Validação inicial do usuário
+    const current = authService.getCurrentUser();
+    if (current) {
+      setUser(current);
+      setIsAuthenticated(true);
+    }
+
+    return () => {
+      unsubscribe();
+      window.removeEventListener('open-ceu-login', handleOpenLogin);
+    };
   }, []);
 
-  const checkAppState = async () => {
-    try {
-      setIsLoadingPublicSettings(true);
-      setAuthError(null);
-      
-      // First, check app public settings (with token if available)
-      // This will tell us if auth is required, user not registered, etc.
-      const appClient = createAxiosClient({
-        baseURL: `/api/apps/public`,
-        headers: {
-          'X-App-Id': appParams.appId
-        },
-        token: appParams.token, // Include token if available
-        interceptResponses: true
-      });
-      
-      try {
-        const publicSettings = await appClient.get(`/prod/public-settings/by-id/${appParams.appId}`);
-        setAppPublicSettings(publicSettings);
-        
-        // If we got the app public settings successfully, check if user is authenticated
-        if (appParams.token) {
-          await checkUserAuth();
-        } else {
-          setIsLoadingAuth(false);
-          setIsAuthenticated(false);
-        }
-        setIsLoadingPublicSettings(false);
-      } catch (appError) {
-        console.error('App state check failed:', appError);
-        
-        // Handle app-level errors
-        if (appError.status === 403 && appError.data?.extra_data?.reason) {
-          const reason = appError.data.extra_data.reason;
-          if (reason === 'auth_required') {
-            setAuthError({
-              type: 'auth_required',
-              message: 'Authentication required'
-            });
-          } else if (reason === 'user_not_registered') {
-            setAuthError({
-              type: 'user_not_registered',
-              message: 'User not registered for this app'
-            });
-          } else {
-            setAuthError({
-              type: reason,
-              message: appError.message
-            });
-          }
-        } else {
-          setAuthError({
-            type: 'unknown',
-            message: appError.message || 'Failed to load app'
-          });
-        }
-        setIsLoadingPublicSettings(false);
-        setIsLoadingAuth(false);
-      }
-    } catch (error) {
-      console.error('Unexpected error:', error);
-      setAuthError({
-        type: 'unknown',
-        message: error.message || 'An unexpected error occurred'
-      });
-      setIsLoadingPublicSettings(false);
-      setIsLoadingAuth(false);
-    }
+  const login = async (email, password) => {
+    const loggedUser = authService.login(email, password);
+    setUser(loggedUser);
+    setIsAuthenticated(true);
+    setIsLoginModalOpen(false);
+    return loggedUser;
   };
 
-  const checkUserAuth = async () => {
-    try {
-      // Now check if the user is authenticated
-      setIsLoadingAuth(true);
-      const currentUser = await base44.auth.me();
-      if (currentUser.access_status === 'disabled') {
-        setUser(currentUser);
-        setIsAuthenticated(false);
-        setAuthError({ type: 'access_disabled', message: 'Access disabled' });
-        setIsLoadingAuth(false);
-        return;
-      }
-      setUser(currentUser);
-      setIsAuthenticated(true);
-      setIsLoadingAuth(false);
-    } catch (error) {
-      console.error('User auth check failed:', error);
-      setIsLoadingAuth(false);
-      setIsAuthenticated(false);
-      
-      // If user auth fails, it might be an expired token
-      if (error.status === 401 || error.status === 403) {
-        setAuthError({
-          type: 'auth_required',
-          message: 'Authentication required'
-        });
-      }
-    }
+  const loginAs = (type) => {
+    const loggedUser = authService.loginAs(type);
+    setUser(loggedUser);
+    setIsAuthenticated(true);
+    setIsLoginModalOpen(false);
+    return loggedUser;
   };
 
-  const logout = (shouldRedirect = true) => {
+  const logout = () => {
+    authService.logout();
     setUser(null);
     setIsAuthenticated(false);
-    
-    if (shouldRedirect) {
-      // Use the SDK's logout method which handles token cleanup and redirect
-      base44.auth.logout(window.location.href);
-    } else {
-      // Just remove the token without redirect
-      base44.auth.logout();
-    }
   };
 
-  const navigateToLogin = () => {
-    // Use the SDK's redirectToLogin method
-    base44.auth.redirectToLogin(window.location.href);
+  const openLoginModal = (nextPath = null) => {
+    if (nextPath) setRedirectPathAfterLogin(nextPath);
+    setIsLoginModalOpen(true);
+  };
+
+  const closeLoginModal = () => {
+    setIsLoginModalOpen(false);
+    setRedirectPathAfterLogin(null);
+  };
+
+  const navigateToLogin = (nextPath) => {
+    openLoginModal(nextPath);
   };
 
   return (
@@ -141,11 +90,19 @@ export const AuthProvider = ({ children }) => {
       isAuthenticated, 
       isLoadingAuth,
       isLoadingPublicSettings,
+      authChecked: true,
       authError,
       appPublicSettings,
+      isLoginModalOpen,
+      redirectPathAfterLogin,
+      openLoginModal,
+      closeLoginModal,
+      login,
+      loginAs,
       logout,
       navigateToLogin,
-      checkAppState
+      checkAppState: async () => {},
+      checkUserAuth: async () => {}
     }}>
       {children}
     </AuthContext.Provider>

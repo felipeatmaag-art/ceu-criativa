@@ -167,6 +167,9 @@ button:focus-visible {
   body {
     @apply bg-background text-foreground;
   }
+  input, textarea, select {
+    color: hsl(var(--foreground));
+  }
 }
 
 @layer utilities {

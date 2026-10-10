@@ -2,6 +2,7 @@ import React from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import HeroCarousel from '@/components/home/HeroCarousel';
+import HomeIntentButtons from '@/components/home/HomeIntentButtons';
 import ProductShowcase from '@/components/home/ProductShowcase';
 import BentoShowcase from '@/components/home/BentoShowcase';
 import FeaturedDesigns from '@/components/home/FeaturedDesigns';
@@ -29,10 +30,17 @@ export default function Home() {
 
   const { data: competitions = [] } = useQuery({
     queryKey: ['active-competitions'],
-    queryFn: () => base44.entities.Competition.filter({ status: 'active' }, '-created_date', 1),
+    queryFn: async () => {
+      try {
+        const res = await base44.entities.Competition.filter({ status: 'active' }, '-created_date', 1);
+        return Array.isArray(res) ? res : [];
+      } catch {
+        return [];
+      }
+    },
   });
 
-  const activeCompetition = competitions[0];
+  const activeCompetition = Array.isArray(competitions) && competitions.length > 0 && typeof competitions[0] === 'object' && competitions[0]?.id ? competitions[0] : null;
 
   const features = [
     {
@@ -60,6 +68,7 @@ export default function Home() {
   return (
     <div className="bg-ceu-cloud text-ceu-navy">
       <HeroCarousel />
+      <HomeIntentButtons />
 
       <div className="bg-ceu-navy">
         <ProductShowcase />

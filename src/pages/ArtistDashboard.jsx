@@ -28,6 +28,7 @@ import FinancialDashboard from '@/components/financial/FinancialDashboard';
 import CategoryBrowser from '@/components/dashboard/CategoryBrowser';
 import MarginCalculator from '@/components/dashboard/MarginCalculator';
 import MarketingSettings from '@/components/dashboard/MarketingSettings';
+import ModernTactileStudioDashboard from '@/components/dashboard/ModernTactileStudioDashboard';
 
 export default function ArtistDashboard() {
   const [tab, setTab] = useState('overview');
@@ -158,7 +159,13 @@ export default function ArtistDashboard() {
           </TabsList>
 
           {/* Overview Tab */}
-          <TabsContent value="overview">
+          <TabsContent value="overview" className="space-y-8">
+            <ModernTactileStudioDashboard
+              user={user}
+              designs={designs}
+              orders={orders}
+              onNavigateTab={setTab}
+            />
             <FinancialDashboard />
             {/* Stats */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">

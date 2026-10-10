@@ -18,6 +18,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import PrintDeliveryPanel from '@/components/production/PrintDeliveryPanel';
+import { pixService } from '@/services/pixService';
 
 export default function MyOrders() {
   const { data: user } = useQuery({
@@ -27,8 +28,18 @@ export default function MyOrders() {
 
   const { data: orders = [], isLoading } = useQuery({
     queryKey: ['my-orders', user?.email],
-    queryFn: () => base44.entities.Order.filter({ customer_email: user?.email }, '-created_date', 50),
-    enabled: !!user,
+    queryFn: async () => {
+      let remote = [];
+      try {
+        if (user?.email) {
+          remote = await base44.entities.Order.filter({ customer_email: user?.email }, '-created_date', 50);
+        }
+      } catch (e) {}
+      const local = pixService.getOrders();
+      const combined = [...(Array.isArray(remote) ? remote : []), ...local];
+      const unique = Array.from(new Map(combined.map(o => [o.id || o.order_number, o])).values());
+      return unique;
+    },
   });
 
   const statusConfig = {

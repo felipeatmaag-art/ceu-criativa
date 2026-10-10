@@ -23,9 +23,14 @@ import CuratorPanel from '@/pages/CuratorPanel';
 import ArtistDashboard from '@/pages/ArtistDashboard';
 import Explore from '@/pages/Explore';
 import ArtistRegistration from '@/pages/ArtistRegistration';
+import Empresas from '@/pages/Empresas';
 import AdminUsers from '@/pages/AdminUsers';
 import AccessDisabled from '@/components/AccessDisabled';
 import ScrollSceneMotion from '@/components/ScrollSceneMotion';
+import Login from '@/pages/Login';
+import LoginModal from '@/components/auth/LoginModal';
+
+import ErrorBoundary from '@/components/common/ErrorBoundary';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -36,28 +41,20 @@ const LayoutWrapper = ({ children, currentPageName }) => Layout ?
   : <>{children}</>;
 
 const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
+  const { isLoadingAuth, isLoadingPublicSettings, authError } = useAuth();
 
   // Show loading spinner while checking app public settings or auth
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center">
+      <div className="fixed inset-0 flex items-center justify-center bg-white/80 z-50">
         <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
       </div>
     );
   }
 
-  // Handle authentication errors
-  if (authError) {
-    if (authError.type === 'user_not_registered') {
-      return <UserNotRegisteredError />;
-    } else if (authError.type === 'access_disabled') {
-      return <AccessDisabled />;
-    } else if (authError.type === 'auth_required') {
-      // Redirect to login automatically
-      navigateToLogin();
-      return null;
-    }
+  // Handle fatal access disabled error only
+  if (authError?.type === 'access_disabled') {
+    return <AccessDisabled />;
   }
 
   // Render the main app
@@ -66,6 +63,11 @@ const AuthenticatedApp = () => {
       <Route path="/" element={
         <LayoutWrapper currentPageName={mainPageKey}>
           <MainPage />
+        </LayoutWrapper>
+      } />
+      <Route path="/login" element={
+        <LayoutWrapper currentPageName="Login">
+          <Login />
         </LayoutWrapper>
       } />
       <Route path="/CheckoutSuccess" element={
@@ -90,10 +92,17 @@ const AuthenticatedApp = () => {
       <Route path="/notifications" element={<LayoutWrapper currentPageName="Notifications"><Notifications /></LayoutWrapper>} />
       <Route path="/curadoria" element={<LayoutWrapper currentPageName="CuratorPanel"><CuratorPanel /></LayoutWrapper>} />
       <Route path="/dashboard" element={<LayoutWrapper currentPageName="ArtistDashboard"><ArtistDashboard /></LayoutWrapper>} />
+      <Route path="/Explore" element={<LayoutWrapper currentPageName="Explore"><Explore /></LayoutWrapper>} />
       <Route path="/Explorar" element={<LayoutWrapper currentPageName="Explore"><Explore /></LayoutWrapper>} />
+      <Route path="/ArtistRegistration" element={<LayoutWrapper currentPageName="ArtistRegistration"><ArtistRegistration /></LayoutWrapper>} />
       <Route path="/cadastrar-artista" element={<LayoutWrapper currentPageName="ArtistRegistration"><ArtistRegistration /></LayoutWrapper>} />
+      <Route path="/criar-loja" element={<LayoutWrapper currentPageName="ArtistRegistration"><ArtistRegistration /></LayoutWrapper>} />
+      <Route path="/Empresas" element={<LayoutWrapper currentPageName="Empresas"><Empresas /></LayoutWrapper>} />
+      <Route path="/empresas" element={<LayoutWrapper currentPageName="Empresas"><Empresas /></LayoutWrapper>} />
+      <Route path="/b2b" element={<LayoutWrapper currentPageName="Empresas"><Empresas /></LayoutWrapper>} />
+      <Route path="/pj" element={<LayoutWrapper currentPageName="Empresas"><Empresas /></LayoutWrapper>} />
       <Route path="/admin/users" element={<LayoutWrapper currentPageName="AdminUsers"><AdminUsers /></LayoutWrapper>} />
-      <Route path="/:storeSlug" element={
+      <Route path="/loja/:storeSlug" element={
         <LayoutWrapper currentPageName="Storefront">
           <Storefront />
         </LayoutWrapper>
@@ -109,6 +118,11 @@ const AuthenticatedApp = () => {
           }
         />
       ))}
+      <Route path="/:storeSlug" element={
+        <LayoutWrapper currentPageName="Storefront">
+          <Storefront />
+        </LayoutWrapper>
+      } />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
@@ -118,20 +132,23 @@ const AuthenticatedApp = () => {
 function App() {
 
   return (
-    <AuthProvider>
-      <QueryClientProvider client={queryClientInstance}>
-        <Router>
-          <NavigationTracker />
-          <ScrollSceneMotion />
-          <Routes>
-            <Route path="/oauth/consent" element={<OAuthConsent />} />
-            <Route path="/*" element={<AuthenticatedApp />} />
-          </Routes>
-        </Router>
-        <Toaster />
-        <VisualEditAgent />
-      </QueryClientProvider>
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <QueryClientProvider client={queryClientInstance}>
+          <Router>
+            <NavigationTracker />
+            <ScrollSceneMotion />
+            <LoginModal />
+            <Routes>
+              <Route path="/oauth/consent" element={<OAuthConsent />} />
+              <Route path="/*" element={<AuthenticatedApp />} />
+            </Routes>
+          </Router>
+          <Toaster />
+          <VisualEditAgent />
+        </QueryClientProvider>
+      </AuthProvider>
+    </ErrorBoundary>
   )
 }
 
