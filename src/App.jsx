@@ -130,11 +130,10 @@ const AuthenticatedApp = () => {
 
 
 function App() {
-
   return (
     <ErrorBoundary>
-      <AuthProvider>
-        <QueryClientProvider client={queryClientInstance}>
+      <QueryClientProvider client={queryClientInstance}>
+        <AuthProvider>
           <Router>
             <NavigationTracker />
             <ScrollSceneMotion />
@@ -146,8 +145,8 @@ function App() {
           </Router>
           <Toaster />
           <VisualEditAgent />
-        </QueryClientProvider>
-      </AuthProvider>
+        </AuthProvider>
+      </QueryClientProvider>
     </ErrorBoundary>
   )
 }

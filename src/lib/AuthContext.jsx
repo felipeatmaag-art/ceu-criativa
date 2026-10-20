@@ -64,6 +64,14 @@ export const AuthProvider = ({ children }) => {
     return loggedUser;
   };
 
+  const register = async (userData) => {
+    const newUser = authService.register(userData);
+    setUser(newUser);
+    setIsAuthenticated(true);
+    setIsLoginModalOpen(false);
+    return newUser;
+  };
+
   const logout = () => {
     authService.logout();
     setUser(null);
@@ -99,6 +107,7 @@ export const AuthProvider = ({ children }) => {
       closeLoginModal,
       login,
       loginAs,
+      register,
       logout,
       navigateToLogin,
       checkAppState: async () => {},

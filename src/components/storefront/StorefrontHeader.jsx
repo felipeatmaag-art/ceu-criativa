@@ -8,7 +8,7 @@ export default function StorefrontHeader({ artist }) {
         <div className="h-32 w-32 overflow-hidden rounded-2xl border-4 border-card bg-ceu-aqua shadow-xl">
           {artist.avatar_url ? <img src={artist.avatar_url} alt={artist.artist_name || artist.full_name} className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center text-4xl font-bold text-ceu-cloud">{(artist.artist_name || artist.full_name || 'S')[0]}</div>}
         </div>
-        <div className="flex-1"><p className="text-sm font-bold text-ceu-navy">Loja oficial SEL</p><h1 className="text-3xl font-bold text-ceu-navy">{artist.store_name || artist.artist_name || artist.full_name}</h1><p className="mt-1 text-sm text-muted-foreground">por {artist.artist_name || artist.full_name}</p></div>
+        <div className="flex-1"><p className="text-sm font-bold text-ceu-navy">Loja Oficial Céu Criativa</p><h1 className="text-3xl font-bold text-ceu-navy">{artist.store_name || artist.artist_name || artist.full_name}</h1><p className="mt-1 text-sm text-muted-foreground">por {artist.artist_name || artist.full_name}</p></div>
       </div>
       {artist.bio && <p className="mt-6 max-w-3xl text-muted-foreground">{artist.bio}</p>}
       <div className="mt-5 flex flex-wrap gap-3">

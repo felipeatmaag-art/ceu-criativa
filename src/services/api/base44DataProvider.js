@@ -7,8 +7,8 @@ const entity = (name) => {
 };
 
 export const base44DataProvider = {
-  list: (name, options) => entity(name).list(options.sort, options.limit, options.skip),
-  filter: (name, query, options) => entity(name).filter(query, options.sort, options.limit, options.skip),
+  list: (name, options) => entity(name).list(options?.sort, options?.limit, options?.skip),
+  filter: (name, query, options) => entity(name).filter(query, options?.sort, options?.limit, options?.skip),
   get: (name, id) => entity(name).get(id),
   create: (name, data) => entity(name).create(data),
   bulkCreate: (name, data) => entity(name).bulkCreate(data),

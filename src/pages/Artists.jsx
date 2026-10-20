@@ -5,7 +5,6 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { 
   Search, 
   BadgeCheck, 
@@ -13,8 +12,7 @@ import {
   Heart,
   Instagram,
   Twitter,
-  Globe,
-  TrendingUp
+  Globe
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -36,8 +34,16 @@ export default function Artists() {
     initialData: FALLBACK_USERS,
   });
 
-  // Filter only users who are artists (exclude admin account)
-  const artists = users.filter(u => u.artist_name && u.id !== 'admin-ceu-gestor' && u.store_slug !== 'admin');
+  // Filter only users who are artists (exclude master admin)
+  const artists = users.filter(u => 
+    u.artist_name && 
+    u.role !== 'admin' && 
+    u.app_role !== 'master' && 
+    u.id !== 'admin-ceu-gestor' && 
+    u.id !== 'admin-master-ceu' && 
+    u.email !== 'admin@seuceu.com.br' &&
+    u.store_slug !== 'admin'
+  );
   
   const filteredArtists = artists.filter(artist => 
     artist.artist_name?.toLowerCase().includes(search.toLowerCase()) ||

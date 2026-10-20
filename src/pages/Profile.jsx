@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
@@ -14,13 +14,15 @@ import {
   BadgeCheck,
   Palette,
   DollarSign,
-  Heart
+  Heart,
+  ShieldCheck
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import FinancialDashboard from '@/components/financial/FinancialDashboard';
+import UserPixTransactionsDashboard from '@/components/financial/UserPixTransactionsDashboard';
 import StoreBrandingFields from '@/components/profile/StoreBrandingFields';
 import StoreContactFields from '@/components/profile/StoreContactFields';
+import PixKeyConfigForm from '@/components/financial/PixKeyConfigForm';
 import ProfileTabs from '@/components/profile/ProfileTabs';
 import CatalogTab from '@/components/profile/CatalogTab';
 import BatchUploadTab from '@/components/profile/BatchUploadTab';
@@ -136,12 +138,38 @@ export default function Profile() {
           </p>
         </motion.div>
 
+        {(user?.role === 'admin' || user?.app_role === 'master' || user?.id === 'admin-master-ceu') && (
+          <div className="mb-8 p-5 sm:p-6 rounded-3xl bg-slate-900 text-white flex flex-col md:flex-row items-center justify-between gap-4 border border-slate-800 shadow-xl">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
+                <ShieldCheck className="w-6 h-6" />
+              </div>
+              <div>
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[11px] font-bold">
+                  🛡️ Modo Administrador Master
+                </div>
+                <h2 className="text-base sm:text-lg font-bold text-white mt-1">
+                  Você está logado como Administrador Master da Plataforma
+                </h2>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  O Administrador Master administra todas as lojas, aprova estampas, controla o estoque físico e configura pagamentos no Painel Master.
+                </p>
+              </div>
+            </div>
+            <Link to="/ProductAdmin">
+              <Button className="rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs h-11 px-5 shadow-lg shadow-emerald-600/30 whitespace-nowrap">
+                Ir para o Painel de Controle Master
+              </Button>
+            </Link>
+          </div>
+        )}
+
         <ProfileTabs active={activeTab} onChange={handleTabChange} publishedCount={artistDesigns.length} />
 
-        {activeTab === 'sales' && (
+        {(activeTab === 'sales' || activeTab === 'financial') && (
           <div className="space-y-8">
+            <UserPixTransactionsDashboard />
             <ModernTactileStudioDashboard user={user} designs={artistDesigns} />
-            <FinancialDashboard />
           </div>
         )}
 
@@ -259,7 +287,7 @@ export default function Profile() {
                         placeholder="Seu nome completo"
                         value={formData.full_name || ''}
                         onChange={(e) => setFormData({...formData, full_name: e.target.value})}
-                        className="mt-2 h-12 rounded-xl"
+                        className="mt-2 h-12 rounded-xl bg-white border-slate-300 text-slate-900"
                       />
                     </div>
                     <div>
@@ -269,7 +297,7 @@ export default function Profile() {
                         placeholder="seu.email@exemplo.com"
                         value={formData.email || ''}
                         onChange={(e) => setFormData({...formData, email: e.target.value})}
-                        className="mt-2 h-12 rounded-xl"
+                        className="mt-2 h-12 rounded-xl bg-white border-slate-300 text-slate-900"
                       />
                     </div>
                   </div>
@@ -283,7 +311,7 @@ export default function Profile() {
                       placeholder="Como você quer ser conhecido?"
                       value={formData.artist_name}
                       onChange={(e) => setFormData({...formData, artist_name: e.target.value})}
-                      className="mt-2 h-12 rounded-xl"
+                      className="mt-2 h-12 rounded-xl bg-white border-slate-300 text-slate-900"
                     />
                   </div>
 
@@ -294,9 +322,21 @@ export default function Profile() {
                       placeholder="Conte sua história como artista..."
                       value={formData.bio}
                       onChange={(e) => setFormData({...formData, bio: e.target.value})}
-                      className="mt-2 h-32 rounded-xl resize-none"
+                      className="mt-2 h-32 rounded-xl resize-none bg-white border-slate-300 text-slate-900"
                     />
                   </div>
+
+                  {/* Configurações Pix & Repasses Atma */}
+                  <PixKeyConfigForm 
+                    initialData={user || formData} 
+                    onSaveSuccess={(saved) => {
+                      setFormData(prev => ({
+                        ...prev,
+                        pix_key: saved.pix_key,
+                        pix_key_type: saved.pix_key_type
+                      }));
+                    }}
+                  />
 
                   <StoreContactFields data={formData} onChange={(field, value) => setFormData({...formData, [field]: value})} />
 

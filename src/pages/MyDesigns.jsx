@@ -22,7 +22,8 @@ import {
   CheckSquare,
   Square,
   ShieldCheck,
-  X
+  X,
+  UploadCloud
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -106,6 +107,32 @@ export default function MyDesigns() {
     return designs.filter(d => selectedIds.includes(d.id));
   }, [designs, selectedIds]);
 
+  // Zerar Todas as Estampas (Iniciar catálogo limpo)
+  const handleWipeAllDesigns = async () => {
+    if (!window.confirm('Atenção: Deseja excluir TODAS as estampas e iniciar o catálogo 100% zerado para você cadastrar as suas próprias artes?')) {
+      return;
+    }
+    setIsBulkDeleting(true);
+    try {
+      await base44.entities.Design.bulkDelete(['all']);
+      setSelectedIds([]);
+      await queryClient.invalidateQueries();
+      setFeedbackMessage({
+        type: 'success',
+        text: '✓ Catálogo zerado com sucesso! Todas as estampas foram excluídas.'
+      });
+      setTimeout(() => setFeedbackMessage(null), 5000);
+    } catch (err) {
+      console.error('Erro ao zerar catálogo:', err);
+      setFeedbackMessage({
+        type: 'error',
+        text: 'Erro ao zerar estampas. Tente novamente.'
+      });
+    } finally {
+      setIsBulkDeleting(false);
+    }
+  };
+
   // Excluir em Lote
   const handleConfirmBulkDelete = async () => {
     if (selectedIds.length === 0) return;
@@ -115,7 +142,7 @@ export default function MyDesigns() {
       const count = selectedIds.length;
       setSelectedIds([]);
       setBulkDeleteDialogOpen(false);
-      await queryClient.invalidateQueries({ queryKey: ['my-designs'] });
+      await queryClient.invalidateQueries();
       setFeedbackMessage({
         type: 'success',
         text: `✓ ${count} ${count === 1 ? 'estampa foi excluída' : 'estampas foram excluídas'} com sucesso!`
@@ -373,6 +400,12 @@ export default function MyDesigns() {
                 </Button>
               </Link>
             )}
+            <Link to="/Profile?tab=upload">
+              <Button variant="outline" className="rounded-xl border-slate-300 text-xs font-bold h-10 bg-white hover:bg-slate-50 text-slate-800 shadow-sm">
+                <UploadCloud className="w-4 h-4 mr-1.5 text-emerald-600" />
+                Subir em Lote (PNG)
+              </Button>
+            </Link>
             <Link to={createPageUrl('Create')}>
               <Button className="ceu-gradient text-white rounded-xl text-xs font-bold h-10 shadow-md shadow-purple-600/20">
                 <Plus className="w-4 h-4 mr-1.5" />
@@ -429,6 +462,19 @@ export default function MyDesigns() {
                       Selecionar Todas ({designs.length})
                     </>
                   )}
+                </Button>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleWipeAllDesigns}
+                  disabled={isBulkDeleting}
+                  className="rounded-xl h-9 text-xs font-bold text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                  title="Apagar todas as estampas e iniciar com o catálogo 100% limpo"
+                >
+                  <Trash2 className="w-3.5 h-3.5 mr-1" />
+                  Zerar Todas as Estampas
                 </Button>
 
                 {selectedIds.length > 0 && (

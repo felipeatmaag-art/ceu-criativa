@@ -1,0 +1,29 @@
+{
+  "pixKey": "felipeatmaag@gmail.com",
+  "pixKeyType": "email",
+  "merchantName": "FELIPE SILVERIO CEU",
+  "merchantCity": "BALNEARIO CAMBORIU",
+  "whatsapp": "5547999999999",
+  "cieloMerchantId": "",
+  "cieloMerchantKey": "",
+  "cieloEnvironment": "sandbox",
+  "cieloSoftDescriptor": "CEU CRIATIVA",
+  "cieloMaxInstallments": 12,
+  "splitEnabled": true,
+  "platformFeeType": "percentage",
+  "platformFeeValue": 15,
+  "partnerPayoutMode": "cielo_split",
+  "subordinatedPartners": [
+    {
+      "id": "sub_artist_001",
+      "name": "Ateliê do Artista Master",
+      "document": "12.345.678/0001-90",
+      "subordinatedMerchantId": "sub-cielo-001",
+      "bankAccount": "Banco Nubank (260) - Ag: 0001 - CC: 987654-3",
+      "pixKey": "felipeatmaag@gmail.com",
+      "commissionPercent": 85,
+      "status": "active"
+    }
+  ],
+  "updatedAt": "2026-10-12T16:00:00.000Z"
+}

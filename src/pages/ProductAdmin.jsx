@@ -6,33 +6,57 @@ import ProductCatalogList from '@/components/products/ProductCatalogList';
 import ProductCatalogDialog from '@/components/products/ProductCatalogDialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AdminFinancialDashboard from '@/components/financial/AdminFinancialDashboard';
+import AdminPaymentGatewayAndSplitManager from '@/components/admin/AdminPaymentGatewayAndSplitManager';
+import AdminInventoryManager from '@/components/products/AdminInventoryManager';
+import CentralizedUsersAndStoresManager from '@/components/admin/CentralizedUsersAndStoresManager';
+import AdminOrdersManager from '@/components/products/AdminOrdersManager';
+import BatchUploadTab from '@/components/profile/BatchUploadTab';
+import { useAuth } from '@/lib/AuthContext';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
 import {
   BulkDeleteDialog,
   BulkEditDialog,
   SingleEditDialog,
 } from '@/components/products/BulkDesignActionsModal';
 import { 
-  Shirt, 
+  Shirt,
+  Boxes,
+  Users,
+  ShoppingBag, 
   Palette, 
-  DollarSign, 
   Search, 
   CheckCircle2, 
   Clock, 
   Sparkles, 
-  RefreshCw,
-  Trash2,
-  Pencil,
-  Sliders,
-  CheckCheck,
-  CheckSquare,
-  Square,
-  X
+  RefreshCw, 
+  Trash2, 
+  Pencil, 
+  Sliders, 
+  CheckCheck, 
+  CheckSquare, 
+  Square, 
+  X, 
+  UploadCloud,
+  ShieldCheck,
+  ShieldAlert,
+  BarChart3,
+  KeyRound,
+  LogIn,
+  CreditCard
 } from 'lucide-react';
 import { createPageUrl } from '@/utils';
 
 export default function ProductAdmin() {
+  const { user, loginAs } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const currentTab = searchParams.get('tab') || 'designs';
 
@@ -45,8 +69,11 @@ export default function ProductAdmin() {
   const [designs, setDesigns] = useState([]);
   const [loadingDesigns, setLoadingDesigns] = useState(true);
   const [designSearch, setDesignSearch] = useState('');
-  const [designStatusFilter, setDesignStatusFilter] = useState('ALL');
+  const [designStatusFilter, setDesignStatusFilter] = useState(searchParams.get('status') || 'ALL');
   const [designCategoryFilter, setDesignCategoryFilter] = useState('ALL');
+
+  // Modal de upload em lote
+  const [isBatchUploadOpen, setIsBatchUploadOpen] = useState(false);
 
   // Seleção múltipla para ações em lote
   const [selectedDesignIds, setSelectedDesignIds] = useState([]);
@@ -60,6 +87,7 @@ export default function ProductAdmin() {
   const [isBulkUpdating, setIsBulkUpdating] = useState(false);
 
   const [editingDesign, setEditingDesign] = useState(null);
+  const pendingCount = designs.filter((d) => d.status === 'pendente').length;
   const [isSavingSingle, setIsSavingSingle] = useState(false);
 
   const loadProducts = () => {
@@ -83,6 +111,13 @@ export default function ProductAdmin() {
     loadProducts();
     loadDesigns();
   }, []);
+
+  useEffect(() => {
+    const statusParam = searchParams.get('status');
+    if (statusParam) {
+      setDesignStatusFilter(statusParam);
+    }
+  }, [searchParams]);
 
   const createProduct = (product) => setProducts((items) => [product, ...items]);
   const updateProduct = (updated) => setProducts((items) => items.map((item) => (item.id === updated.id ? updated : item)));
@@ -126,6 +161,32 @@ export default function ProductAdmin() {
   const selectedDesignsObjects = useMemo(() => {
     return designs.filter((d) => selectedDesignIds.includes(d.id));
   }, [designs, selectedDesignIds]);
+
+  // Zerar todas as estampas do catálogo
+  const handleWipeAllDesigns = async () => {
+    if (!window.confirm('Atenção: Deseja apagar TODAS as estampas cadastradas no catálogo da loja para iniciar 100% zerado?')) {
+      return;
+    }
+    setIsBulkDeleting(true);
+    try {
+      await base44.entities.Design.bulkDelete(['all']);
+      setDesigns([]);
+      setSelectedDesignIds([]);
+      setFeedbackMessage({
+        type: 'success',
+        text: '✓ Catálogo zerado com sucesso! Todas as estampas foram excluídas.'
+      });
+      setTimeout(() => setFeedbackMessage(null), 5000);
+    } catch (err) {
+      console.error('Erro ao zerar estampas:', err);
+      setFeedbackMessage({
+        type: 'error',
+        text: 'Erro ao zerar estampas. Tente novamente.'
+      });
+    } finally {
+      setIsBulkDeleting(false);
+    }
+  };
 
   // Ação em lote: EXCLUIR
   const handleConfirmBulkDelete = async () => {
@@ -239,11 +300,30 @@ export default function ProductAdmin() {
       );
       setFeedbackMessage({
         type: 'success',
-        text: '✓ Estampa aprovada com sucesso!'
+        text: '✓ Estampa aprovada com sucesso! Ela já está visível na vitrine pública para compra.'
       });
-      setTimeout(() => setFeedbackMessage(null), 3000);
+      setTimeout(() => setFeedbackMessage(null), 4000);
     } catch (err) {
       console.error('Erro ao aprovar estampa:', err);
+    }
+  };
+
+  const handleRejectDesign = async (designId) => {
+    try {
+      await base44.entities.Design.update(designId, {
+        status: 'rejeitado',
+        rejected_date: new Date().toISOString(),
+      });
+      setDesigns((prev) =>
+        prev.map((d) => (d.id === designId ? { ...d, status: 'rejeitado' } : d))
+      );
+      setFeedbackMessage({
+        type: 'success',
+        text: 'Estampa foi rejeitada e removida da fila de aprovação.'
+      });
+      setTimeout(() => setFeedbackMessage(null), 4000);
+    } catch (err) {
+      console.error('Erro ao rejeitar estampa:', err);
     }
   };
 
@@ -278,45 +358,190 @@ export default function ProductAdmin() {
     setBulkDeleteDialogOpen(true);
   };
 
+  // Verificação de Acesso: Interface exclusiva para admin@seuceu.com.br
+  const isMasterUser = user && (user.role === 'admin' || user.app_role === 'master' || user.email === 'admin@seuceu.com.br' || user.id === 'admin-master-ceu');
+
+  if (!user) {
+    return (
+      <div className="min-h-[75vh] flex flex-col items-center justify-center px-4 py-16 text-center bg-ceu-cloud">
+        <div className="max-w-md w-full bg-white rounded-3xl p-8 border border-slate-200 shadow-xl space-y-4">
+          <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-600 mx-auto shadow-inner">
+            <ShieldCheck className="w-8 h-8" />
+          </div>
+          <h1 className="text-2xl font-black text-slate-900">
+            Painel de Administração Master
+          </h1>
+          <p className="text-xs text-slate-600 leading-relaxed">
+            Área de controle geral da Céu Criativa para gerenciamento centralizado de usuários e lojas, aprovação de estampas, controle de estoque total e configuração global de chaves Pix.
+          </p>
+          <div className="pt-2 space-y-2">
+            <Button
+              onClick={() => loginAs('admin')}
+              className="w-full h-11 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs gap-2"
+            >
+              <KeyRound className="w-4 h-4 text-emerald-400" />
+              Entrar como admin@seuceu.com.br (1 Clique)
+            </Button>
+            <Link to="/login" className="block">
+              <Button variant="outline" className="w-full h-11 rounded-xl border-slate-300 text-xs font-bold gap-2">
+                <LogIn className="w-4 h-4" />
+                Digitar E-mail e Senha
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isMasterUser) {
+    return (
+      <div className="min-h-[70vh] flex flex-col items-center justify-center px-4 py-16 text-center bg-ceu-cloud">
+        <div className="max-w-md w-full bg-white rounded-3xl p-8 border border-slate-200 shadow-xl space-y-4">
+          <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-600 mx-auto">
+            <ShieldAlert className="w-8 h-8" />
+          </div>
+          <h1 className="text-2xl font-black text-slate-900">
+            Acesso Restrito ao Administrador
+          </h1>
+          <p className="text-xs text-slate-600 leading-relaxed">
+            Esta interface de administração é restrita exclusivamente à conta Master (<strong>admin@seuceu.com.br</strong>). Você está conectado como <strong>{user.email}</strong>.
+          </p>
+          <div className="pt-2">
+            <Button
+              onClick={() => loginAs('admin')}
+              className="w-full h-11 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs gap-2"
+            >
+              <ShieldCheck className="w-4 h-4 text-emerald-400" />
+              Alternar para Administrador Master
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen overflow-x-hidden bg-ceu-cloud px-4 py-8 sm:py-12">
       <div className="mx-auto max-w-7xl">
+        {/* BANNER DE IDENTIFICAÇÃO MASTER EXCLUSIVO */}
+        <div className="mb-8 p-5 sm:p-6 rounded-3xl bg-slate-900 text-white flex flex-col md:flex-row items-center justify-between gap-4 border border-slate-800 shadow-xl">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0 shadow-inner">
+              <ShieldCheck className="w-6 h-6" />
+            </div>
+            <div>
+              <div className="inline-flex items-center gap-2">
+                <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-extrabold uppercase tracking-wider border border-emerald-500/30">
+                  Painel Exclusivo de Administração
+                </span>
+                <span className="text-emerald-400 font-mono text-[11px] font-bold">
+                  admin@seuceu.com.br
+                </span>
+              </div>
+              <h1 className="text-xl sm:text-2xl font-black text-white mt-1">
+                Controle Geral da Plataforma Céu Criativa
+              </h1>
+              <p className="text-xs text-slate-400 mt-0.5 max-w-2xl">
+                Gerenciamento centralizado de usuários e lojas, aprovação de estampas pendentes, visualização de estoque físico total e chave Pix global.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 self-start md:self-auto">
+            <Badge className="bg-emerald-500/10 text-emerald-300 border-emerald-500/30 text-xs py-1 px-3">
+              ● Gestor Geral (Sem Loja Individual)
+            </Badge>
+          </div>
+        </div>
+
         <Tabs
-          value={currentTab}
+          value={currentTab === 'stores' ? 'users' : currentTab}
           onValueChange={(val) => setSearchParams({ tab: val })}
         >
           {/* Navegação entre abas */}
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
-            <TabsList className="rounded-2xl bg-white p-1 border border-slate-200/80 shadow-sm h-12">
+            <TabsList className="rounded-2xl bg-white p-1 border border-slate-200/80 shadow-sm h-auto flex flex-wrap gap-1">
               <TabsTrigger 
                 value="designs" 
-                className="rounded-xl px-5 py-2 font-bold text-xs data-[state=active]:bg-slate-900 data-[state=active]:text-white"
+                className="rounded-xl px-4 py-2 font-bold text-xs data-[state=active]:bg-slate-900 data-[state=active]:text-white flex items-center gap-1.5"
               >
-                <Palette className="w-4 h-4 mr-2 text-purple-500" />
-                Catálogo de Estampas ({designs.length})
+                <Palette className="w-4 h-4 text-purple-500" />
+                <span>Aprovação de Estampas</span>
+                {pendingCount > 0 && (
+                  <span className="px-1.5 py-0.5 rounded-full bg-amber-500 text-white text-[10px] font-black animate-pulse">
+                    {pendingCount}
+                  </span>
+                )}
               </TabsTrigger>
+
+              <TabsTrigger 
+                value="users" 
+                className="rounded-xl px-4 py-2 font-bold text-xs data-[state=active]:bg-slate-900 data-[state=active]:text-white flex items-center gap-1.5"
+              >
+                <Users className="w-4 h-4 text-pink-500" />
+                <span>Usuários &amp; Lojas</span>
+              </TabsTrigger>
+
+              <TabsTrigger 
+                value="inventory" 
+                className="rounded-xl px-4 py-2 font-bold text-xs data-[state=active]:bg-slate-900 data-[state=active]:text-white flex items-center gap-1.5"
+              >
+                <Boxes className="w-4 h-4 text-emerald-500" />
+                <span>Estoque Total</span>
+              </TabsTrigger>
+
+              <TabsTrigger 
+                value="payments" 
+                className="rounded-xl px-4 py-2 font-bold text-xs data-[state=active]:bg-slate-900 data-[state=active]:text-white flex items-center gap-1.5"
+              >
+                <CreditCard className="w-4 h-4 text-blue-500" />
+                <span>Gateway &amp; Split Cielo</span>
+              </TabsTrigger>
+
+              <TabsTrigger 
+                value="orders" 
+                className="rounded-xl px-4 py-2 font-bold text-xs data-[state=active]:bg-slate-900 data-[state=active]:text-white flex items-center gap-1.5"
+              >
+                <ShoppingBag className="w-4 h-4 text-sky-500" />
+                <span>Pedidos</span>
+              </TabsTrigger>
+
               <TabsTrigger 
                 value="catalog" 
-                className="rounded-xl px-5 py-2 font-bold text-xs data-[state=active]:bg-slate-900 data-[state=active]:text-white"
+                className="rounded-xl px-4 py-2 font-bold text-xs data-[state=active]:bg-slate-900 data-[state=active]:text-white flex items-center gap-1.5"
               >
-                <Shirt className="w-4 h-4 mr-2 text-blue-500" />
-                Modelos Base de Roupas ({products.length})
+                <Shirt className="w-4 h-4 text-blue-500" />
+                <span>Modelos Base</span>
               </TabsTrigger>
+
               <TabsTrigger 
                 value="finance" 
-                className="rounded-xl px-5 py-2 font-bold text-xs data-[state=active]:bg-slate-900 data-[state=active]:text-white"
+                className="rounded-xl px-4 py-2 font-bold text-xs data-[state=active]:bg-slate-900 data-[state=active]:text-white flex items-center gap-1.5"
               >
-                <DollarSign className="w-4 h-4 mr-2 text-emerald-500" />
-                Financeiro
+                <BarChart3 className="w-4 h-4 text-purple-500" />
+                <span>Relatórios Financeiros</span>
               </TabsTrigger>
             </TabsList>
 
-            <Link to={createPageUrl('Create')}>
-              <Button className="rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs h-10 px-4 shadow-md shadow-purple-600/20">
-                <Sparkles className="w-4 h-4 mr-1.5" />
-                Criar Nova Estampa
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                type="button"
+                onClick={() => setIsBatchUploadOpen(true)}
+                variant="outline"
+                className="rounded-xl border-purple-300 text-purple-700 hover:bg-purple-50 font-bold text-xs h-10 px-3.5 shadow-xs"
+              >
+                <UploadCloud className="w-4 h-4 mr-1.5 text-purple-600" />
+                Subir em Lote
               </Button>
-            </Link>
+
+              <Link to={createPageUrl('Create')}>
+                <Button className="rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs h-10 px-4 shadow-md shadow-purple-600/20">
+                  <Sparkles className="w-4 h-4 mr-1.5" />
+                  Criar Nova Estampa
+                </Button>
+              </Link>
+            </div>
           </div>
 
           {/* Feedback Toast Banner */}
@@ -397,6 +622,19 @@ export default function ProductAdmin() {
                         Selecionar Todas ({filteredDesigns.length})
                       </>
                     )}
+                  </Button>
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleWipeAllDesigns}
+                    disabled={isBulkDeleting}
+                    className="rounded-xl h-9 text-xs font-bold text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                    title="Excluir todas as estampas de demonstração para começar com o catálogo limpo"
+                  >
+                    <Trash2 className="w-3.5 h-3.5 mr-1" />
+                    Zerar Todas as Estampas
                   </Button>
 
                   {selectedDesignIds.length > 0 ? (
@@ -514,6 +752,17 @@ export default function ProductAdmin() {
                   }`}
                 >
                   Rascunhos ({designs.filter((d) => d.status === 'rascunho').length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDesignStatusFilter('rejeitado')}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                    designStatusFilter === 'rejeitado'
+                      ? 'bg-rose-600 text-white'
+                      : 'text-slate-600 hover:bg-slate-100'
+                  }`}
+                >
+                  Rejeitadas ({designs.filter((d) => d.status === 'rejeitado').length})
                 </button>
               </div>
 
@@ -651,14 +900,25 @@ export default function ProductAdmin() {
                         {/* Botões de Ação Individual */}
                         <div className="space-y-1.5 pt-1">
                           {!isApproved && (
-                            <Button
-                              type="button"
-                              size="sm"
-                              onClick={() => handleApproveDesign(design.id)}
-                              className="w-full h-7 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px]"
-                            >
-                              ✓ Aprovar Estampa
-                            </Button>
+                            <div className="grid grid-cols-2 gap-1.5">
+                              <Button
+                                type="button"
+                                size="sm"
+                                onClick={() => handleApproveDesign(design.id)}
+                                className="h-8 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-xs"
+                              >
+                                ✓ Aprovar
+                              </Button>
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleRejectDesign(design.id)}
+                                className="h-8 rounded-xl border-red-300 text-red-600 hover:bg-red-50 font-bold text-xs"
+                              >
+                                ✕ Rejeitar
+                              </Button>
+                            </div>
                           )}
 
                           <div className="grid grid-cols-2 gap-1.5">
@@ -727,13 +987,73 @@ export default function ProductAdmin() {
           </TabsContent>
 
           {/* ========================================================================= */}
-          {/* TAB 3: FINANCEIRO */}
+          {/* TAB: ESTOQUE TOTAL FÍSICO */}
           {/* ========================================================================= */}
-          <TabsContent value="finance">
+          <TabsContent value="inventory" className="space-y-6">
+            <AdminInventoryManager />
+          </TabsContent>
+
+          {/* ========================================================================= */}
+          {/* TAB: GERENCIAMENTO CENTRALIZADO DE USUÁRIOS E LOJAS */}
+          {/* ========================================================================= */}
+          <TabsContent value="users" className="space-y-6">
+            <CentralizedUsersAndStoresManager />
+          </TabsContent>
+          <TabsContent value="stores" className="space-y-6">
+            <CentralizedUsersAndStoresManager />
+          </TabsContent>
+
+          {/* ========================================================================= */}
+          {/* TAB: CONFIGURAÇÕES MASTER DE GATEWAY & SPLIT CIELO */}
+          {/* ========================================================================= */}
+          <TabsContent value="payments" className="space-y-6">
+            <AdminPaymentGatewayAndSplitManager />
+          </TabsContent>
+          <TabsContent value="pix" className="space-y-6">
+            <AdminPaymentGatewayAndSplitManager />
+          </TabsContent>
+
+          {/* ========================================================================= */}
+          {/* TAB: PEDIDOS DA PLATAFORMA */}
+          {/* ========================================================================= */}
+          <TabsContent value="orders" className="space-y-6">
+            <AdminOrdersManager />
+          </TabsContent>
+
+          {/* ========================================================================= */}
+          {/* TAB: RELATÓRIOS FINANCEIROS */}
+          {/* ========================================================================= */}
+          <TabsContent value="finance" className="space-y-8">
             <AdminFinancialDashboard />
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* DIÁLOGO: SUBIR ESTAMPAS EM LOTE */}
+      <Dialog open={isBatchUploadOpen} onOpenChange={setIsBatchUploadOpen}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto rounded-3xl p-6">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-black text-slate-900">
+              Upload de Estampas em Lote
+            </DialogTitle>
+            <DialogDescription className="text-xs text-slate-500">
+              Suba múltiplos arquivos PNG com fundo transparente para adicionar estampas diretamente ao catálogo.
+            </DialogDescription>
+          </DialogHeader>
+          <BatchUploadTab
+            user={user || { id: 'admin-master-ceu', full_name: 'Administrador Master', artist_name: 'Céu Criativa' }}
+            onComplete={() => {
+              setIsBatchUploadOpen(false);
+              loadDesigns();
+              setFeedbackMessage({
+                type: 'success',
+                text: '✓ Estampas enviadas com sucesso! Elas já constam no catálogo para aprovação.'
+              });
+              setTimeout(() => setFeedbackMessage(null), 4000);
+            }}
+          />
+        </DialogContent>
+      </Dialog>
 
       {/* DIÁLOGOS DE AÇÕES EM LOTE E INDIVIDUAL */}
       <BulkDeleteDialog

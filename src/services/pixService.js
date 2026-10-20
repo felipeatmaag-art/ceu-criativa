@@ -1,21 +1,45 @@
 /**
- * Serviço Oficial de Pagamento Pix e Checkout da Céu Criativa
- * Compatível com o padrão EMV do Banco Central do Brasil (BACEN)
- * Gera QR Code e código Pix Copia e Cola funcional em qualquer ambiente (HostGator ou Nuvem).
+ * Serviço Oficial de Pagamento Pix, Gateway Cielo 3.0 e Split de Marketplace da Céu Criativa
+ * Compatível com o padrão EMV do Banco Central do Brasil (BACEN) e Cielo E-commerce API 3.0
+ * Funciona de forma resiliente tanto no Node quanto no Apache / PHP da HostGator.
  */
 
 const PAYMENT_STORAGE_KEY = 'ceu_payment_settings';
 const ORDERS_STORAGE_KEY = 'ceu_orders';
 
 export const DEFAULT_PAYMENT_CONFIG = {
-  pixKey: 'felipeatmaag@gmail.com', // Chave Pix do Felipe Silvério / Céu Criativa
+  // PIX OFICIAL & CONTINGÊNCIA
+  pixKey: 'felipeatmaag@gmail.com',
   pixKeyType: 'email', // email | cpf | cnpj | phone | random
   merchantName: 'FELIPE SILVERIO CEU',
   merchantCity: 'BALNEARIO CAMBORIU',
-  whatsapp: '5547999999999', // Número para atendimento e envio de pedidos
-  storeMode: 'production', // production | test
-  mercadoPagoPublicKey: '',
-  mercadoPagoAccessToken: '',
+  whatsapp: '5547999999999',
+  storeMode: 'production',
+
+  // GATEWAY CIELO E-COMMERCE API 3.0
+  cieloMerchantId: '',
+  cieloMerchantKey: '',
+  cieloEnvironment: 'sandbox', // sandbox | production
+  cieloSoftDescriptor: 'CEU CRIATIVA',
+  cieloMaxInstallments: 12,
+
+  // SPLIT DE PAGAMENTO CIELO MARKETPLACE
+  splitEnabled: true,
+  platformFeeType: 'percentage', // percentage | fixed
+  platformFeeValue: 15, // 15% retido pela empresa master
+  partnerPayoutMode: 'cielo_split', // cielo_split | pix_transfer
+  subordinatedPartners: [
+    {
+      id: 'sub_artist_001',
+      name: 'Ateliê do Artista Master',
+      document: '12.345.678/0001-90',
+      subordinatedMerchantId: 'sub-cielo-001',
+      bankAccount: 'Banco Nubank (260) - Ag: 0001 - CC: 987654-3',
+      pixKey: 'felipeatmaag@gmail.com',
+      commissionPercent: 85,
+      status: 'active'
+    }
+  ]
 };
 
 // Cálculo de CRC16 CCITT (Polinômio 0x1021) exigido pelo Banco Central
@@ -53,6 +77,23 @@ export const pixService = {
     return DEFAULT_PAYMENT_CONFIG;
   },
 
+  async fetchRemoteConfig() {
+    try {
+      const res = await fetch('/api/payment/config').catch(() => null);
+      if (res && res.ok) {
+        const data = await res.json();
+        if (data.config) {
+          const merged = { ...DEFAULT_PAYMENT_CONFIG, ...data.config };
+          this.saveConfig(merged);
+          return merged;
+        }
+      }
+    } catch (e) {
+      console.warn('Falha ao buscar config remota de pagamento:', e);
+    }
+    return this.getConfig();
+  },
+
   saveConfig(newConfig) {
     if (typeof window === 'undefined') return;
     try {
@@ -62,6 +103,27 @@ export const pixService = {
     } catch (e) {
       console.warn('Erro ao salvar configs de pagamento:', e);
     }
+  },
+
+  async saveRemoteConfig(newConfig) {
+    const local = this.saveConfig(newConfig);
+    try {
+      const res = await fetch('/api/payment/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newConfig)
+      }).catch(() => null);
+
+      if (res && res.ok) {
+        const data = await res.json();
+        if (data.config) {
+          return this.saveConfig(data.config);
+        }
+      }
+    } catch (e) {
+      console.warn('Falha ao sincronizar config de pagamento com o servidor:', e);
+    }
+    return local;
   },
 
   /**
@@ -148,6 +210,22 @@ export const pixService = {
       return stored ? JSON.parse(stored) : [];
     } catch (e) {
       return [];
+    }
+  },
+
+  updateOrderStatus(orderIdOrNumber, newStatus) {
+    if (typeof window === 'undefined') return;
+    try {
+      const orders = this.getOrders();
+      const updated = orders.map(o => {
+        if (o.id === orderIdOrNumber || o.order_number === orderIdOrNumber) {
+          return { ...o, status: newStatus, payment_status: newStatus === 'paid' ? 'pago' : o.payment_status };
+        }
+        return o;
+      });
+      localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(updated));
+    } catch (e) {
+      console.warn('Erro ao atualizar status do pedido:', e);
     }
   },
 

@@ -95,15 +95,15 @@ export default function HeroCarousel() {
           >
             <div className="mb-4 sm:mb-6 inline-flex items-center gap-2 text-xs sm:text-sm font-bold uppercase tracking-[0.18em] text-ceu-sky">
               <Icon className="h-4 w-4" />
-              {slide.eyebrow}
+              <span>{slide.eyebrow}</span>
             </div>
 
             <h1 className="text-4xl sm:text-6xl lg:text-7xl xl:text-8xl font-black leading-[0.94] tracking-[-0.05em] text-white">
-              {slide.title}
+              <span>{slide.title}</span>
             </h1>
 
             <p className="mt-5 max-w-2xl text-base sm:text-xl lg:text-2xl leading-relaxed text-white/85">
-              {slide.description}
+              <span>{slide.description}</span>
             </p>
 
             <div className="mt-8 flex flex-wrap gap-4">

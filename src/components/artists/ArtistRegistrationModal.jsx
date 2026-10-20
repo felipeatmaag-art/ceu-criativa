@@ -6,6 +6,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
+import { PIX_KEY_TYPES, validatePixKey } from '@/components/financial/PixKeyConfigForm';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -35,6 +36,7 @@ export default function ArtistRegistrationModal({
     cpf: '',
     phone: '',
     pix_key: '',
+    pix_key_type: 'email',
     bio: ''
   });
   const [saving, setSaving] = useState(false);
@@ -95,6 +97,11 @@ export default function ArtistRegistrationModal({
       setError('Por favor, informe um número de WhatsApp/Telefone para contato.');
       return;
     }
+    const pixCheck = validatePixKey(formData.pix_key_type || 'email', formData.pix_key);
+    if (!pixCheck.isValid) {
+      setError(`Chave Pix inválida: ${pixCheck.error}`);
+      return;
+    }
     if (!formData.pix_key.trim()) {
       setError('Por favor, informe uma Chave PIX para receber suas comissões.');
       return;
@@ -113,6 +120,7 @@ export default function ArtistRegistrationModal({
         cpf: formData.cpf.trim(),
         phone: formData.phone.trim(),
         pix_key: formData.pix_key.trim(),
+        pix_key_type: formData.pix_key_type || 'email',
         bio: formData.bio.trim(),
         is_artist: true,
         is_verified_artist: true,
@@ -156,7 +164,7 @@ export default function ArtistRegistrationModal({
         <DialogHeader className="text-left space-y-2">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100 text-purple-800 text-xs font-bold w-fit">
             <Sparkles className="w-3.5 h-3.5" />
-            Comunidade de Artistas SEL
+            Comunidade de Artistas Céu Criativa
           </div>
           <DialogTitle className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight">
             Finalize seu Cadastro de Artista
@@ -166,11 +174,11 @@ export default function ArtistRegistrationModal({
           </DialogDescription>
         </DialogHeader>
 
-        {/* Banner com a Regra Oficial da SEL */}
+        {/* Banner com a Regra Oficial da Céu Criativa */}
         <div className="my-3 p-4 rounded-2xl bg-gradient-to-r from-amber-500/10 via-purple-500/10 to-indigo-500/10 border border-purple-200/80 space-y-2 text-xs">
           <div className="flex items-center gap-2 font-bold text-slate-900 text-sm">
             <Store className="w-4 h-4 text-purple-600 shrink-0" />
-            Regra da SEL para Artistas e Lojinhas:
+            Regra da Céu Criativa para Artistas e Lojinhas:
           </div>
           <p className="text-slate-700 leading-relaxed">
             Para ativar sua <strong>Lojinha Oficial</strong> e liberar suas estampas na galeria pública, você conclui este cadastro e <strong>adquire sua primeira estampa</strong> para conferir em mãos a qualidade premium do produto.
@@ -287,17 +295,42 @@ export default function ArtistRegistrationModal({
                 />
               </div>
 
-              <div>
-                <Label className="text-xs font-bold uppercase tracking-wider text-slate-700">
-                  Chave PIX (para comissões) *
-                </Label>
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                    Chave PIX (para repasses da Atma) *
+                  </Label>
+                  <select
+                    value={formData.pix_key_type || 'email'}
+                    onChange={(e) => setFormData({ ...formData, pix_key_type: e.target.value })}
+                    className="text-[11px] font-bold bg-slate-100 border border-slate-300 rounded-lg px-2 py-0.5 text-slate-800"
+                  >
+                    {PIX_KEY_TYPES.map((t) => (
+                      <option key={t.id} value={t.id}>{t.label}</option>
+                    ))}
+                  </select>
+                </div>
                 <Input
-                  placeholder="CPF, e-mail ou chave aleatória"
+                  placeholder={PIX_KEY_TYPES.find(t => t.id === (formData.pix_key_type || 'email'))?.placeholder}
                   value={formData.pix_key}
                   onChange={(e) => setFormData({ ...formData, pix_key: e.target.value })}
-                  className="mt-1 h-11 rounded-xl bg-white border-slate-300"
+                  className="mt-1 h-11 rounded-xl bg-white border-slate-300 font-mono text-xs"
                   required
                 />
+                {formData.pix_key && (
+                  <p className={`text-[11px] font-semibold mt-0.5 ${
+                    validatePixKey(formData.pix_key_type || 'email', formData.pix_key).isValid 
+                      ? 'text-emerald-700' 
+                      : 'text-amber-700'
+                  }`}>
+                    {validatePixKey(formData.pix_key_type || 'email', formData.pix_key).isValid 
+                      ? '✓ Formato Válido' 
+                      : validatePixKey(formData.pix_key_type || 'email', formData.pix_key).error}
+                  </p>
+                )}
+                <p className="text-[11px] text-slate-500 mt-0.5">
+                  A plataforma Atma recebe as vendas e faz os repasses de comissão para esta chave Pix.
+                </p>
               </div>
             </div>
 

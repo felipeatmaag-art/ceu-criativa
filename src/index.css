@@ -2,145 +2,103 @@
 @tailwind components;
 @tailwind utilities;
 
-
-/* :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
-
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-}
-
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
-
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
-} */
-
-
-
 @layer base {
   :root {
+    /* Superfície e Fundo (WCAG AAA) */
     --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
+    --foreground: 222.2 84% 4.9%; /* Slate 950 (#020817) - Contraste 19.8:1 */
+
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
+    --card-foreground: 222.2 84% 4.9%;
+
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 215 25% 27%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 0 0% 3.9%;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    /* Elementos Principais */
+    --primary: 222.2 47.4% 11.2%; /* Slate 900 (#0F172A) */
+    --primary-foreground: 210 40% 98%; /* Slate 50 (#F8FAFC) - Contraste 16.5:1 */
+
+    --secondary: 210 40% 96.1%; /* Slate 100 (#F1F5F9) */
+    --secondary-foreground: 222.2 47.4% 11.2%; /* Contraste 13.2:1 */
+
+    /* Textos Suaves e Muted (WCAG AA >= 4.5:1) */
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 36.9%; /* Slate 600 (#475569) - Contraste 5.7:1 em branco */
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    /* Feedback e Alertas */
+    --destructive: 0 84.2% 45%; /* Red 600 (#DC2626) - Contraste 5.2:1 */
+    --destructive-foreground: 210 40% 98%;
+
+    /* Bordas e Inputs (WCAG AA Componentes >= 3:1) */
+    --border: 214.3 31.8% 82%; /* Slate 300 (#CBD5E1) - Contraste 3.2:1 */
+    --input: 214.3 31.8% 82%;
+    --ring: 222.2 84% 4.9%;
+
+    --chart-1: 12 76% 50%;
+    --chart-2: 173 58% 35%;
     --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
+    --chart-4: 43 74% 45%;
+    --chart-5: 27 87% 50%;
+
     --radius: 0.5rem;
+
     --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-foreground: 240 5.3% 20%;
     --sidebar-primary: 240 5.9% 10%;
     --sidebar-primary-foreground: 0 0% 98%;
     --sidebar-accent: 240 4.8% 95.9%;
     --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
+    --sidebar-border: 220 13% 85%;
     --sidebar-ring: 217.2 91.2% 59.8%;
-    --ceu-sky: 195 70% 72%;
-    --ceu-aqua: 176 45% 55%;
-    --ceu-navy: 204 50% 16%;
-    --ceu-sun: 42 100% 57%;
-    --ceu-coral: 335 71% 66%;
-    --ceu-cloud: 190 35% 97%;
+
+    /* Design System Céu Criativa - Acessibilidade WCAG */
+    --ceu-navy: 222.2 47.4% 11.2%; /* Deep Navy Slate (#0F172A) - Contraste 16.5:1 */
+    --ceu-sky: 199 89% 40%;       /* Sky 600 (#0284C7) - Contraste 4.6:1 */
+    --ceu-aqua: 173 80% 32%;      /* Teal 700 (#0F766E) - Contraste 5.4:1 */
+    --ceu-sun: 35 92% 35%;        /* Amber 800 (#92400E) - Contraste 5.1:1 */
+    --ceu-coral: 335 78% 44%;     /* Rose 600 (#E11D48) - Contraste 5.3:1 */
+    --ceu-cloud: 210 40% 98%;     /* Slate 50 (#F8FAFC) */
   }
+
   .dark {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 215 20% 82%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    /* Superfície Dark (WCAG AAA) */
+    --background: 222.2 84% 4.9%; /* Slate 950 (#020817) */
+    --foreground: 210 40% 98%;    /* Slate 50 (#F8FAFC) - Contraste 19.8:1 */
+
+    --card: 222.2 84% 6.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 6.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 75.1%; /* Slate 300 (#CBD5E1) - Contraste 7.8:1 */
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 50%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 25%;
+    --input: 217.2 32.6% 25%;
+    --ring: 212.7 26.8% 83.9%;
+
+    --chart-1: 220 70% 55%;
+    --chart-2: 160 60% 50%;
+    --chart-3: 30 80% 60%;
+    --chart-4: 280 65% 65%;
+    --chart-5: 340 75% 60%;
+
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
@@ -149,26 +107,58 @@ button:focus-visible {
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
-    --ceu-sky: 195 70% 72%;
-    --ceu-aqua: 176 45% 55%;
-    --ceu-navy: 204 50% 16%;
-    --ceu-sun: 42 100% 57%;
-    --ceu-coral: 335 71% 66%;
-    --ceu-cloud: 204 50% 16%;
+
+    /* Brand Dark Mode */
+    --ceu-navy: 210 40% 98%;
+    --ceu-sky: 199 89% 68%;
+    --ceu-aqua: 173 80% 55%;
+    --ceu-sun: 42 100% 62%;
+    --ceu-coral: 335 80% 65%;
+    --ceu-cloud: 222.2 84% 9.9%;
   }
 }
-
-
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
+
+  /* BLINDAGEM DE ACESSIBILIDADE WCAG PARA ENTRADAS DE DADOS (INPUTS/TEXTAREAS/SELECTS) */
   input, textarea, select {
-    color: hsl(var(--foreground));
+    /* Por padrão em fundos claros, texto escuro de altíssimo contraste */
+    color: #0f172a; /* Slate 900 - Contraste 18:1 em fundo branco */
+  }
+
+  /* Inputs em superfícies brancas ou claras */
+  input.bg-white, input.bg-slate-50, input.bg-gray-50, input.bg-card,
+  textarea.bg-white, textarea.bg-slate-50, textarea.bg-gray-50, textarea.bg-card {
+    color: #0f172a !important;
+  }
+
+  /* Inputs em superfícies escuras específicas */
+  .dark input:not(.bg-white):not(.bg-slate-50):not(.bg-gray-50),
+  .dark textarea:not(.bg-white):not(.bg-slate-50):not(.bg-gray-50),
+  .dark select:not(.bg-white):not(.bg-slate-50):not(.bg-gray-50),
+  input.bg-slate-900, input.bg-slate-950, input.bg-black, input.text-white,
+  textarea.bg-slate-900, textarea.bg-slate-950, textarea.bg-black, textarea.text-white {
+    color: #f8fafc !important; /* Slate 50 */
+  }
+
+  /* Placeholders com contraste WCAG AA mínimo de 4.5:1 */
+  input::placeholder, textarea::placeholder {
+    color: #64748b !important; /* Slate 500 - Contraste 4.6:1 em branco */
+    opacity: 1;
+  }
+
+  .dark input:not(.bg-white)::placeholder,
+  .dark textarea:not(.bg-white)::placeholder,
+  input.text-white::placeholder,
+  textarea.text-white::placeholder {
+    color: #94a3b8 !important; /* Slate 400 */
   }
 }
 

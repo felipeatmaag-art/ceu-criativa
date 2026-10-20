@@ -1,0 +1,64 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 1. Default-deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == 'felipeatmaag@gmail.com' ||
+        request.auth.token.email == 'admin@seuceu.art.br'
+      );
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128;
+    }
+
+    // 2. Users Collection
+    match /users/{userId} {
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isAdmin();
+      allow create: if isOwner(userId) && isValidId(userId);
+      allow update: if (isOwner(userId) || isAdmin()) && isValidId(userId);
+      allow delete: if isAdmin();
+    }
+
+    // 3. Payout Requests Collection
+    match /payout_requests/{payoutId} {
+      allow get: if isSignedIn() && (resource.data.artist_id == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() && (
+        (resource.data.artist_id == request.auth.uid) || isAdmin()
+      );
+      allow create: if isSignedIn() && request.resource.data.artist_id == request.auth.uid;
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // 4. Orders Collection
+    match /orders/{orderId} {
+      allow get: if isSignedIn() && (resource.data.customer_email == request.auth.token.email || isAdmin());
+      allow list: if isAdmin();
+      allow create: if true; // Permite checkout público de novos pedidos
+      allow update, delete: if isAdmin();
+    }
+
+    // 5. Payment Configurations Collection (Pix da loja e Cielo)
+    match /payment_configs/{configId} {
+      allow get: if true; // Leitura pública das chaves ativas para o checkout
+      allow list: if isAdmin();
+      allow write: if isAdmin();
+    }
+  }
+}

@@ -3,6 +3,7 @@ import ArtistRegistrationForm from '@/components/artists/ArtistRegistrationForm'
 import { Store, Palette, Coins, ShieldCheck } from 'lucide-react';
 
 export default function ArtistRegistration() {
+
   return (
     <div className="min-h-screen bg-ceu-cloud py-12 sm:py-16">
       <main className="mx-auto max-w-4xl px-4 sm:px-6">

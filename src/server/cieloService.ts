@@ -1,43 +1,137 @@
 /**
- * Cielo E-commerce API 3.0 Service
- * Suporta Cartão de Crédito, Pix e Boleto
- * Documentação Oficial: https://developercielo.github.io/manual/cielo-ecommerce
+ * Céu Criativa - Integração Segura Cielo 3.0 & Split de Pagamento
+ * NUNCA armazena número de cartão ou CVV em texto puro ou logs
+ * Sem fallback simulado em ambiente de produção
  */
+import fs from 'fs';
+import path from 'path';
 import crypto from 'crypto';
-
-export interface CieloCustomer {
-  name: string;
-  email: string;
-  cpf: string;
-  phone?: string;
-}
-
-export interface CieloAddress {
-  street: string;
-  number: string;
-  complement?: string;
-  neighborhood?: string;
-  city: string;
-  state: string;
-  zipcode: string;
-}
-
-export interface CieloCard {
-  cardNumber: string;
-  holder: string;
-  expirationDate: string; // MM/YYYY ou MM/YY
-  securityCode: string;
-  brand?: string;
-}
 
 export interface CieloCheckoutPayload {
   paymentMethod: 'credit_card' | 'pix' | 'boleto';
-  customer: CieloCustomer;
-  shippingAddress: CieloAddress;
-  items: any[];
-  totalAmount: number; // Em Reais, ex: 149.90
+  totalAmount: number;
   installments?: number;
-  card?: CieloCard;
+  customer: {
+    name: string;
+    email: string;
+    cpf?: string;
+    phone?: string;
+  };
+  shippingAddress: {
+    street: string;
+    number?: string;
+    complement?: string;
+    neighborhood?: string;
+    city: string;
+    state: string;
+    zipcode: string;
+  };
+  items: Array<{
+    id: string;
+    title: string;
+    price: number;
+    quantity: number;
+    artist_id?: string;
+    commission_rate?: number;
+  }>;
+  card?: {
+    cardNumber: string;
+    holder: string;
+    expirationDate: string;
+    securityCode: string;
+    brand?: string;
+  };
+}
+
+export interface PaymentConfig {
+  pixKey: string;
+  pixKeyType: string;
+  merchantName: string;
+  merchantCity: string;
+  whatsapp: string;
+  cieloMerchantId: string;
+  cieloMerchantKey: string;
+  cieloEnvironment: 'sandbox' | 'production';
+  cieloSoftDescriptor: string;
+  cieloMaxInstallments: number;
+  splitEnabled: boolean;
+  platformFeeType: 'percentage' | 'fixed';
+  platformFeeValue: number;
+  subordinatedPartners: any[];
+  geminiApiKey?: string;
+  updatedAt?: string;
+}
+
+const DEFAULT_CONFIG: PaymentConfig = {
+  pixKey: 'felipeatmaag@gmail.com',
+  pixKeyType: 'email',
+  merchantName: 'FELIPE SILVERIO CEU',
+  merchantCity: 'BALNEARIO CAMBORIU',
+  whatsapp: '5547999999999',
+  cieloMerchantId: process.env.CIELO_MERCHANT_ID || '',
+  cieloMerchantKey: process.env.CIELO_MERCHANT_KEY || '',
+  cieloEnvironment: (process.env.CIELO_ENVIRONMENT as any) || 'sandbox',
+  cieloSoftDescriptor: 'CEU CRIATIVA',
+  cieloMaxInstallments: 12,
+  splitEnabled: true,
+  platformFeeType: 'percentage',
+  platformFeeValue: 15,
+  subordinatedPartners: [
+    {
+      artistId: '69431e0c00397efc6e14e9e0',
+      artistName: 'Felipe Silvério',
+      subordinatedMerchantId: 'a3d4f5b6-7890-4123-8abc-def012345678',
+      status: 'active'
+    }
+  ]
+};
+
+const CONFIG_PATHS = [
+  path.resolve(process.cwd(), 'data/payment_config.json'),
+  path.resolve(process.cwd(), 'public/api/payment_config.json')
+];
+
+export function getPaymentConfig(): PaymentConfig {
+  for (const p of CONFIG_PATHS) {
+    if (fs.existsSync(p)) {
+      try {
+        const raw = fs.readFileSync(p, 'utf-8');
+        const parsed = JSON.parse(raw);
+        return { ...DEFAULT_CONFIG, ...parsed };
+      } catch (e) {
+        console.warn('Erro ao ler', p, e);
+      }
+    }
+  }
+  return DEFAULT_CONFIG;
+}
+
+export function savePaymentConfig(newConfig: Partial<PaymentConfig>): PaymentConfig {
+  const current = getPaymentConfig();
+  const merged: PaymentConfig = {
+    ...current,
+    ...newConfig,
+    updatedAt: new Date().toISOString()
+  };
+
+  // Se veio chave vazia mas já existia salva, não sobrescreve com vazio
+  if (!newConfig.cieloMerchantKey && current.cieloMerchantKey) {
+    merged.cieloMerchantKey = current.cieloMerchantKey;
+  }
+
+  for (const p of CONFIG_PATHS) {
+    try {
+      const dir = path.dirname(p);
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+      fs.writeFileSync(p, JSON.stringify(merged, null, 2), 'utf-8');
+    } catch (e) {
+      console.warn('Erro ao salvar config de pagamento em', p, e);
+    }
+  }
+
+  return merged;
 }
 
 export function detectCardBrand(number: string): string {
@@ -63,10 +157,46 @@ export function formatExpirationDate(exp: string): string {
   return exp;
 }
 
+// Consulta de Venda na Cielo para validação idempotente de Webhook
+export async function consultCieloSale(paymentId: string): Promise<any | null> {
+  if (!paymentId) return null;
+  const config = getPaymentConfig();
+  const merchantId = (config.cieloMerchantId || process.env.CIELO_MERCHANT_ID || '').trim();
+  const merchantKey = (config.cieloMerchantKey || process.env.CIELO_MERCHANT_KEY || '').trim();
+  const isProduction = (config.cieloEnvironment || process.env.CIELO_ENVIRONMENT) === 'production';
+
+  if (!merchantId || !merchantKey) {
+    return null;
+  }
+
+  const queryUrl = isProduction
+    ? `https://apiquery.cieloecommerce.cielo.com.br/1/sales/${paymentId}`
+    : `https://apiquerysandbox.cieloecommerce.cielo.com.br/1/sales/${paymentId}`;
+
+  try {
+    const res = await fetch(queryUrl, {
+      method: 'GET',
+      headers: {
+        'MerchantId': merchantId,
+        'MerchantKey': merchantKey,
+        'RequestId': crypto.randomUUID()
+      }
+    });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (err: any) {
+    console.error('Falha ao consultar venda Cielo:', err.message);
+    return null;
+  }
+}
+
 export async function processCieloPayment(payload: CieloCheckoutPayload, orderNumber: string) {
-  const merchantId = process.env.CIELO_MERCHANT_ID;
-  const merchantKey = process.env.CIELO_MERCHANT_KEY;
-  const isProduction = process.env.CIELO_ENVIRONMENT === 'production';
+  const config = getPaymentConfig();
+
+  const merchantId = (config.cieloMerchantId || process.env.CIELO_MERCHANT_ID || '').trim();
+  const merchantKey = (config.cieloMerchantKey || process.env.CIELO_MERCHANT_KEY || '').trim();
+  const isProduction = (config.cieloEnvironment || process.env.CIELO_ENVIRONMENT) === 'production';
+  const isNodeProduction = process.env.NODE_ENV === 'production';
 
   const baseUrl = isProduction
     ? 'https://api.cieloecommerce.cielo.com.br/1/sales/'
@@ -76,10 +206,42 @@ export async function processCieloPayment(payload: CieloCheckoutPayload, orderNu
   const cleanCpf = (payload.customer.cpf || '').replace(/\D/g, '') || '11111111111';
   const cleanZip = (payload.shippingAddress.zipcode || '').replace(/\D/g, '') || '01310100';
 
-  // Se o lojista configurou as chaves reais da Cielo, chama a API oficial da Cielo 3.0
+  // -------------------------------------------------------------
+  // Cálculo de Split de Pagamento Marketplace Cielo 3.0
+  // -------------------------------------------------------------
+  let splitsArray: any[] = [];
+  if (config.splitEnabled && Array.isArray(config.subordinatedPartners) && config.subordinatedPartners.length > 0) {
+    const partner = config.subordinatedPartners.find((p: any) => p.status === 'active' && p.subordinatedMerchantId);
+    if (partner) {
+      let platformFeeCents = 0;
+      if (config.platformFeeType === 'percentage') {
+        const pct = Number(config.platformFeeValue) || 15;
+        platformFeeCents = Math.round(amountInCents * (pct / 100));
+      } else {
+        const fixedVal = Number(config.platformFeeValue) || 10;
+        platformFeeCents = Math.round(fixedVal * 100);
+      }
+
+      const subordinateCents = Math.max(0, amountInCents - platformFeeCents);
+      if (subordinateCents > 0) {
+        splitsArray.push({
+          SubordinatedMerchantId: partner.subordinatedMerchantId,
+          Amount: subordinateCents,
+          Fares: {
+            Mdr: 0,
+            Fee: 0
+          }
+        });
+      }
+    }
+  }
+
+  // -------------------------------------------------------------
+  // Chamada Real à API Cielo 3.0 (se chaves configuradas)
+  // -------------------------------------------------------------
   if (merchantId && merchantKey) {
     try {
-      let cieloBody: any = {
+      const cieloBody: any = {
         MerchantOrderId: orderNumber,
         Customer: {
           Name: payload.customer.name,
@@ -104,7 +266,7 @@ export async function processCieloPayment(payload: CieloCheckoutPayload, orderNu
           Type: 'CreditCard',
           Amount: amountInCents,
           Installments: Number(payload.installments) || 1,
-          SoftDescriptor: 'CEU CRIATIVA',
+          SoftDescriptor: (config.cieloSoftDescriptor || 'CEU CRIATIVA').slice(0, 13),
           Capture: true,
           CreditCard: {
             CardNumber: payload.card.cardNumber.replace(/\D/g, ''),
@@ -114,6 +276,10 @@ export async function processCieloPayment(payload: CieloCheckoutPayload, orderNu
             Brand: brand
           }
         };
+
+        if (splitsArray.length > 0) {
+          cieloBody.Payment.Splits = splitsArray;
+        }
       } else if (payload.paymentMethod === 'pix') {
         cieloBody.Payment = {
           Type: 'Pix',
@@ -142,13 +308,23 @@ export async function processCieloPayment(payload: CieloCheckoutPayload, orderNu
       const data = await cieloResponse.json();
 
       if (!cieloResponse.ok) {
-        const errMsg = Array.isArray(data) ? data.map((d: any) => d.Message).join(', ') : (data.Message || 'Erro ao comunicar com a Cielo.');
-        throw new Error(errMsg);
+        const errMsg = Array.isArray(data)
+          ? data.map((d: any) => d.Message).join(', ')
+          : (data.Message || 'Erro retornado pela Cielo.');
+        
+        // Em produção ou caso real, retorna falha imediata SEM criar pedido pago
+        return {
+          success: false,
+          isApproved: false,
+          status: 'denied',
+          returnCode: data.Payment?.ReturnCode || '99',
+          returnMessage: errMsg,
+          error: errMsg
+        };
       }
 
       const payment = data.Payment || {};
       const status = payment.Status;
-      // Status Cielo: 1 = Autorizado, 2 = Pago/Confirmado, 12 = Pendente (Pix/Boleto)
       const isApproved = status === 1 || status === 2;
 
       return {
@@ -160,20 +336,52 @@ export async function processCieloPayment(payload: CieloCheckoutPayload, orderNu
         authCode: payment.AuthorizationCode,
         proofOfSale: payment.ProofOfSale,
         returnCode: payment.ReturnCode,
-        returnMessage: payment.ReturnMessage || (isApproved ? 'Transação autorizada com sucesso' : 'Pagamento pendente'),
+        returnMessage: payment.ReturnMessage || (isApproved ? 'Transação autorizada com sucesso pela Cielo' : 'Pagamento não autorizado'),
         qrCodeBase64: payment.QrCodeBase64Image,
         qrCodeString: payment.QrCodeString,
-        boletoBarCode: payment.BarCodeNumber,
-        boletoUrl: payment.Url,
-        raw: data
+        splitApplied: splitsArray.length > 0,
+        cardBrand: payload.card ? (payload.card.brand || detectCardBrand(payload.card.cardNumber)) : undefined,
+        cardLast4: payload.card ? payload.card.cardNumber.replace(/\D/g, '').slice(-4) : undefined
       };
     } catch (err: any) {
-      console.warn('Falha na requisição direta da Cielo:', err.message);
-      // Caso a chave seja de teste ou esteja offline, prossegue com simulação segura
+      console.error('Falha na comunicação direta da Cielo:', err.message);
+      // Se estamos em produção, falhar com erro e NUNCA gerar pedido pago simulado
+      if (isProduction || isNodeProduction) {
+        return {
+          success: false,
+          isApproved: false,
+          status: 'failed',
+          returnCode: '99',
+          returnMessage: `Falha de conexão com a Cielo: ${err.message}`,
+          error: `Falha de conexão com a Cielo: ${err.message}`
+        };
+      }
     }
+  } else if (isProduction || isNodeProduction) {
+    // Produção sem credenciais configuradas: ERRO ESTRITO
+    return {
+      success: false,
+      isApproved: false,
+      status: 'failed',
+      returnCode: '98',
+      returnMessage: 'Credenciais de pagamento Cielo não configuradas para o ambiente de produção.',
+      error: 'Credenciais de pagamento Cielo não configuradas para o ambiente de produção.'
+    };
   }
 
-  // Modo Sandbox Integrado Cielo (Garante funcionamento perfeito em ambiente de teste ou antes de preencher as chaves)
+  // -------------------------------------------------------------
+  // MODO SANDBOX LOCAL / TESTE SEGURO
+  // Ativo ESTRITAMENTE quando NODE_ENV !== "production" E CIELO_ENVIRONMENT === "sandbox"
+  // -------------------------------------------------------------
+  if (isProduction || isNodeProduction) {
+    return {
+      success: false,
+      isApproved: false,
+      status: 'failed',
+      returnMessage: 'Modo simulado desativado em ambiente de produção.'
+    };
+  }
+
   const paymentId = crypto.randomUUID();
   const tid = '10' + Date.now().toString().slice(-8) + Math.floor(1000 + Math.random() * 9000);
   const authCode = Math.floor(100000 + Math.random() * 900000).toString();
@@ -203,18 +411,16 @@ export async function processCieloPayment(payload: CieloCheckoutPayload, orderNu
       authCode,
       proofOfSale: nsu,
       returnCode: '00',
-      returnMessage: 'Transação autorizada com sucesso pela Cielo',
+      returnMessage: 'Transação autorizada com sucesso (Modo Sandbox de Desenvolvimento)',
       cardBrand: payload.card?.brand || detectCardBrand(payload.card?.cardNumber || ''),
-      cardLast4: cardClean.slice(-4) || '1234'
+      cardLast4: cardClean.slice(-4) || '1234',
+      splitApplied: splitsArray.length > 0
     };
   }
 
   if (payload.paymentMethod === 'pix') {
-    // Gerar QR Code e Copia-e-Cola PIX padrão Banco Central do Brasil
-    const pixKey = 'cielo-pix-' + orderNumber.toLowerCase();
+    const pixKey = config.pixKey || 'felipeatmaag@gmail.com';
     const qrCodeString = `00020126580014BR.GOV.BCB.PIX0136${pixKey}5204000053039865406${payload.totalAmount.toFixed(2)}5802BR5912CEU CRIATIVA6009SAO PAULO62070503***6304`;
-    
-    // QR Code visual em SVG embutido
     const qrSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200"><rect width="200" height="200" fill="#ffffff"/><path d="M20 20h50v50h-50zM30 30h30v30h-30zM130 20h50v50h-50zM140 30h30v30h-30zM20 130h50v50h-50zM30 140h30v30h-30zM80 30h20v20h-20zM90 60h20v20h-20zM30 90h20v20h-20zM80 90h40v40h-40zM140 90h20v20h-20zM90 140h20v20h-20zM130 130h20v20h-20zM160 140h20v40h-20zM130 170h20v10h-20z" fill="#002D72"/></svg>`;
     const qrCodeBase64 = 'data:image/svg+xml;base64,' + Buffer.from(qrSvg).toString('base64');
 
@@ -227,7 +433,7 @@ export async function processCieloPayment(payload: CieloCheckoutPayload, orderNu
       qrCodeString,
       qrCodeBase64,
       returnCode: '12',
-      returnMessage: 'Pix Cielo gerado com sucesso. Aguardando pagamento.'
+      returnMessage: 'Pix gerado com sucesso. Aguardando pagamento.'
     };
   }
 

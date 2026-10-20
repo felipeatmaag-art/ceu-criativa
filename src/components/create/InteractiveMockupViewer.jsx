@@ -1,7 +1,6 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
-  GalleryHorizontalEnd, Save, History, Trash2, Check, Copy, ArrowLeftRight, Sparkles, AlertCircle,
+  GalleryHorizontalEnd, Trash2, Copy, ArrowLeftRight, Sparkles, AlertCircle,
   Ruler, User
 } from 'lucide-react';
 import ApparelPrintStage from '@/components/create/ApparelPrintStage';
@@ -12,6 +11,7 @@ import { captureStudioElement } from '@/components/create/studioMockups';
 import { calculatePrintDimensions } from '@/components/create/dtfPricing';
 import StandardPrintSizesGuide from '@/components/create/StandardPrintSizesGuide';
 import ProductPrintSizeSelector from '@/components/create/ProductPrintSizeSelector';
+import FloatingMockupControls from '@/components/create/FloatingMockupControls';
 
 /**
  * Editor de mockup inspirado no Marketgen 2026.
@@ -96,6 +96,8 @@ export default function InteractiveMockupViewer({
   onRemoveArtwork,
   selectedSize,
   onSizeChange,
+  hideFloatingControls = false,
+  hideControls = false,
 }) {
   const [localSide, setLocalSide] = useState('front');
   const side = controlledSide ?? localSide;
@@ -376,10 +378,23 @@ export default function InteractiveMockupViewer({
         ) : (
           <div className="absolute inset-0">{renderMockup?.(designImage)}</div>
         )}
+
+        {/* PAINEL FLUTUANTE TRANSLÚCIDO NAS LATERAIS DO PRODUTO (SOMENTE NA ETAPA DE EDIÇÃO) */}
+        {designImage && !hideFloatingControls && !hideControls && (
+          <FloatingMockupControls
+            transform={transform}
+            onTransformChange={updateTransform}
+            side={side}
+            onSideChange={setSide}
+            isApparel={isApparel}
+            hasFront={!!frontImage}
+            hasBack={!!backImage}
+          />
+        )}
       </div>
 
       {/* Painel de controles da estampa */}
-      {designImage ? (
+      {designImage && !hideControls ? (
         <div className="px-6 py-5 border-t border-ceu-navy/10 space-y-5">
           <div className="flex items-center justify-between text-xs text-muted-foreground pb-1">
             <span className="font-semibold text-ceu-navy">
@@ -475,7 +490,7 @@ export default function InteractiveMockupViewer({
             </div>
           </div>
 
-          {/* Seletor Dinâmico de Tamanho de Estampa por Produto */}
+          {/* Seletor Dinâmico de Tamanho de Estampa por Produto (Tamanhos Padrões) */}
           <ProductPrintSizeSelector
             productType={productType}
             currentTransform={transform}
@@ -484,118 +499,8 @@ export default function InteractiveMockupViewer({
             onProductSizeChange={onSizeChange}
             side={side}
           />
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5">
-            <SliderControl
-              label="Escala da estampa"
-              value={scalePct}
-              min={10} max={250} step={1}
-              unit="%"
-              onChange={setScale}
-            />
-            <SliderControl
-              label="Rotação da arte"
-              value={rotDeg}
-              min={0} max={360} step={1}
-              unit="°"
-              onChange={setRotation}
-            />
-            <SliderControl
-              label="Offset horizontal (X)"
-              value={offsetX}
-              min={-200} max={200} step={1}
-              unit=" un."
-              onChange={setOffsetX}
-            />
-            <SliderControl
-              label="Offset vertical (Y)"
-              value={offsetY}
-              min={-200} max={200} step={1}
-              unit=" un."
-              onChange={setOffsetY}
-            />
-          </div>
-
-          {/* Presets */}
-          <div className="pt-4 border-t border-ceu-navy/10">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-1.5">
-                <History className="w-3.5 h-3.5 text-ceu-navy/50" />
-                <span className="text-[10px] font-bold tracking-widest text-ceu-navy/50 uppercase">
-                  Presets de posição
-                </span>
-              </div>
-              <button
-                onClick={() => setShowPresets(!showPresets)}
-                className="text-[10px] text-ceu-navy/50 hover:text-ceu-aqua uppercase tracking-wider font-semibold"
-              >
-                {showPresets ? 'Ocultar' : 'Ver'} ({currentPresets.length})
-              </button>
-            </div>
-
-            {/* Salvar preset */}
-            <div className="flex gap-2 mb-2">
-              <input
-                type="text"
-                placeholder="Nome do preset..."
-                value={presetName}
-                onChange={(e) => setPresetName(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSavePreset()}
-                className="flex-1 h-10 px-3 rounded-xl bg-white border border-slate-300 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-800 focus:border-slate-800 shadow-sm"
-              />
-              <button
-                onClick={handleSavePreset}
-                disabled={!presetName.trim()}
-                className="h-10 px-4 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider transition-colors disabled:opacity-30 disabled:cursor-not-allowed shadow-sm"
-              >
-                <Save className="w-3 h-3" />
-                Salvar
-              </button>
-            </div>
-
-            {/* Lista de presets */}
-            <AnimatePresence>
-              {showPresets && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  className="overflow-hidden"
-                >
-                  {currentPresets.length === 0 ? (
-                    <p className="text-[10px] text-gray-600 uppercase tracking-wider py-2 text-center">
-                      Nenhum preset salvo ainda
-                    </p>
-                  ) : (
-                    <div className="space-y-1.5 max-h-32 overflow-y-auto">
-                      {currentPresets.map((preset) => (
-                        <div
-                          key={preset.id}
-                          className="flex items-center gap-2 p-2 rounded-lg bg-neutral-900 hover:bg-neutral-800 transition-colors group"
-                        >
-                          <button
-                            onClick={() => handleApplyPreset(preset)}
-                            className="flex-1 text-left flex items-center gap-2"
-                          >
-                            <Check className="w-3 h-3 text-gray-600 group-hover:text-[#ff6600]" />
-                            <span className="text-xs text-gray-300 font-medium">{preset.name}</span>
-                          </button>
-                          <button
-                            onClick={() => handleDeletePreset(preset.id)}
-                            className="opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
-                            <Trash2 className="w-3.5 h-3.5 text-gray-600 hover:text-red-500" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
         </div>
-      ) : isApparel && (
+      ) : isApparel && !hideControls && (
         <div className="px-6 py-5 border-t border-ceu-navy/10 bg-amber-50/70">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="space-y-1">

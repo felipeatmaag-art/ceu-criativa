@@ -15,10 +15,12 @@ import {
   BookOpen,
   SprayCan,
   Award,
-  Dices
+  Dices,
+  AlertCircle
 } from 'lucide-react';
 import { prepareGeneratedArtwork } from '@/components/create/preparePrintArtwork';
 import { getArtworkMetadata } from '@/components/create/artworkMetadata';
+import { safeParseResponse } from '@/api/geminiIntegrations';
 import VoiceDictationButton from '@/components/audio/VoiceDictationButton';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -198,7 +200,7 @@ export default function ArtisticPrintGenerator({
           style: selectedStyle.name
         })
       });
-      const data = await response.json();
+      const data = await safeParseResponse(response);
       if (data.enhancedPrompt) {
         setPrompt(data.enhancedPrompt);
       } else if (data.suggestions?.[0]) {
@@ -249,12 +251,10 @@ Style Details: ${selectedStyle.promptSuffix}`;
         })
       });
 
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || `Erro ${res.status} ao gerar estampa com a IA.`);
+      const data = await safeParseResponse(res);
+      if (!res.ok || !data?.url) {
+        throw new Error(data?.error || `Erro ${res.status} ao gerar estampa com a IA.`);
       }
-
-      const data = await res.json();
       if (!data.url) {
         throw new Error('A IA não retornou o arquivo da estampa. Tente novamente.');
       }
@@ -431,10 +431,64 @@ Style Details: ${selectedStyle.promptSuffix}`;
         </div>
       </div>
 
-      {/* Mensagem de Erro */}
+      {/* Mensagem de Erro / Cota */}
       {errorMessage && (
-        <div className="p-3 rounded-2xl bg-destructive/10 border border-destructive/20 text-destructive text-xs">
-          {errorMessage}
+        <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-950 dark:text-amber-200 text-xs space-y-2.5">
+          <div className="flex items-start gap-2">
+            <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="font-semibold text-amber-900 dark:text-amber-100">
+                {errorMessage.includes('402') || errorMessage.includes('cota') || errorMessage.includes('crédito')
+                  ? 'Créditos pré-pagos esgotados no Gemini (Erro 402)'
+                  : 'Aviso na Geração de Estampa'}
+              </p>
+              <p className="mt-0.5 text-slate-700 dark:text-slate-300 leading-relaxed">
+                {errorMessage}
+              </p>
+            </div>
+          </div>
+
+          <div className="pt-1 border-t border-amber-500/20">
+            <p className="text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1.5">
+              💡 Você pode continuar testando a aplicação imediatamente com estampas prontas em alta definição:
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  const sampleUrl = '/sample-prints/estampa-arte-urbana.png';
+                  setCurrentArtworkUrl(sampleUrl);
+                  setErrorMessage('');
+                  if (onArtworkSelected) {
+                    onArtworkSelected(sampleUrl, {
+                      style: selectedStyle,
+                      prompt: 'Arte Urbana Master (Demonstração)'
+                    });
+                  }
+                }}
+                className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-xl text-xs transition-colors shadow-sm inline-flex items-center gap-1.5"
+              >
+                🎨 Carregar Estampa Urbana Demo
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const sampleUrl = '/sample-prints/estampa-minimalista.png';
+                  setCurrentArtworkUrl(sampleUrl);
+                  setErrorMessage('');
+                  if (onArtworkSelected) {
+                    onArtworkSelected(sampleUrl, {
+                      style: selectedStyle,
+                      prompt: 'Linhas Minimalistas (Demonstração)'
+                    });
+                  }
+                }}
+                className="px-3 py-1.5 bg-slate-800 hover:bg-slate-900 text-white font-medium rounded-xl text-xs transition-colors shadow-sm inline-flex items-center gap-1.5"
+              >
+                ✨ Carregar Estampa Minimalista Demo
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

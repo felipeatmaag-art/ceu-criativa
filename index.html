@@ -1,15 +1,54 @@
 <!doctype html>
-<html lang="en">
+<html lang="pt-BR" class="notranslate" translate="no">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="google" content="notranslate" />
     <script>
+      // Clear any stale Service Workers or cached HTML in preview/dev
+      if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function(regs) {
+          for (var i = 0; i < regs.length; i++) {
+            regs[i].unregister();
+          }
+        }).catch(function() {});
+        if ('caches' in window) {
+          caches.keys().then(function(keys) {
+            for (var j = 0; j < keys.length; j++) {
+              caches.delete(keys[j]);
+            }
+          }).catch(function() {});
+        }
+      }
+
+      // Defensive guard against Google Translate / extensions DOM manipulation breaking React
+      if (typeof window !== 'undefined' && typeof Node === 'function' && Node.prototype && !window.__domPatched) {
+        window.__domPatched = true;
+        var origInsertBefore = Node.prototype.insertBefore;
+        Node.prototype.insertBefore = function(newNode, referenceNode) {
+          if (referenceNode && referenceNode.parentNode && referenceNode.parentNode !== this) {
+            return this.appendChild(newNode);
+          }
+          return origInsertBefore.call(this, newNode, referenceNode);
+        };
+        var origRemoveChild = Node.prototype.removeChild;
+        Node.prototype.removeChild = function(child) {
+          if (child && child.parentNode && child.parentNode !== this) {
+            return child.parentNode.removeChild(child);
+          }
+          return origRemoveChild.call(this, child);
+        };
+      }
+
+      // Filter environment-level websocket noise & catch fatal bootstrapping errors
       window.addEventListener('error', function(e) {
-        if (e && (e.message?.includes('websocket') || e.message?.includes('WebSocket') || e.target instanceof WebSocket)) {
+        if (e && (e.message?.includes('websocket') || e.message?.includes('WebSocket') || (typeof WebSocket !== 'undefined' && e.target instanceof WebSocket))) {
           e.stopImmediatePropagation?.();
           e.preventDefault?.();
+          return;
         }
       }, true);
+
       window.addEventListener('unhandledrejection', function(e) {
         if (e && e.reason && (String(e.reason).includes('websocket') || String(e.reason).includes('WebSocket'))) {
           e.stopImmediatePropagation?.();
@@ -37,7 +76,7 @@
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
   </head>
-  <body>
+  <body class="bg-[#0a0a0f] text-slate-100">
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

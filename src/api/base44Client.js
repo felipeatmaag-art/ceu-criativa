@@ -1,11 +1,12 @@
 import { createClient } from '@base44/sdk';
 import { appParams } from '@/lib/app-params';
 import { GeminiCore } from './geminiIntegrations';
-import { FALLBACK_DESIGNS, FALLBACK_PRODUCTS } from '@/data/catalogFallback';
+import { FALLBACK_PRODUCTS } from '@/data/catalogFallback';
+import { authService } from '@/services/authService';
 
 const { appId, token, functionsVersion } = appParams;
 
-//Create a client with authentication required
+// Create a client instance
 export const base44 = createClient({
   appId,
   token,
@@ -14,8 +15,6 @@ export const base44 = createClient({
   requiresAuth: false
 });
 
-import { authService } from '@/services/authService';
-
 // Safeguard auth.me against HTML responses or errors in standalone environments
 if (base44?.auth) {
   const originalMe = base44.auth.me?.bind(base44.auth);
@@ -23,7 +22,6 @@ if (base44?.auth) {
     try {
       const local = authService.getCurrentUser();
       if (local) return local;
-
       const u = await originalMe();
       if (!u || typeof u !== 'object' || typeof u === 'string' || !u.id) {
         return null;
@@ -50,7 +48,7 @@ if (base44?.auth) {
   };
 }
 
-// Local in-memory entity event emitter replacing failing Socket.IO connections
+// Local in-memory entity event emitter
 const entityListeners = new Map();
 
 export function emitEntityUpdate(entityName, event) {
@@ -66,7 +64,46 @@ export function emitEntityUpdate(entityName, event) {
   }
 }
 
-// Override integrations and entities
+// Universal Entity REST Client connected to local server & HostGator
+async function requestEntityApi(entityName, method = 'GET', subPath = '', body = null, queryObj = null) {
+  try {
+    let url = `/api/entities/${entityName}${subPath}`;
+    if (queryObj) {
+      const sp = new URLSearchParams();
+      for (const [k, v] of Object.entries(queryObj)) {
+        if (v !== undefined && v !== null) {
+          sp.set(k, typeof v === 'object' ? JSON.stringify(v) : String(v));
+        }
+      }
+      const qs = sp.toString();
+      if (qs) url += `?${qs}`;
+    }
+
+    const opts = {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+    };
+    if (body) {
+      opts.body = JSON.stringify(body);
+    }
+
+    const response = await fetch(url, opts);
+    if (!response.ok) {
+      console.warn(`[EntityApi] ${method} ${url} status ${response.status}`);
+      return null;
+    }
+    const contentType = response.headers.get('content-type') || '';
+    if (contentType.includes('application/json')) {
+      return await response.json();
+    }
+    return null;
+  } catch (err) {
+    console.warn(`[EntityApi] Falha na requisição ${method} ${entityName}:`, err);
+    return null;
+  }
+}
+
+// Override integrations and entities with robust direct implementation
 if (base44) {
   const originalIntegrations = base44.integrations;
   const overriddenIntegrations = {
@@ -83,111 +120,109 @@ if (base44) {
     enumerable: true,
   });
 
-  const originalEntities = base44.entities;
-  const wrappedEntities = new Proxy(originalEntities || {}, {
-    get(target, entityName) {
+  const wrappedEntities = new Proxy({}, {
+    get(_target, entityName) {
       if (typeof entityName !== 'string' || entityName === 'then' || entityName.startsWith('_')) {
-        return Reflect.get(target, entityName);
+        return undefined;
       }
-      const originalHandler = target[entityName];
-      if (!originalHandler) return originalHandler;
 
-      return new Proxy(originalHandler, {
-        get(hTarget, prop) {
-          if (prop === 'filter' || prop === 'list') {
-            return async (...args) => {
-              try {
-                const result = await hTarget[prop](...args);
-                if (Array.isArray(result)) return result;
-                if (Array.isArray(result?.data)) return result.data;
-                if (entityName === 'Design') return FALLBACK_DESIGNS;
-                if (entityName === 'Product') return FALLBACK_PRODUCTS;
-                return [];
-              } catch (err) {
-                if (entityName === 'Design') return FALLBACK_DESIGNS;
-                if (entityName === 'Product') return FALLBACK_PRODUCTS;
-                return [];
-              }
-            };
+      return {
+        // List entities
+        async list(sort = '-created_date', limit = 250, skip = 0) {
+          const result = await requestEntityApi(entityName, 'GET', '', null, { sort, limit, skip });
+          if (Array.isArray(result)) return result;
+          if (entityName === 'Product') return FALLBACK_PRODUCTS;
+          return [];
+        },
+
+        // Filter entities by criteria
+        async filter(query = {}, sort = '-created_date', limit = 250, skip = 0) {
+          const result = await requestEntityApi(entityName, 'GET', '', null, { q: query, sort, limit, skip });
+          if (Array.isArray(result)) return result;
+          if (entityName === 'Product') return FALLBACK_PRODUCTS;
+          return [];
+        },
+
+        // Get single entity by ID
+        async get(id) {
+          if (!id) return null;
+          const result = await requestEntityApi(entityName, 'GET', `/${id}`);
+          if (result && typeof result === 'object') return result;
+          if (entityName === 'Product') return FALLBACK_PRODUCTS.find(p => p.id === id) || null;
+          return null;
+        },
+
+        // Create new entity
+        async create(data) {
+          const result = await requestEntityApi(entityName, 'POST', '', data) || data;
+          emitEntityUpdate(entityName, { type: 'create', data: result });
+          return result;
+        },
+
+        // Bulk create multiple entities
+        async bulkCreate(items) {
+          const list = Array.isArray(items) ? items : [items];
+          const result = await requestEntityApi(entityName, 'POST', '/bulk', list);
+          emitEntityUpdate(entityName, { type: 'bulk-create', data: result });
+          return result || list;
+        },
+
+        // Update entity by ID
+        async update(id, data) {
+          const result = await requestEntityApi(entityName, 'PUT', `/${id}`, data) || { ...data, id };
+          emitEntityUpdate(entityName, { type: 'update', id, data: result });
+          return result;
+        },
+
+        // Delete entity by ID
+        async delete(id) {
+          const result = await requestEntityApi(entityName, 'DELETE', `/${id}`);
+          emitEntityUpdate(entityName, { type: 'delete', id });
+          return result || { success: true };
+        },
+
+        // Bulk delete multiple entities
+        async bulkDelete(ids) {
+          const idList = Array.isArray(ids) ? ids : [ids];
+          const result = await requestEntityApi(entityName, 'POST', '/delete-many', { ids: idList });
+          emitEntityUpdate(entityName, { type: 'bulk-delete', ids: idList });
+          return result || { success: true, count: idList.length };
+        },
+
+        // Delete many by query or ids
+        async deleteMany(queryOrIds) {
+          const ids = Array.isArray(queryOrIds) ? queryOrIds : [queryOrIds];
+          return this.bulkDelete(ids);
+        },
+
+        // Bulk update multiple entities
+        async bulkUpdate(ids, data) {
+          const result = await requestEntityApi(entityName, 'POST', '/update-many', { ids, data });
+          emitEntityUpdate(entityName, { type: 'bulk-update', ids, data });
+          return result || { success: true };
+        },
+
+        // Update many
+        async updateMany(queryOrIds, data) {
+          if (Array.isArray(queryOrIds)) {
+            return this.bulkUpdate(queryOrIds, data);
           }
-          if (prop === 'get') {
-            return async (...args) => {
-              try {
-                const result = await hTarget.get(...args);
-                if (result && typeof result === 'object' && typeof result !== 'string') return result;
-                if (entityName === 'Design') return FALLBACK_DESIGNS.find(d => d.id === args[0]) || null;
-                if (entityName === 'Product') return FALLBACK_PRODUCTS.find(p => p.id === args[0]) || null;
-                return null;
-              } catch {
-                if (entityName === 'Design') return FALLBACK_DESIGNS.find(d => d.id === args[0]) || null;
-                if (entityName === 'Product') return FALLBACK_PRODUCTS.find(p => p.id === args[0]) || null;
-                return null;
-              }
-            };
+          const result = await requestEntityApi(entityName, 'POST', '/update-many', { query: queryOrIds, data });
+          emitEntityUpdate(entityName, { type: 'bulk-update', data });
+          return result || { success: true };
+        },
+
+        // Realtime event subscription
+        subscribe(callback) {
+          if (!entityListeners.has(entityName)) {
+            entityListeners.set(entityName, new Set());
           }
-          if (prop === 'subscribe') {
-            return (callback) => {
-              if (!entityListeners.has(entityName)) {
-                entityListeners.set(entityName, new Set());
-              }
-              entityListeners.get(entityName).add(callback);
-              return () => {
-                entityListeners.get(entityName)?.delete(callback);
-              };
-            };
-          }
-          if (prop === 'create') {
-            return async (...args) => {
-              const result = await hTarget.create(...args);
-              emitEntityUpdate(entityName, { type: 'create', data: result });
-              return result;
-            };
-          }
-          if (prop === 'update') {
-            return async (...args) => {
-              const result = await hTarget.update(...args);
-              emitEntityUpdate(entityName, { type: 'update', data: result });
-              return result;
-            };
-          }
-          if (prop === 'delete') {
-            return async (...args) => {
-              const result = await hTarget.delete(...args);
-              emitEntityUpdate(entityName, { type: 'delete', id: args[0] });
-              return result;
-            };
-          }
-          if (prop === 'bulkDelete') {
-            return async (ids) => {
-              const res = await fetch(`/api/entities/${entityName}/delete-many`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ids: Array.isArray(ids) ? ids : [ids] })
-              });
-              const json = await res.json();
-              emitEntityUpdate(entityName, { type: 'bulk-delete', ids });
-              return json;
-            };
-          }
-          if (prop === 'bulkUpdate') {
-            return async (ids, data) => {
-              const res = await fetch(`/api/entities/${entityName}/update-many`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ids, data })
-              });
-              const json = await res.json();
-              emitEntityUpdate(entityName, { type: 'bulk-update', ids, data });
-              return json;
-            };
-          }
-          const val = Reflect.get(hTarget, prop);
-          if (typeof val === 'function') {
-            return val.bind(hTarget);
-          }
-          return val;
+          entityListeners.get(entityName).add(callback);
+          return () => {
+            entityListeners.get(entityName)?.delete(callback);
+          };
         }
-      });
+      };
     }
   });
 
@@ -198,4 +233,3 @@ if (base44) {
     enumerable: true,
   });
 }
-

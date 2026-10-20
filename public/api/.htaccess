@@ -1,0 +1,16 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /api/
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^(.*)$ index.php [QSA,L]
+</IfModule>
+
+# Bloqueia acesso web direto aos arquivos de configuração, credenciais e logs
+<FilesMatch "(\.json|\.lock|config\.php|\.env|\.ini|\.log)$">
+  Order allow,deny
+  Deny from all
+</FilesMatch>
+
+# Desativa listagem de arquivos
+Options -Indexes

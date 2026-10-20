@@ -1,0 +1,27 @@
+# Céu Criativa - Bloqueio de Execução em Diretório de Uploads
+# Impede execução de qualquer script PHP, CGI ou shell em uploads
+Options -Indexes -ExecCGI
+
+<IfModule mod_php.c>
+  php_flag engine off
+</IfModule>
+<IfModule mod_php7.c>
+  php_flag engine off
+</IfModule>
+<IfModule mod_php8.c>
+  php_flag engine off
+</IfModule>
+
+RemoveHandler .php .phtml .php3 .php4 .php5 .php7 .php8 .phps .cgi .pl .py
+RemoveType .php .phtml .php3 .php4 .php5 .php7 .php8 .phps .cgi .pl .py
+
+<FilesMatch "(?i)\.(php|phtml|php3|php4|php5|php7|php8|phps|cgi|pl|py|sh|asp|aspx|exe|bin)$">
+  Order Allow,Deny
+  Deny from all
+</FilesMatch>
+
+# Permite estritamente acesso a imagens seguras
+<FilesMatch "(?i)\.(jpg|jpeg|png|webp|svg|gif|ico)$">
+  Order Allow,Deny
+  Allow from all
+</FilesMatch>

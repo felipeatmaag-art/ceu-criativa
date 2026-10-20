@@ -24,6 +24,7 @@ import {
 import {
   Sparkles,
   Upload,
+  Camera,
   Wand2,
   Loader2,
   ArrowRight,
@@ -31,18 +32,11 @@ import {
   Check,
   CheckCircle2,
   SunMedium,
-  Minus,
-  Plus,
-  RotateCcw,
-  Sliders,
   Shirt,
   CreditCard,
-  ArrowUp,
-  ArrowDown,
-  MoveVertical,
   Store,
-  ShoppingBag } from
-'lucide-react';
+  ShoppingBag
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProductSelector from '@/components/create/ProductSelector';
@@ -63,6 +57,7 @@ import PrintApproval from '@/components/create/PrintApproval';
 import PhysicalStockNotice from '@/components/create/PhysicalStockNotice';
 import EcobagMockup from '@/components/create/EcobagMockup';
 import ArtisticPrintGenerator from '@/components/create/ArtisticPrintGenerator';
+import LiveCameraPrintStudio from '@/components/create/LiveCameraPrintStudio';
 import ArtworkAudioNarrator from '@/components/audio/ArtworkAudioNarrator';
 import { getPrintPrompt, getPrintStandard, getColorContrastPrompt, isDarkProductColor } from '@/components/production/printStandards';
 import { adaptArtworkForDarkBackground } from '@/components/create/artworkContrastAdapter';
@@ -445,13 +440,19 @@ DIRETRIZES TÉCNICAS OBRIGATÓRIAS:
     }
   };
 
-  const catalogStudioProducts = catalogProducts.map((product) => ({ value: product.id, type: product.type, label: product.name, price: product.base_price ?? product.base_cost, image: product.front_model_url, category_id: product.category_id, collection_id: product.collection_id, tags: product.tags || [] }));
-  const missingProducts = PRODUCTS.filter((option) => !catalogProducts.some((product) => product.type === option.value)).map((option) => ({ ...option, type: option.value, price: productPrices[option.value] }));
+  // Garante que APENAS peças base em branco apareçam no estúdio (nunca estampas prontas com design_id)
+  const catalogStudioProducts = catalogProducts
+    .filter((product) => !product.design_id && product.catalog_product !== false)
+    .map((product) => ({ value: product.id, type: product.type, label: product.name, price: product.base_price ?? product.base_cost, image: product.front_model_url, category_id: product.category_id, collection_id: product.collection_id, tags: product.tags || [] }));
+  const missingProducts = PRODUCTS.filter((option) => !catalogProducts.some((product) => product.type === option.value && !product.design_id)).map((option) => ({ ...option, type: option.value, price: productPrices[option.value] }));
   const studioProducts = [...catalogStudioProducts, ...missingProducts];
   const baseProductPrice = Number(selectedCatalogProduct?.base_price ?? productPrices[selectedProduct]);
-  const currentSizes = selectedCatalogProduct?.sizes_available?.length ? selectedCatalogProduct.sizes_available : (productSizes[selectedProduct] || []);
+  const isApparel = selectedProduct === 'camiseta' || selectedProduct === 'baby_look' || selectedProduct === 'vestido' || (selectedCatalogProduct?.type === 'camiseta' || selectedCatalogProduct?.type === 'baby_look');
+  const rawSizes = selectedCatalogProduct?.sizes_available?.length ? selectedCatalogProduct.sizes_available : (productSizes[selectedProduct] || ['P', 'M', 'G', 'GG']);
+  // Garante que para qualquer vestuário os tamanhos sejam estritamente P, M, G, GG (e nunca dimensões de estampa como 10x10cm, peito ou costas)
+  const isInvalidApparelSize = isApparel && rawSizes.some(s => /cm|peito|costas|frente/i.test(s));
+  const currentSizes = isInvalidApparelSize ? ['P', 'M', 'G', 'GG'] : rawSizes;
   const busy = isGenerating || isUploading || backBusy || mockupsBusy || isAdaptingContrast;
-  const isApparel = selectedProduct === 'camiseta' || selectedProduct === 'baby_look' || selectedProduct === 'vestido';
   const hasAnyArtwork = Boolean(selectedImage || backDesignImage);
 
   // Cálculo de custo DTF proporcional em tempo real baseado no metro linear (58x100cm = R$ 80)
@@ -592,7 +593,7 @@ DIRETRIZES TÉCNICAS OBRIGATÓRIAS:
       return;
     }
 
-    // 2. Para os artistas participarem da SEL, têm que comprar a primeira estampa.
+    // 2. Para os artistas participarem da Céu Criativa, têm que comprar a primeira estampa.
     // A partir do momento que ele comprou, sua lojinha é gerada e todas as próximas
     // estampas que ele gerar não precisam ser compradas por ele!
     if (!hasPurchasedFirstPrint) {
@@ -916,14 +917,18 @@ DIRETRIZES TÉCNICAS OBRIGATÓRIAS:
                 {/* Coluna Esquerda: Abas de Criação (IA e Upload) */}
                 <div className="min-w-0">
                   <Tabs value={mode} onValueChange={setMode} className="w-full">
-                    <TabsList className="w-full grid grid-cols-2 h-11 sm:h-12 rounded-2xl bg-gray-100 p-1 mb-4">
+                    <TabsList className="w-full grid grid-cols-3 h-11 sm:h-12 rounded-2xl bg-gray-100 p-1 mb-4">
                       <TabsTrigger value="ai" className="rounded-xl h-full data-[state=active]:bg-white data-[state=active]:shadow font-bold text-xs sm:text-sm">
                         <Wand2 className="w-4 h-4 mr-1.5 text-purple-600" />
                         Criar com IA
                       </TabsTrigger>
+                      <TabsTrigger value="camera" className="rounded-xl h-full data-[state=active]:bg-white data-[state=active]:shadow font-bold text-xs sm:text-sm">
+                        <Camera className="w-4 h-4 mr-1.5 text-purple-600" />
+                        Tirar Foto
+                      </TabsTrigger>
                       <TabsTrigger value="upload" className="rounded-xl h-full data-[state=active]:bg-white data-[state=active]:shadow font-bold text-xs sm:text-sm">
                         <Upload className="w-4 h-4 mr-1.5 text-purple-600" />
-                        Enviar Arte do Artista
+                        Enviar Arte
                       </TabsTrigger>
                     </TabsList>
 
@@ -948,6 +953,29 @@ DIRETRIZES TÉCNICAS OBRIGATÓRIAS:
                         productType={selectedProduct}
                         productColor={productColor}
                         activeArtworkUrl={activeDesignImage}
+                        disabled={busy}
+                      />
+                    </TabsContent>
+
+                    <TabsContent value="camera" className={mode !== 'camera' ? 'hidden' : ''} forceMount>
+                      <LiveCameraPrintStudio
+                        onArtworkSelected={(url, styleInfo) => {
+                          if (editorSide === 'back') {
+                            setBackDesignImage(url);
+                          } else {
+                            setSelectedImage(url);
+                          }
+                          setGeneratedImages(prev => [url, ...prev.filter(i => i !== url)]);
+                          if (styleInfo?.prompt) {
+                            setAiPrompt(styleInfo.prompt);
+                            setDesignData(prev => ({
+                              ...prev,
+                              title: prev.title || 'Foto Estilizada na Câmera'
+                            }));
+                          }
+                        }}
+                        productType={selectedProduct}
+                        productColor={productColor}
                         disabled={busy}
                       />
                     </TabsContent>
@@ -1100,157 +1128,8 @@ DIRETRIZES TÉCNICAS OBRIGATÓRIAS:
                     />
                   </div>
 
-                  {/* Barra Intuitiva de Posicionar e Ajustar a Estampa */}
+                  {/* Ações Finais: Contraste e Avançar para Finalização */}
                   <div className="p-4 sm:p-5 rounded-3xl bg-white border border-slate-200/90 shadow-sm space-y-4">
-                    {/* Controle Vertical: Mover para Cima e para Baixo */}
-                    <div className="space-y-2.5">
-                      <div className="flex items-center justify-between">
-                        <span className="flex items-center gap-1.5 text-xs font-bold text-slate-800 uppercase tracking-wider">
-                          <MoveVertical className="w-4 h-4 text-purple-600" />
-                          Movimentar Estampa (Cima / Baixo)
-                        </span>
-                        <span className="text-xs font-bold px-2.5 py-1 rounded-lg bg-purple-50 text-purple-700 border border-purple-200/60">
-                          {(activeTransform?.y ?? 0) < -25
-                            ? '▲ Mais Alta (Peito / Gola)'
-                            : (activeTransform?.y ?? 0) > 25
-                            ? '▼ Mais Baixa'
-                            : '↕ Centralizada'}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-2.5">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => handleMoveY(-20)}
-                          className="rounded-2xl h-11 px-4 text-xs font-bold bg-slate-50 hover:bg-purple-50 hover:text-purple-700 border-slate-300 shadow-xs flex items-center gap-2 shrink-0 transition-transform active:scale-95"
-                          title="Subir estampa para cima"
-                        >
-                          <ArrowUp className="w-4 h-4 text-purple-600" />
-                          <span>Subir (Cima)</span>
-                        </Button>
-
-                        <div className="flex-1 px-1">
-                          <input
-                            type="range"
-                            min="-140"
-                            max="140"
-                            step="5"
-                            value={activeTransform?.y ?? 0}
-                            onChange={(e) => handleSetY(parseInt(e.target.value, 10))}
-                            className="w-full h-3 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-purple-600"
-                            aria-label="Posição vertical da estampa"
-                          />
-                          <div className="flex justify-between text-[11px] text-slate-500 font-semibold mt-1 px-0.5">
-                            <span>▲ Subir (Peito)</span>
-                            <span>Centro</span>
-                            <span>Descer (Baixo) ▼</span>
-                          </div>
-                        </div>
-
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => handleMoveY(20)}
-                          className="rounded-2xl h-11 px-4 text-xs font-bold bg-slate-50 hover:bg-purple-50 hover:text-purple-700 border-slate-300 shadow-xs flex items-center gap-2 shrink-0 transition-transform active:scale-95"
-                          title="Descer estampa para baixo"
-                        >
-                          <ArrowDown className="w-4 h-4 text-purple-600" />
-                          <span>Descer (Baixo)</span>
-                        </Button>
-                      </div>
-                    </div>
-
-                    {/* Controle de Tamanho (Diminuir / Aumentar) */}
-                    <div className="pt-3 border-t border-slate-100 space-y-2">
-                      <div className="flex items-center justify-between text-xs font-bold text-slate-800">
-                        <span className="flex items-center gap-1.5 text-slate-700 uppercase tracking-wider">
-                          <Sliders className="w-4 h-4 text-purple-600" />
-                          Tamanho da Estampa
-                        </span>
-                        <span className="text-purple-600 font-bold tabular-nums">
-                          {Math.round((activeTransform?.scale ?? 1) * 100)}%
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-3">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleScaleDelta(-0.15)}
-                          className="rounded-xl h-10 px-3.5 text-xs font-bold text-slate-700 hover:bg-slate-100 border-slate-300 shrink-0"
-                          title="Diminuir estampa"
-                        >
-                          <Minus className="w-3.5 h-3.5 mr-1 text-slate-600" /> Diminuir
-                        </Button>
-
-                        <input
-                          type="range"
-                          min="0.35"
-                          max="1.8"
-                          step="0.05"
-                          value={activeTransform?.scale ?? 1}
-                          onChange={(e) => handleSetScale(parseFloat(e.target.value))}
-                          className="flex-1 h-2.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-purple-600"
-                          aria-label="Tamanho da estampa"
-                        />
-
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleScaleDelta(0.15)}
-                          className="rounded-xl h-10 px-3.5 text-xs font-bold text-slate-700 hover:bg-slate-100 border-slate-300 shrink-0"
-                          title="Aumentar estampa"
-                        >
-                          <Plus className="w-3.5 h-3.5 mr-1 text-slate-600" /> Aumentar
-                        </Button>
-                      </div>
-                    </div>
-
-                    {/* Presets Rápidos de Posição */}
-                    <div className="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs">
-                      <span className="text-slate-500 font-medium">Posições Rápidas:</span>
-                      <div className="flex flex-wrap gap-1.5">
-                        <button
-                          type="button"
-                          onClick={() => handleApplyPreset('chest_center')}
-                          className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-purple-100 text-slate-700 hover:text-purple-700 font-bold text-xs transition-colors"
-                        >
-                          ▲ Peito Alto
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleApplyPreset('chest')}
-                          className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-purple-100 text-slate-700 hover:text-purple-700 font-bold text-xs transition-colors"
-                        >
-                          Peito Esquerdo
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleApplyPreset('center')}
-                          className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-purple-100 text-slate-700 hover:text-purple-700 font-bold text-xs transition-colors"
-                        >
-                          Centro
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleApplyPreset('lower')}
-                          className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-purple-100 text-slate-700 hover:text-purple-700 font-bold text-xs transition-colors"
-                        >
-                          ▼ Mais Baixo
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleApplyPreset('reset')}
-                          className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold text-xs transition-colors flex items-center gap-1"
-                        >
-                          <RotateCcw className="w-3 h-3" /> Reset
-                        </button>
-                      </div>
-                    </div>
-
                     {/* Ajuste de Contraste para Peças Escuras */}
                     {isDarkFabric && hasAnyArtwork && (
                       <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2 text-xs bg-amber-50/60 p-3 rounded-2xl border border-amber-200/60">
@@ -1309,7 +1188,7 @@ DIRETRIZES TÉCNICAS OBRIGATÓRIAS:
                     3. Finalização &amp; Lojinha de Artista
                   </h2>
                   <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-                    Revise sua criação, finalize seu cadastro e compre seu produto ou ative sua lojinha na SEL.
+                    Revise sua criação, finalize seu cadastro e compre seu produto ou ative sua lojinha na Céu Criativa.
                   </p>
                 </div>
 
@@ -1340,6 +1219,8 @@ DIRETRIZES TÉCNICAS OBRIGATÓRIAS:
                       productViews={views}
                       customBaseImages={customBaseImages}
                       onBaseImagesChange={setCustomBaseImages}
+                      hideFloatingControls={true}
+                      hideControls={true}
                     />
                   </div>
 
@@ -1358,7 +1239,7 @@ DIRETRIZES TÉCNICAS OBRIGATÓRIAS:
                   </div>
                 </div>
 
-                {/* Lado Direito: Formulário, Card de Artista SEL e Botões */}
+                {/* Lado Direito: Formulário, Card de Artista Céu Criativa e Botões */}
                 <div className="space-y-5">
                   <div>
                     <Label className="text-xs font-bold uppercase tracking-wider mb-1.5 block text-slate-700">
@@ -1442,19 +1323,19 @@ DIRETRIZES TÉCNICAS OBRIGATÓRIAS:
                     </p>
                   )}
 
-                  {/* SEÇÃO ESPECIAL: REGRAS DE CADASTRO E LOJINHA DE ARTISTA SEL */}
+                  {/* SEÇÃO ESPECIAL: REGRAS DE CADASTRO E LOJINHA DE ARTISTA CÉU CRIATIVA */}
                   <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-500/10 via-indigo-500/10 to-amber-500/10 border border-purple-200/80 space-y-3">
                     <div className="flex items-center gap-2">
                       <Store className="w-5 h-5 text-purple-600" />
                       <h4 className="text-sm font-bold text-slate-900">
-                        Programa de Artistas &amp; Lojinha SEL
+                        Programa de Artistas &amp; Lojinha Céu Criativa
                       </h4>
                     </div>
 
                     {!isArtistProfileComplete ? (
                       <div className="space-y-2 text-xs">
                         <p className="text-slate-700 leading-relaxed">
-                          Quer expor sua arte na Galeria pública da SEL e lucrar <strong>25% de comissão</strong> a cada venda? Finalize seu cadastro de Artista com nome da sua loja, CPF e chave Pix.
+                          Quer expor sua arte na Galeria pública da Céu Criativa e lucrar <strong>25% de comissão</strong> a cada venda? Finalize seu cadastro de Artista com nome da sua loja, CPF e chave Pix.
                         </p>
                         <Button
                           type="button"
@@ -1463,7 +1344,7 @@ DIRETRIZES TÉCNICAS OBRIGATÓRIAS:
                           className="w-full h-10 rounded-xl bg-white border-purple-300 text-purple-800 hover:bg-purple-50 font-bold text-xs shadow-xs"
                         >
                           <Sparkles className="w-3.5 h-3.5 mr-1.5 text-purple-600" />
-                          Finalizar Cadastro de Artista SEL
+                          Finalizar Cadastro de Artista Céu Criativa
                         </Button>
                       </div>
                     ) : !hasPurchasedFirstPrint ? (
@@ -1473,7 +1354,7 @@ DIRETRIZES TÉCNICAS OBRIGATÓRIAS:
                           Cadastro preenchido: Loja "{currentUser?.store_name || 'Sua Loja'}"
                         </div>
                         <p className="text-slate-700 leading-relaxed">
-                          <strong>Regra SEL:</strong> Para sua estampa entrar na Galeria e sua lojinha ser ativada, você deve comprar a sua primeira estampa física. <strong>A partir dessa primeira compra, você poderá publicar todas as próximas estampas sem precisar comprar nenhuma delas!</strong>
+                          <strong>Regra Céu Criativa:</strong> Para sua estampa entrar na Galeria e sua lojinha ser ativada, você deve comprar a sua primeira estampa física. <strong>A partir dessa primeira compra, você poderá publicar todas as próximas estampas sem precisar comprar nenhuma delas!</strong>
                         </p>
                       </div>
                     ) : (
@@ -1563,19 +1444,19 @@ DIRETRIZES TÉCNICAS OBRIGATÓRIAS:
         productPrice={currentPrice}
       />
 
-      {/* Modal Educativo da Regra da SEL (Primeira Compra do Artista) */}
+      {/* Modal Educativo da Regra da Céu Criativa (Primeira Compra do Artista) */}
       <Dialog open={showFirstPurchaseRuleModal} onOpenChange={setShowFirstPurchaseRuleModal}>
         <DialogContent className="max-w-lg rounded-3xl p-6 sm:p-8 bg-card border border-border shadow-2xl">
           <DialogHeader className="text-left space-y-2">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-100 text-purple-800 text-xs font-bold w-fit">
               <Store className="w-3.5 h-3.5" />
-              Regra Oficial de Lojinhas SEL
+              Regra Oficial de Lojinhas Céu Criativa
             </div>
             <DialogTitle className="text-2xl font-black text-slate-950">
               Ative sua Loja com a 1ª Compra
             </DialogTitle>
             <DialogDescription className="text-sm text-slate-600 leading-relaxed">
-              Para os artistas participarem da SEL e gerarem sua lojinha oficial, é necessário comprar a sua primeira estampa física.
+              Para os artistas participarem da Céu Criativa e gerarem sua lojinha oficial, é necessário comprar a sua primeira estampa física.
             </DialogDescription>
           </DialogHeader>
 

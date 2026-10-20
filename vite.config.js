@@ -11,6 +11,9 @@ export default defineConfig({
     allowedHosts: true,
     hmr: false,
   },
+  resolve: {
+    dedupe: ['react', 'react-dom'],
+  },
   plugins: [
     base44({
       // Support for legacy code that imports the base44 SDK with @/integrations, @/entities, etc.

@@ -1,0 +1,8 @@
+{
+  "name": "Céu Criativa",
+  "description": "Uma plataforma intuitiva e artística onde você pode criar, vender e colecionar estampas.",
+  "permissions": [],
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

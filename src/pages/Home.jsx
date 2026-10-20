@@ -25,7 +25,14 @@ import { Palette, Users, TrendingUp, Shield } from 'lucide-react';
 export default function Home() {
   const { data: designs = [] } = useQuery({
     queryKey: ['featured-designs'],
-    queryFn: () => base44.entities.Design.filter({ is_featured: true, status: 'aprovado' }, '-created_date', 8),
+    queryFn: async () => {
+      try {
+        const items = await base44.entities.Design.filter({ is_featured: true, status: 'aprovado' }, '-created_date', 8);
+        return Array.isArray(items) ? items : [];
+      } catch {
+        return [];
+      }
+    },
   });
 
   const { data: competitions = [] } = useQuery({

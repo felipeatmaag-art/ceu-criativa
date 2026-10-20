@@ -29,7 +29,6 @@ import {
 } from "@/components/ui/sheet";
 import { motion, AnimatePresence } from 'framer-motion';
 import { Skeleton } from '@/components/ui/skeleton';
-import { FALLBACK_DESIGNS } from '@/data/catalogFallback';
 
 export default function Explore() {
   const [search, setSearch] = useState('');
@@ -47,9 +46,9 @@ export default function Explore() {
     queryFn: async () => {
       try {
         const items = await base44.entities.Design.filter({ status: 'aprovado' }, sortBy, 100);
-        return items.length ? items : FALLBACK_DESIGNS;
+        return Array.isArray(items) ? items : [];
       } catch {
-        return FALLBACK_DESIGNS;
+        return [];
       }
     },
   });

@@ -1,15 +1,18 @@
 import React from 'react';
+import { Navigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import StorefrontHeader from '@/components/storefront/StorefrontHeader';
 import DesignCard from '@/components/design/DesignCard';
 import { Skeleton } from '@/components/ui/skeleton';
-import { FALLBACK_USERS, FALLBACK_DESIGNS } from '@/data/catalogFallback';
+import { FALLBACK_USERS } from '@/data/catalogFallback';
 
 export default function Storefront() {
   const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
   const rawSlug = pathname.replace(/^\/loja\//, '').replace(/^\//, '').toLowerCase();
   const slug = rawSlug || 'felipe-silverio';
+
+  const isForbiddenMasterSlug = slug === 'admin' || slug === 'master' || slug === 'administrador';
 
   const { data: artist, isLoading } = useQuery({
     queryKey: ['storefront', slug],
@@ -25,25 +28,26 @@ export default function Storefront() {
       // Default to Felipe Silvério if slug matches or if default
       return FALLBACK_USERS.find(u => u.store_slug === 'felipe-silverio') || FALLBACK_USERS[0];
     },
+    enabled: !isForbiddenMasterSlug,
   });
 
   const { data: designs = [] } = useQuery({
     queryKey: ['storefront-designs', artist?.id],
     queryFn: async () => {
-      if (!artist?.id) return FALLBACK_DESIGNS;
+      if (!artist?.id) return [];
       try {
         const res = await base44.entities.Design.filter({ artist_id: artist.id, status: 'aprovado' }, '-created_date', 50);
-        if (Array.isArray(res) && res.length > 0) return res;
-      } catch (e) {}
-
-      // Fallback: return approved designs by this artist
-      const felipeDesigns = FALLBACK_DESIGNS.filter(d => 
-        d.artist_id === artist.id || (d.artist_name || '').toLowerCase().includes('felipe')
-      );
-      return felipeDesigns.length > 0 ? felipeDesigns : FALLBACK_DESIGNS;
+        return Array.isArray(res) ? res : [];
+      } catch (e) {
+        return [];
+      }
     },
-    enabled: !!artist?.id,
+    enabled: !isForbiddenMasterSlug && !!artist?.id,
   });
+
+  if (isForbiddenMasterSlug) {
+    return <Navigate to="/ProductAdmin" replace />;
+  }
 
   if (isLoading) {
     return (

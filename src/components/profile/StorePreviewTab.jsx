@@ -11,6 +11,18 @@ export default function StorePreviewTab({ user, designs }) {
       </div>
       {user.store_slug ? (
         <div className="space-y-8 p-5"><StorefrontHeader artist={user} /><div><h3 className="mb-4 text-xl font-bold text-ceu-navy">Estampas da loja</h3><div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{designs.slice(0, 4).map((design) => <article key={design.id} className="overflow-hidden rounded-2xl bg-white"><img src={design.image_url} alt={design.title} className="aspect-square w-full object-cover" /><div className="p-3"><strong className="text-ceu-navy">{design.title}</strong><p className="text-sm text-ceu-navy/60">R$ {(design.price_base || 49.9).toFixed(2)}</p></div></article>)}</div>{!designs.length && <div className="rounded-2xl bg-white py-12 text-center text-ceu-navy/55">Sua loja ainda não tem estampas publicadas.</div>}</div></div>
+      ) : (user?.role === 'admin' || user?.app_role === 'master') ? (
+        <div className="p-12 text-center text-ceu-navy space-y-3">
+          <p className="text-lg font-bold">O perfil de Administrador Master não possui loja própria.</p>
+          <p className="text-xs text-ceu-navy/60 max-w-md mx-auto">
+            Sua conta tem a função de administrar todas as lojas da plataforma, aprovar estampas e controlar estoque físico. Caso deseje ter uma loja autoral, utilize uma conta de artista.
+          </p>
+          <div className="pt-2">
+            <Button asChild className="rounded-xl bg-ceu-navy text-white text-xs">
+              <a href="/ProductAdmin?tab=stores">Administrar Todas as Lojas</a>
+            </Button>
+          </div>
+        </div>
       ) : <div className="p-16 text-center text-ceu-navy/60">Defina o endereço da loja em Dados & Fotos para visualizar sua prévia.</div>}
     </section>
   );

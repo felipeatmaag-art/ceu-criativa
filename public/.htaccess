@@ -1,8 +1,41 @@
+# Céu Criativa - Configuração Apache / HostGator
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
+
+  # 1. Bloqueia acesso web direto a dados sensíveis, backups, .env e scripts do servidor
+  RewriteRule ^(data|\.env|.*\.cjs|.*\.json|.*\.sql|.*\.log|.*\.bak|.*\.md)$ - [F,L]
+  RewriteRule ^data/ - [F,L]
+  RewriteRule ^\..* - [F,L]
+
+  # 2. Roteamento de chamadas de API para o backend PHP da HostGator
+  RewriteRule ^api/(.*)$ api/index.php [QSA,L]
+
+  # 3. Ignora reescrita direta do index.html
   RewriteRule ^index\.html$ - [L]
-  RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteCond %{REQUEST_FILENAME} !-d
+
+  # 4. Arquivos e diretórios estáticos públicos existentes são servidos diretamente (exceto bloqueados)
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # 5. Redirecionamento SPA para React Router
   RewriteRule . /index.html [L]
 </IfModule>
+
+# Bloqueio estrito de arquivos sensíveis
+<FilesMatch "(?i)(\.env|\.json|\.cjs|\.sql|\.log|\.bak|\.config)$">
+  Order Allow,Deny
+  Deny from all
+</FilesMatch>
+
+# Cabeçalhos de Segurança HTTP
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set X-Frame-Options "SAMEORIGIN"
+  Header set X-XSS-Protection "1; mode=block"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# Desativa listagem de diretórios
+Options -Indexes

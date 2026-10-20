@@ -40,7 +40,7 @@ export default function Login() {
       setSuccess(`Bem-vindo, ${loggedUser.full_name}!`);
       setTimeout(() => {
         if (loggedUser.role === 'admin') {
-          navigate('/curadoria');
+          navigate('/ProductAdmin');
         } else {
           navigate('/MyDesigns');
         }
@@ -61,7 +61,7 @@ export default function Login() {
       setSuccess(`Entrando como ${loggedUser.full_name}...`);
       setTimeout(() => {
         if (loggedUser.role === 'admin') {
-          navigate('/curadoria');
+          navigate('/ProductAdmin');
         } else {
           navigate('/MyDesigns');
         }
@@ -119,41 +119,60 @@ export default function Login() {
             <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
               <KeyRound className="w-3.5 h-3.5 text-emerald-400" /> Acesso Rápido em 1 Clique
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               <button
                 type="button"
-                onClick={() => handleQuickLogin('artist')}
+                onClick={() => handleQuickLogin('admin')}
                 disabled={isLoading}
-                className="flex items-center gap-3 p-3 rounded-2xl bg-gradient-to-br from-purple-900/30 to-purple-800/10 border border-purple-500/30 hover:border-purple-400 text-left transition-all hover:scale-[1.02] group"
+                className="flex items-center gap-2.5 p-2.5 rounded-2xl bg-gradient-to-br from-emerald-900/30 to-emerald-800/10 border border-emerald-500/30 hover:border-emerald-400 text-left transition-all hover:scale-[1.02] group"
               >
-                <div className="w-10 h-10 rounded-xl bg-purple-600/30 border border-purple-500/40 flex items-center justify-center text-purple-300 shrink-0 group-hover:bg-purple-600 group-hover:text-white transition-colors">
-                  <Palette className="w-5 h-5" />
+                <div className="w-9 h-9 rounded-xl bg-emerald-600/30 border border-emerald-500/40 flex items-center justify-center text-emerald-300 shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                  <ShieldCheck className="w-4 h-4" />
                 </div>
                 <div className="min-w-0">
-                  <div className="text-xs font-bold text-white group-hover:text-purple-300 transition-colors">
-                    Felipe Silvério
+                  <div className="text-xs font-bold text-white group-hover:text-emerald-300 transition-colors">
+                    Admin MASTER
                   </div>
-                  <div className="text-[11px] text-gray-400">
-                    Artista & Criador
+                  <div className="text-[10px] text-gray-400 truncate">
+                    admin@seuceu.com.br
                   </div>
                 </div>
               </button>
 
               <button
                 type="button"
-                onClick={() => handleQuickLogin('admin')}
+                onClick={() => handleQuickLogin('customer')}
                 disabled={isLoading}
-                className="flex items-center gap-3 p-3 rounded-2xl bg-gradient-to-br from-emerald-900/30 to-emerald-800/10 border border-emerald-500/30 hover:border-emerald-400 text-left transition-all hover:scale-[1.02] group"
+                className="flex items-center gap-2.5 p-2.5 rounded-2xl bg-gradient-to-br from-blue-900/30 to-blue-800/10 border border-blue-500/30 hover:border-blue-400 text-left transition-all hover:scale-[1.02] group"
               >
-                <div className="w-10 h-10 rounded-xl bg-emerald-600/30 border border-emerald-500/40 flex items-center justify-center text-emerald-300 shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
-                  <ShieldCheck className="w-5 h-5" />
+                <div className="w-9 h-9 rounded-xl bg-blue-600/30 border border-blue-500/40 flex items-center justify-center text-blue-300 shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                  <User className="w-4 h-4" />
                 </div>
                 <div className="min-w-0">
-                  <div className="text-xs font-bold text-white group-hover:text-emerald-300 transition-colors">
-                    Administrador
+                  <div className="text-xs font-bold text-white group-hover:text-blue-300 transition-colors">
+                    Usuário Teste
                   </div>
-                  <div className="text-[11px] text-gray-400">
-                    Aprovação & Gestão
+                  <div className="text-[10px] text-gray-400 truncate">
+                    usuario@seuceu.com.br
+                  </div>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleQuickLogin('artist')}
+                disabled={isLoading}
+                className="flex items-center gap-2.5 p-2.5 rounded-2xl bg-gradient-to-br from-purple-900/30 to-purple-800/10 border border-purple-500/30 hover:border-purple-400 text-left transition-all hover:scale-[1.02] group"
+              >
+                <div className="w-9 h-9 rounded-xl bg-purple-600/30 border border-purple-500/40 flex items-center justify-center text-purple-300 shrink-0 group-hover:bg-purple-600 group-hover:text-white transition-colors">
+                  <Palette className="w-4 h-4" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-xs font-bold text-white group-hover:text-purple-300 transition-colors">
+                    Felipe Silvério
+                  </div>
+                  <div className="text-[10px] text-gray-400 truncate">
+                    felipe@seuceu.art.br
                   </div>
                 </div>
               </button>
@@ -223,19 +242,32 @@ export default function Login() {
           </form>
 
           {/* Credential summary */}
-          <div className="mt-6 p-4 rounded-2xl bg-white/[0.03] border border-white/5 text-xs text-gray-400 space-y-1.5">
-            <p className="font-semibold text-gray-300">🔑 Credenciais de Acesso Prontas:</p>
-            <div className="flex justify-between items-center text-gray-300">
-              <span>• Felipe Silvério (Artista):</span>
-              <span className="font-mono text-emerald-400">felipe2026</span>
-            </div>
-            <p className="text-[11px] text-gray-500 ml-2">felipe@seuceu.art.br (ou felipeatmaag@gmail.com)</p>
+          <div className="mt-6 p-4 rounded-2xl bg-white/[0.03] border border-white/5 text-xs text-gray-400 space-y-2">
+            <p className="font-bold text-gray-200">🔑 Credenciais Oficiais Ativas para Teste:</p>
             
-            <div className="flex justify-between items-center text-gray-300 pt-1">
-              <span>• Administrador Geral:</span>
-              <span className="font-mono text-emerald-400">admin2026</span>
+            <div className="p-2.5 rounded-xl bg-white/[0.04] border border-white/5 space-y-1">
+              <div className="flex justify-between items-center text-gray-200">
+                <span className="font-bold text-emerald-300">• Conta MASTER / Administrador:</span>
+                <span className="font-mono text-emerald-400 font-bold">MasterAdmin@2026</span>
+              </div>
+              <p className="text-[11px] text-gray-400 font-mono">admin@seuceu.com.br</p>
             </div>
-            <p className="text-[11px] text-gray-500 ml-2">admin@seuceu.art.br</p>
+
+            <div className="p-2.5 rounded-xl bg-white/[0.04] border border-white/5 space-y-1">
+              <div className="flex justify-between items-center text-gray-200">
+                <span className="font-bold text-blue-300">• Conta de Teste Usuário:</span>
+                <span className="font-mono text-blue-400 font-bold">TesteUser@2026</span>
+              </div>
+              <p className="text-[11px] text-gray-400 font-mono">usuario@seuceu.com.br</p>
+            </div>
+
+            <div className="p-2.5 rounded-xl bg-white/[0.04] border border-white/5 space-y-1">
+              <div className="flex justify-between items-center text-gray-200">
+                <span className="font-bold text-purple-300">• Felipe Silvério (Master/Artista):</span>
+                <span className="font-mono text-purple-400 font-bold">felipe2026</span>
+              </div>
+              <p className="text-[11px] text-gray-400 font-mono">felipeatmaag@gmail.com / felipe@seuceu.art.br</p>
+            </div>
           </div>
         </div>
       </div>
